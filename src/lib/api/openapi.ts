@@ -17,7 +17,7 @@ const errorEnvelope = z.object({
 export const openApiDocument = createDocument({
   openapi: "3.1.0",
   info: {
-    title: "Starter Stack API",
+    title: "Hiremate API",
     version: "1.0.0",
   },
   paths: {

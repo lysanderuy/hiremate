@@ -1,21 +1,20 @@
-# starter-stack
+# Hiremate
 
 Reusable full-stack boilerplate: Next.js 16 + Supabase + Drizzle + Zod.
 
-| Layer         | Tech                                                              |
-| ------------- | ----------------------------------------------------------------- |
-| Frontend      | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4 |
-| Database      | Supabase (PostgreSQL)                                             |
-| Auth          | Supabase Auth (`@supabase/ssr`, cookie-based sessions)            |
-| ORM           | Drizzle ORM + drizzle-kit migrations                              |
-| Validation    | Zod v4                                                            |
-| Server state  | TanStack Query v5 (API data: caching, mutations)                  |
-| Client state  | Zustand (UI-only state: modals, sidebar, filters)                 |
-| API docs      | OpenAPI 3.1 (`zod-openapi`) + Scalar (`/api/docs`)                |
-| Testing       | Vitest (unit tests, colocated `*.test.ts`)                        |
-| Rate limiting | Upstash Redis (`@upstash/ratelimit`), optional                    |
-| Code quality  | ESLint + Prettier + Husky/lint-staged pre-commit                  |
-| CI            | GitHub Actions — typecheck/lint/test + PR description bot         |
+| Layer        | Tech                                                              |
+| ------------ | ----------------------------------------------------------------- |
+| Frontend     | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4 |
+| Database     | Supabase (PostgreSQL)                                             |
+| Auth         | Supabase Auth (`@supabase/ssr`, cookie-based sessions)            |
+| ORM          | Drizzle ORM + drizzle-kit migrations                              |
+| Validation   | Zod v4                                                            |
+| Server state | TanStack Query v5 (API data: caching, mutations)                  |
+| Client state | Zustand (UI-only state: modals, sidebar, filters)                 |
+| API docs     | OpenAPI 3.1 (`zod-openapi`) + Scalar (`/api/docs`)                |
+| Testing      | Vitest (unit tests, colocated `*.test.ts`)                        |
+| Code quality | ESLint + Prettier + Husky/lint-staged pre-commit                  |
+| CI           | GitHub Actions — typecheck/lint/test + PR description bot         |
 
 ## Quick start
 
@@ -40,16 +39,6 @@ Reusable full-stack boilerplate: Next.js 16 + Supabase + Drizzle + Zod.
    - **URL Configuration → Redirect URLs**: add
      `http://localhost:3000/api/auth/callback` (+ production URL later).
      Confirmation and recovery emails bounce without this.
-   - **Production**: configure the **Send Email Hook** (Dashboard →
-     Authentication → Hooks) to point at `/api/auth/email-hook`, using the
-     `SEND_EMAIL_HOOK_SECRET` from `.env.example`. Confirm/recovery emails
-     are then rendered by this app (`src/emails/confirm-signup-email.tsx`,
-     `reset-password-email.tsx`) and sent via Resend instead of Supabase's
-     dashboard-edited templates.
-   - **Local dev**: keeps using Supabase's built-in sender (unchanged) —
-     it's rate-limited (~2/hour), slow, spam-prone, and the hook isn't
-     reachable from Supabase's servers against `localhost`, so this is
-     prod-only by design.
 
 4. Apply the bundled example schema — or remove it first (see
    [Removing the example](#removing-the-profiles-example)):
@@ -91,18 +80,6 @@ db (src/db, Drizzle)  /  Supabase
 - `/api/openapi.json` — the generated OpenAPI 3.1 spec, raw JSON (deliberately not wrapped in `ApiResponse<T>`).
 
 Hand-maintained in `src/lib/api/openapi.ts`, not derived from route files — when you add/change an endpoint, add `.meta({ description, example })` to its validator fields and update the matching path entry there. Both routes are public/unauthenticated by design (dev tooling); gate them before a production launch that shouldn't expose the API surface.
-
-## Rate limiting
-
-`src/proxy.ts` rate-limits every `/api/**` request per IP before it reaches
-the route handler (pages aren't limited — abuse happens through `/api`, not
-navigation).
-
-- **Default**: 60 req/min per IP. **Override**: `/api/auth/*` → 10 req/min.
-- Backed by Upstash Redis (`src/lib/rate-limit.ts`) — REST-based, so it works from Edge middleware.
-- **Optional and lazy**: without `UPSTASH_REDIS_REST_URL`/`TOKEN` (see `.env.example`), requests always pass — no Upstash account needed to run the app.
-- Blocked requests log via `console.warn` (visible in your host's function logs) instead of an analytics dashboard.
-- To add a stricter route, extend the `overrides` array in `src/lib/rate-limit.ts` (mirrors `protectedPrefixes` in `src/lib/supabase/proxy.ts`).
 
 ## Testing
 
@@ -146,7 +123,7 @@ Tests are excluded on purpose — kept fast locally; they run in CI instead.
 src/
 ├── app/                  # Routes, layouts — frontend only
 │   ├── (auth)/           # Login, signup, forgot/reset password (route group)
-│   ├── dashboard/        # Example protected page
+│   ├── dashboard/        # Role-based redirect + applicant/ and recruiter/ dashboards
 │   ├── error.tsx         # Error boundary (wire Sentry etc. here)
 │   ├── global-error.tsx  # Root-layout error fallback (self-contained)
 │   ├── not-found.tsx     # 404
@@ -162,6 +139,7 @@ src/
 ├── stores/               # Zustand stores (*.store.ts) — client-only UI state
 ├── lib/
 │   ├── api/              # client.ts (fetch wrapper) + response.ts (envelope helpers) + openapi.ts (spec builder)
+│   ├── auth/             # require-role.ts (getSessionProfile, requireRole)
 │   ├── query/            # QueryClient provider (wired in app/layout.tsx)
 │   ├── supabase/         # client.ts (browser), server.ts (RSC/routes), proxy.ts (session refresh)
 │   └── env.ts            # Zod-validated env vars (server only, lazy)
@@ -184,7 +162,8 @@ reference implementation of the layering — replace per project.
 ## Auth
 
 Working end-to-end: signup → email confirm (`/api/auth/callback`) → login →
-protected `/dashboard` → logout.
+protected `/dashboard` (redirects to `/dashboard/applicant` or
+`/dashboard/recruiter` by role) → logout.
 
 - **Password recovery**: `/forgot-password` emails a link that lands on
   `/reset-password` (via the callback's `next` param) with a recovery session.
@@ -199,16 +178,18 @@ protected `/dashboard` → logout.
   its own cookies) and skip the service/`ApiResponse` pattern — they're
   redirect-driven browser navigations, not JSON API calls. App data still
   always goes through `/api` with the full service/`ApiResponse` pattern.
-  `/api/auth/email-hook` is also outside the normal pattern, but as an
-  inbound webhook from Supabase (signature-verified, not
-  session-authenticated) rather than a browser navigation.
 - **Signup → profile**: a Postgres trigger (`0001_auth-trigger-and-rls.sql`)
-  auto-creates a `profiles` row for each new auth user.
+  auto-creates a `profiles` row for each new auth user. The role
+  (`applicant` or `recruiter`) is picked at signup, passed as
+  `options.data.role`, and stored in `profiles.role`; it is read-only
+  afterwards.
 
 ## Security model
 
 Drizzle connects as `postgres` and **bypasses RLS** — authorization lives in
-route handlers (`getUser()` + user-scoped queries). Every table must still
+route handlers (`getUser()` + user-scoped queries). Roles live in `profiles.role`
+(never in JWT `user_metadata`, which users can edit) and are enforced
+server-side by `requireRole()` in `src/lib/auth/require-role.ts`. Every table must still
 `ENABLE ROW LEVEL SECURITY` (no policies needed) to lock Supabase's
 auto-generated REST API (`/rest/v1`) away from the anon key. Enforced
 automatically: `db:migrate` runs the RLS guardrail (`scripts/verify-db.mjs`)
@@ -240,23 +221,15 @@ To start a project with a clean schema, delete the example slice:
 
 ```
 src/db/schema/profiles.ts            # + remove its export from schema/index.ts
-src/db/migrations/0000_*.sql, 0001_*.sql, 0002_*.sql, meta/   # keep the migrations dir
+src/db/migrations/0000_*.sql, 0001_*.sql, meta/   # keep the migrations dir
 src/validators/profile.validator.ts
 src/services/profile.service.ts
 src/app/api/profile/
 src/hooks/use-profile.ts
 ```
 
-Also delete `src/emails/welcome-email.tsx` (not the whole `src/emails/`
-directory — `confirm-signup-email.tsx`/`reset-password-email.tsx` don't
-depend on `profiles`) and the `sendWelcome` method from
-`src/services/email.service.ts` (not the whole file — `sendConfirmSignup`/
-`sendResetPassword` stay, since removing `profiles` doesn't remove
-Supabase Auth).
-
 Then:
 
-- Edit `src/app/api/auth/callback/route.ts` to drop `sendWelcomeOnce` and its two service imports.
 - Remove the `/api/profile` path entry and `profileResponseSchema` from `src/lib/api/openapi.ts` — otherwise the generated spec references a deleted endpoint.
 - Only delete migrations never applied to a live database; otherwise drop the objects first (`DROP TABLE profiles; DROP FUNCTION public.handle_new_user CASCADE;`) or reset the database.
 - To bring a companion table back later, reuse the pattern in `0001_auth-trigger-and-rls.sql`: FK to `auth.users(id) ON DELETE CASCADE`, RLS enabled, `AFTER INSERT ON auth.users` trigger.
