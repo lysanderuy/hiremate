@@ -1,33 +1,23 @@
--- Custom migration: wire profiles to Supabase Auth + lock down PostgREST.
--- Delete this file (and 0000_*) before first migrate if your project
--- does not need the profiles table.
-
--- 1. Integrity: profile rows belong to auth users, die with them.
-ALTER TABLE "profiles"
-  ADD CONSTRAINT "profiles_id_auth_users_fk"
-  FOREIGN KEY ("id") REFERENCES auth.users("id") ON DELETE CASCADE;
---> statement-breakpoint
-
--- 2. Enable RLS with NO policies: blocks all PostgREST (/rest/v1) access via
--- the anon key. Drizzle is unaffected (connects as postgres, bypasses RLS).
--- Do this for EVERY table this template adds.
-ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;
---> statement-breakpoint
-
--- 3. Auto-create a profile row on signup.
-CREATE OR REPLACE FUNCTION public.handle_new_user()
+ALTER TABLE "profiles" ADD CONSTRAINT "profiles_id_auth_users_fk" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "companies" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "jobs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "resumes" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "applications" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
-SECURITY DEFINER SET search_path = ''
+SECURITY DEFINER
+SET search_path = ''
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email)
-  VALUES (NEW.id, NEW.email);
+  INSERT INTO public.profiles (id, email, role)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    (CASE WHEN NEW.raw_user_meta_data->>'role' = 'recruiter' THEN 'recruiter' ELSE 'applicant' END)::public.user_role
+  );
   RETURN NEW;
 END;
-$$;
---> statement-breakpoint
-
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+$$;--> statement-breakpoint
+CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

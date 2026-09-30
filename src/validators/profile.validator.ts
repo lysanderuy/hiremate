@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { USER_ROLES } from "@/types/roles";
+
 // Example validator — replace/extend per project.
 export const updateProfileSchema = z.object({
   displayName: z
@@ -26,9 +28,9 @@ export const profileResponseSchema = z
       .string()
       .nullable()
       .meta({ description: "Display name shown throughout the app.", example: "Jane Doe" }),
-    welcomeEmailSentAt: z.string().datetime().nullable().meta({
-      description: "Timestamp the welcome email was sent, if any.",
-      example: "2026-01-15T09:30:00.000Z",
+    role: z.enum(USER_ROLES).meta({
+      description: "Account role, chosen at signup and read-only afterwards.",
+      example: "applicant",
     }),
     createdAt: z.string().datetime().meta({
       description: "Timestamp the profile was created.",
