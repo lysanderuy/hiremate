@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "starter-stack",
-  description: "Next.js + Supabase + Drizzle + Zod boilerplate",
+  title: "Hiremate",
+  description: "A job board with AI resume matching",
 };
 
 export default function RootLayout({

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { USER_ROLES } from "@/types/roles";
+
 export const signInSchema = z.object({
   email: z.email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
@@ -8,6 +10,7 @@ export const signInSchema = z.object({
 export const signUpSchema = z.object({
   email: z.email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(USER_ROLES, "Choose whether you are looking for a job or hiring"),
 });
 
 export const forgotPasswordSchema = z.object({

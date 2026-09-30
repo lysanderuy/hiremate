@@ -28,9 +28,11 @@ export default function SignupPage() {
     setLoading(true);
     const supabase = createClient();
     const { data, error: authError } = await supabase.auth.signUp({
-      ...parsed.data,
+      email: parsed.data.email,
+      password: parsed.data.password,
       options: {
         emailRedirectTo: `${location.origin}/api/auth/callback`,
+        data: { role: parsed.data.role },
       },
     });
 
@@ -121,6 +123,18 @@ export default function SignupPage() {
             className="w-full rounded-md border border-foreground/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/50"
           />
         </label>
+
+        <fieldset className="space-y-1.5">
+          <legend className="text-sm font-medium">I am</legend>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="radio" name="role" value="applicant" required />
+            I&apos;m looking for a job
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="radio" name="role" value="recruiter" required />
+            I&apos;m hiring
+          </label>
+        </fieldset>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
