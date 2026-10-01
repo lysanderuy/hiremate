@@ -11,8 +11,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 
 import { AuthInput } from "@/components/auth/auth-input";
 import { AuthSplit, panelContent } from "@/components/auth/auth-split";
@@ -30,8 +30,18 @@ const roleOptions: { value: UserRole; label: string; detail: string; icon: Lucid
 type Step = "role" | "details";
 
 export default function SignupPage() {
-  const [step, setStep] = useState<Step>("role");
-  const [role, setRole] = useState<UserRole>("applicant");
+  return (
+    <Suspense>
+      <SignupFlow />
+    </Suspense>
+  );
+}
+
+function SignupFlow() {
+  const presetRole = useSearchParams().get("role");
+  const presetValid = roleOptions.some((option) => option.value === presetRole);
+  const [step, setStep] = useState<Step>(presetValid ? "details" : "role");
+  const [role, setRole] = useState<UserRole>(presetValid ? (presetRole as UserRole) : "applicant");
 
   return (
     <AuthSplit content={panelContent[role]} step={step === "role" ? 1 : 2}>
