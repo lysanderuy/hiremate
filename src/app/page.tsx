@@ -1,5 +1,4 @@
 import { AiMatching } from "@/components/landing/ai-matching";
-import { Audience } from "@/components/landing/audience";
 import { Cta } from "@/components/landing/cta";
 import { Footer } from "@/components/landing/footer";
 import { Hero } from "@/components/landing/hero";
@@ -13,7 +12,6 @@ export default function HomePage() {
       <main>
         <Hero />
         <HowItWorks />
-        <Audience />
         <AiMatching />
         <Cta />
       </main>
