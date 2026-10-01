@@ -9,6 +9,7 @@ export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(),
   email: text("email").notNull(),
   displayName: text("display_name"),
+  jobTitle: text("job_title"),
   role: userRole("role").notNull().default("applicant"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

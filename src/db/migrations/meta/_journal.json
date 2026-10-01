@@ -15,6 +15,20 @@
       "when": 1790787140004,
       "tag": "0001_auth-trigger-and-rls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790852109419,
+      "tag": "0002_add-profile-job-title",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790852112834,
+      "tag": "0003_signup-profile-fields-trigger",
+      "breakpoints": true
     }
   ]
 }

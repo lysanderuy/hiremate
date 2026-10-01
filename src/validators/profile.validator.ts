@@ -28,6 +28,10 @@ export const profileResponseSchema = z
       .string()
       .nullable()
       .meta({ description: "Display name shown throughout the app.", example: "Jane Doe" }),
+    jobTitle: z
+      .string()
+      .nullable()
+      .meta({ description: "Job title, set at signup for recruiters.", example: "Talent Lead" }),
     role: z.enum(USER_ROLES).meta({
       description: "Account role, chosen at signup and read-only afterwards.",
       example: "applicant",
