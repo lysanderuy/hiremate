@@ -1,8 +1,11 @@
 import { ArrowRight, FileText, Sparkles, Star } from "lucide-react";
 
+import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 import { MatchBar } from "./match-bar";
 
@@ -42,10 +45,13 @@ export function Hero() {
             potential and helps recruiters discover the right talent faster.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" className="h-11 px-6 text-base">
+            <Link
+              href="/signup"
+              className={cn(buttonVariants({ size: "lg" }), "h-11 px-6 text-base")}
+            >
               Get Started for Free
               <ArrowRight />
-            </Button>
+            </Link>
             <Button variant="outline" size="lg" className="h-11 px-6 text-base">
               Explore Jobs
             </Button>
@@ -119,10 +125,6 @@ export function Hero() {
               ))}
             </div>
           </Card>
-
-          <Button size="lg" className="mt-5 h-11 w-full text-sm">
-            Apply Now
-          </Button>
         </div>
       </div>
     </section>

@@ -1,11 +1,13 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import { Logo } from "./logo";
 import { MobileNav } from "./mobile-nav";
 
 const links = [
   { label: "How it works", href: "#how-it-works" },
-  { label: "For Recruiters", href: "#recruiters" },
   { label: "AI Matching", href: "#ai-matching" },
 ];
 
@@ -26,15 +28,24 @@ export function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-1 sm:gap-2">
-          <Button
-            variant="ghost"
-            className="hidden h-10 px-3 lg:h-9 text-sm text-slate-700 sm:inline-flex"
+          <Link
+            href="/login"
+            className={cn(
+              buttonVariants({ variant: "ghost" }),
+              "hidden h-10 px-3 lg:h-9 text-sm text-slate-700 sm:inline-flex",
+            )}
           >
             Sign In
-          </Button>
-          <Button className="hidden h-10 px-4 text-sm min-[360px]:inline-flex lg:h-9">
+          </Link>
+          <Link
+            href="/signup"
+            className={cn(
+              buttonVariants(),
+              "hidden h-10 px-4 text-sm min-[360px]:inline-flex lg:h-9",
+            )}
+          >
             Get Started
-          </Button>
+          </Link>
           <MobileNav links={links} />
         </div>
       </div>

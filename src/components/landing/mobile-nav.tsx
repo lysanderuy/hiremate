@@ -1,9 +1,11 @@
 "use client";
 
 import { Menu } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetClose,
@@ -59,12 +61,20 @@ export function MobileNav({ links }: MobileNavProps) {
           ))}
         </nav>
         <div className="mt-auto flex flex-col gap-3 border-t p-4">
-          <Button variant="outline" className="h-11 w-full text-sm" onClick={() => setOpen(false)}>
+          <Link
+            href="/login"
+            className={cn(buttonVariants({ variant: "outline" }), "h-11 w-full text-sm")}
+            onClick={() => setOpen(false)}
+          >
             Sign In
-          </Button>
-          <Button className="h-11 w-full text-sm" onClick={() => setOpen(false)}>
+          </Link>
+          <Link
+            href="/signup"
+            className={cn(buttonVariants(), "h-11 w-full text-sm")}
+            onClick={() => setOpen(false)}
+          >
             Get Started
-          </Button>
+          </Link>
         </div>
       </SheetContent>
     </Sheet>
