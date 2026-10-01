@@ -1,10 +1,14 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AuthInput } from "@/components/auth/auth-input";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { resetPasswordSchema } from "@/validators/auth.validator";
+import { completeRecovery } from "./actions";
 
 export function ResetPasswordForm() {
   const router = useRouter();
@@ -35,36 +39,39 @@ export function ResetPasswordForm() {
       return;
     }
 
+    await completeRecovery();
     router.push("/dashboard");
     router.refresh();
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Set new password</h1>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight text-navy">Set a new password</h1>
+        <p className="text-sm text-muted-foreground">Use at least 8 characters.</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium">New password</span>
-          <input
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={8}
-            className="w-full rounded-md border border-foreground/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/50"
-          />
-        </label>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <AuthInput
+          label="New password"
+          icon={Lock}
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Enter your new password"
+          minLength={8}
+          required
+        />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
-        >
+        <Button type="submit" size="lg" disabled={loading} className="h-11 w-full text-base">
           {loading ? "Updating..." : "Update password"}
-        </button>
+        </Button>
       </form>
     </div>
   );
