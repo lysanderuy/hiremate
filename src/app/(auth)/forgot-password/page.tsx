@@ -1,15 +1,32 @@
 "use client";
 
+import { ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { AuthInput } from "@/components/auth/auth-input";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { forgotPasswordSchema } from "@/validators/auth.validator";
+
+function BackToSignIn() {
+  return (
+    <div className="text-center">
+      <Link
+        href="/login"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-navy"
+      >
+        <ArrowLeft className="size-4" />
+        Back to sign in
+      </Link>
+    </div>
+  );
+}
 
 export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,56 +52,58 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    setEmailSent(true);
+    setSentTo(parsed.data.email);
   }
 
-  if (emailSent) {
+  if (sentTo) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Check your email</h1>
-        <p className="text-sm text-foreground/70">
-          If an account exists for that email, we sent a password reset link.
-        </p>
+      <div className="space-y-6 text-center">
+        <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-tint text-primary">
+          <Mail className="size-6" />
+        </span>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">Check your email</h1>
+          <p className="text-sm text-muted-foreground">
+            If an account exists for {sentTo}, we sent a link to reset your password.
+          </p>
+        </div>
+        <BackToSignIn />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Reset password</h1>
-      <p className="text-sm text-foreground/70">
-        Enter your email and we&apos;ll send you a reset link.
-      </p>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight text-navy">Forgot your password?</h1>
+        <p className="text-sm text-muted-foreground">
+          Enter your email and we&apos;ll send you a reset link.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium">Email</span>
-          <input
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="w-full rounded-md border border-foreground/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/50"
-          />
-        </label>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <AuthInput
+          label="Email address"
+          icon={Mail}
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="Enter your email address"
+          required
+        />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
-        >
+        <Button type="submit" size="lg" disabled={loading} className="h-11 w-full text-base">
           {loading ? "Sending..." : "Send reset link"}
-        </button>
+        </Button>
       </form>
 
-      <p className="text-sm text-foreground/70">
-        Remembered it?{" "}
-        <Link href="/login" className="underline hover:text-foreground">
-          Sign in
-        </Link>
-      </p>
+      <BackToSignIn />
     </div>
   );
 }
