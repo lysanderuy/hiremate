@@ -29,6 +29,20 @@
       "when": 1790852112834,
       "tag": "0003_signup-profile-fields-trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791433405346,
+      "tag": "0004_recruiter-prereqs",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791433422149,
+      "tag": "0005_recruiter-prereqs-rls-trigger",
+      "breakpoints": true
     }
   ]
 }

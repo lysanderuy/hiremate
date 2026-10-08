@@ -1,8 +1,10 @@
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-import { USER_ROLES } from "@/types/roles";
+import { ACCOUNT_STATUSES, APP_ROLES } from "@/types/roles";
 
-export const userRole = pgEnum("user_role", USER_ROLES);
+export const userRole = pgEnum("user_role", APP_ROLES);
+
+export const accountStatus = pgEnum("account_status", ACCOUNT_STATUSES);
 
 // `id` mirrors `auth.users.id`.
 export const profiles = pgTable("profiles", {
@@ -11,6 +13,9 @@ export const profiles = pgTable("profiles", {
   displayName: text("display_name"),
   jobTitle: text("job_title"),
   role: userRole("role").notNull().default("applicant"),
+  accountStatus: accountStatus("account_status").notNull().default("active"),
+  rejectionReason: text("rejection_reason"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

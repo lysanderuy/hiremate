@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { USER_ROLES } from "@/types/roles";
+import { ACCOUNT_STATUSES, APP_ROLES } from "@/types/roles";
 
 // Example validator — replace/extend per project.
 export const updateProfileSchema = z.object({
@@ -32,9 +32,21 @@ export const profileResponseSchema = z
       .string()
       .nullable()
       .meta({ description: "Job title, set at signup for recruiters.", example: "Talent Lead" }),
-    role: z.enum(USER_ROLES).meta({
+    role: z.enum(APP_ROLES).meta({
       description: "Account role, chosen at signup and read-only afterwards.",
       example: "applicant",
+    }),
+    accountStatus: z.enum(ACCOUNT_STATUSES).meta({
+      description: "Account approval status. Recruiters start as pending until approved.",
+      example: "active",
+    }),
+    rejectionReason: z.string().nullable().meta({
+      description: "Reason given when the account was rejected.",
+      example: "Company could not be verified.",
+    }),
+    approvedAt: z.string().datetime().nullable().meta({
+      description: "Timestamp the account was approved.",
+      example: "2026-01-02T08:00:00.000Z",
     }),
     createdAt: z.string().datetime().meta({
       description: "Timestamp the profile was created.",
