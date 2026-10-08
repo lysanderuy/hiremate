@@ -1,16 +1,28 @@
-import { Briefcase } from "lucide-react";
+import Link from "next/link";
 
-import { PagePlaceholder } from "@/components/shared/page-placeholder";
+import { ListingsTable } from "@/components/listings/listings-table";
+import { buttonVariants } from "@/components/ui/button";
 import { requireActiveRecruiter } from "@/lib/auth/require-role";
+import { cn } from "@/lib/utils";
 
 export default async function RecruiterListingsPage() {
   await requireActiveRecruiter();
 
   return (
-    <PagePlaceholder
-      icon={Briefcase}
-      title="Listings"
-      description="Your listings will appear here."
-    />
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">Listings</h1>
+          <p className="text-sm text-muted-foreground">Post and manage your listings.</p>
+        </div>
+        <Link
+          href="/dashboard/recruiter/listings/new"
+          className={cn(buttonVariants({ size: "lg" }), "h-10 px-4")}
+        >
+          Post listing
+        </Link>
+      </div>
+      <ListingsTable />
+    </div>
   );
 }
