@@ -10,16 +10,18 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
-  Sparkles,
   User,
   Users,
   type LucideIcon,
 } from "lucide-react";
 
-import { Logo } from "@/components/landing/logo";
+import { Logo, SparkleIcon } from "@/components/landing/logo";
+import { Avatar } from "@/components/shared/avatar";
 import { DiscardGuardLink } from "@/components/shared/discard-guard-link";
 import { LogoutButton } from "@/components/shared/logout-button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { useCompany } from "@/hooks/use-company";
+import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/stores/ui.store";
 
@@ -35,12 +37,12 @@ const BASE = "/dashboard/recruiter";
 const NAV_ITEMS: NavItem[] = [
   { href: BASE, label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: `${BASE}/listings`, label: "Listings", icon: Briefcase },
-  { href: `${BASE}/candidates`, label: "Candidates", icon: Users },
+  { href: `${BASE}/applicants`, label: "Applicants", icon: Users },
   { href: `${BASE}/profile`, label: "Profile", icon: User },
 ];
 
 const ITEM_CLASS =
-  "flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-tint-border transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+  "flex w-full items-center gap-3 rounded-md font-medium whitespace-nowrap text-on-night transition-colors hover:bg-white/7 hover:text-white focus-visible:outline-white";
 
 function isActive(pathname: string, item: NavItem) {
   return item.exact
@@ -58,13 +60,17 @@ function SidebarContent({
   onToggleCollapse?: () => void;
 }) {
   const pathname = usePathname();
+  const profile = useProfile();
+  const company = useCompany();
+  const displayName = profile.data?.displayName ?? profile.data?.email ?? "";
+  const companyName = company.data?.name ?? "";
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col px-4 py-6">
       <div
         className={cn(
-          "flex items-center pt-5 pb-4",
-          collapsed ? "justify-center px-2" : "justify-between gap-2 px-4",
+          "mb-8 flex min-h-10 items-center",
+          collapsed ? "justify-center" : "justify-between gap-2",
         )}
       >
         {collapsed ? (
@@ -73,26 +79,26 @@ function SidebarContent({
             onClick={onToggleCollapse}
             aria-label="Expand sidebar"
             aria-expanded={false}
-            className="group flex size-9 items-center justify-center rounded-lg bg-primary text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="group flex size-10 items-center justify-center rounded-[25%] bg-primary text-white focus-visible:outline-white"
           >
-            <Sparkles className="size-5 group-hover:hidden group-focus-visible:hidden" />
+            <SparkleIcon className="size-5.5 group-hover:hidden group-focus-visible:hidden" />
             <PanelLeftOpen className="hidden size-5 group-hover:block group-focus-visible:block" />
           </button>
         ) : (
           <>
             <Link
               href={BASE}
-              aria-label="Talentflow AI home"
-              className="flex min-w-0 items-center gap-2.5"
+              aria-label="TalentFlow AI home"
+              className="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-white"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
-                <Sparkles className="size-5" />
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-[25%] bg-primary text-white">
+                <SparkleIcon className="size-5.5" />
               </span>
-              <span className="flex flex-col leading-tight">
-                <span className="whitespace-nowrap text-base font-semibold text-white">
-                  Talentflow AI
+              <span className="flex min-w-0 flex-col">
+                <span className="font-display text-base leading-tight font-semibold tracking-[-0.02em] whitespace-nowrap text-white">
+                  TalentFlow AI
                 </span>
-                <span className="text-xs text-tint-border">Recruiter</span>
+                <span className="text-xs text-on-night-muted">Recruiter</span>
               </span>
             </Link>
             {onToggleCollapse && (
@@ -101,7 +107,7 @@ function SidebarContent({
                 onClick={onToggleCollapse}
                 aria-label="Collapse sidebar"
                 aria-expanded
-                className="flex size-8 shrink-0 items-center justify-center rounded-lg text-tint-border transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="flex size-10 shrink-0 items-center justify-center rounded-md text-on-night-muted transition-colors hover:bg-white/8 hover:text-white focus-visible:outline-white"
               >
                 <PanelLeftClose className="size-5" />
               </button>
@@ -110,7 +116,7 @@ function SidebarContent({
         )}
       </div>
 
-      <nav aria-label="Recruiter" className="mt-3 flex flex-1 flex-col gap-1 px-3">
+      <nav aria-label="Recruiter" className="grid gap-1">
         {NAV_ITEMS.map((item) => {
           const active = isActive(pathname, item);
           return (
@@ -123,27 +129,50 @@ function SidebarContent({
               title={collapsed ? item.label : undefined}
               className={cn(
                 ITEM_CLASS,
+                "h-10 px-4 text-sm",
                 collapsed && "justify-center px-0",
                 active && "bg-primary text-white hover:bg-primary-hover",
               )}
             >
-              <item.icon className="size-5 shrink-0" />
+              <item.icon className="size-[18px] shrink-0" />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </DiscardGuardLink>
           );
         })}
       </nav>
 
-      <div className="flex flex-col gap-1 border-t border-white/10 p-3">
+      <div className="mt-auto grid gap-2 border-t border-white/10 pt-4">
+        {displayName && (
+          <div
+            className={cn(
+              "flex min-w-0 items-center gap-3 py-2",
+              collapsed ? "justify-center" : "px-4",
+            )}
+          >
+            <Avatar name={displayName} className="bg-white/12 text-white" />
+            {!collapsed && (
+              <span className="min-w-0">
+                <span className="block truncate text-sm leading-snug font-semibold text-white">
+                  {displayName}
+                </span>
+                {companyName && (
+                  <span className="block truncate text-xs leading-snug text-on-night-muted">
+                    {companyName}
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
+        )}
         <LogoutButton
           className={cn(
             ITEM_CLASS,
-            "border-0 px-3 py-0 text-left",
+            "h-10 border-0 bg-transparent px-4 py-0 text-left text-sm",
             collapsed && "justify-center px-0",
           )}
         >
           <LogOut className="size-5 shrink-0" aria-hidden />
-          <span className={cn(collapsed && "sr-only")}>Logout</span>
+          <span className={cn(collapsed && "sr-only")}>Log out</span>
         </LogoutButton>
       </div>
     </div>
@@ -157,7 +186,7 @@ export function RecruiterSidebar() {
   const toggleCollapsed = useUiStore((state) => state.toggleSidebarCollapsed);
 
   useEffect(() => {
-    const query = window.matchMedia("(min-width: 768px)");
+    const query = window.matchMedia("(min-width: 961px)");
     const closeOnDesktop = (event: MediaQueryListEvent) => {
       if (event.matches) setSidebarOpen(false);
     };
@@ -169,8 +198,8 @@ export function RecruiterSidebar() {
     <>
       <aside
         className={cn(
-          "sticky top-0 hidden h-screen shrink-0 bg-navy transition-[width] duration-200 md:block",
-          collapsed ? "w-16" : "w-70",
+          "sticky top-0 hidden h-screen shrink-0 bg-night transition-[width] duration-200 min-[961px]:block",
+          collapsed ? "w-19" : "w-66",
         )}
       >
         <SidebarContent collapsed={collapsed} onToggleCollapse={toggleCollapsed} />
@@ -180,7 +209,7 @@ export function RecruiterSidebar() {
         <SheetContent
           side="left"
           showCloseButton={false}
-          className="w-70 max-w-[85vw] gap-0 border-0 bg-navy p-0 md:hidden"
+          className="gap-0 border-0 bg-night p-0 data-[side=left]:w-66 data-[side=left]:max-w-[85vw] min-[961px]:hidden"
         >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SidebarContent onNavigate={() => setSidebarOpen(false)} />
@@ -195,17 +224,17 @@ export function RecruiterTopBar() {
   const sidebarOpen = useUiStore((state) => state.sidebarOpen);
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-3 border-b border-border bg-white px-4 md:hidden">
-      <Logo href={BASE} />
+    <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-white px-4 min-[961px]:hidden">
       <button
         type="button"
         onClick={toggleSidebar}
         aria-label="Open navigation"
         aria-expanded={sidebarOpen}
-        className="flex size-9 items-center justify-center rounded-lg text-navy hover:bg-muted"
+        className="flex size-10 items-center justify-center rounded-md text-ink transition-colors hover:bg-page"
       >
         <Menu className="size-5" />
       </button>
+      <Logo href={BASE} size="sm" />
     </header>
   );
 }

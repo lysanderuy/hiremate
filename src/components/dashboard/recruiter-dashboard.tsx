@@ -1,31 +1,35 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { ApplicationStatusBadge } from "@/components/candidates/application-status-badge";
+import { Avatar } from "@/components/shared/avatar";
+import { DataTable, Td, Th } from "@/components/shared/data-table";
+import { ScoreCell } from "@/components/shared/match-score";
+import { PageHeader } from "@/components/shared/page-header";
+import { ApplicationStatusPill } from "@/components/shared/status-pill";
 import { ListingStatusBadge } from "@/components/listings/listing-status-badge";
 import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { useListings } from "@/hooks/use-listings";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { DashboardResponse } from "@/validators/dashboard.validator";
 
-const LISTINGS_PATH = "/dashboard/recruiter/listings";
-const CANDIDATES_PATH = "/dashboard/recruiter/candidates";
-const MAX_ACTIVE_LISTINGS = 4;
-
-const rowGrid =
-  "xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_5rem_8rem] xl:items-center xl:gap-6";
+const BASE_PATH = "/dashboard/recruiter";
+const LISTINGS_PATH = `${BASE_PATH}/listings`;
+const APPLICANTS_PATH = `${BASE_PATH}/applicants`;
+const MAX_LISTINGS_SHOWN = 5;
 
 const STAT_TILES: { key: keyof DashboardResponse["stats"]; label: string }[] = [
-  { key: "activeJobs", label: "Active listings" },
-  { key: "totalApplicants", label: "Total applicants" },
+  { key: "activeJobs", label: "Open listings" },
+  { key: "totalApplicants", label: "Total applications" },
+  { key: "last7Days", label: "Last 7 days" },
   { key: "shortlisted", label: "Shortlisted" },
-  { key: "interviews", label: "Interviews" },
 ];
 
-function Section({
+function SectionCard({
   title,
   href,
   children,
@@ -35,15 +39,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col rounded-xl border border-border bg-white p-4">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-navy">{title}</h2>
+    <Card className="gap-0 py-0">
+      <div className="flex items-center justify-between gap-4 px-5 pt-5 pb-3">
+        <h2 className="text-base font-semibold tracking-[-0.01em]">{title}</h2>
         <Link href={href} className="text-sm font-medium text-primary hover:underline">
           View all
         </Link>
       </div>
-      <div className="flex flex-1 flex-col">{children}</div>
-    </section>
+      {children}
+    </Card>
   );
 }
 
@@ -52,8 +56,8 @@ function SectionMessage({ message, isError }: { message: string; isError?: boole
     <p
       role={isError ? "alert" : undefined}
       className={cn(
-        "flex flex-1 items-center justify-center py-10 text-center text-sm",
-        isError ? "text-red-600" : "text-muted-foreground",
+        "border-t border-line px-5 py-10 text-center",
+        isError ? "text-error" : "text-muted-foreground",
       )}
     >
       {message}
@@ -63,18 +67,28 @@ function SectionMessage({ message, isError }: { message: string; isError?: boole
 
 function StatTiles({ stats }: { stats: DashboardResponse["stats"] | undefined }) {
   return (
-    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+    <div className="mb-6 grid grid-cols-2 gap-3 min-[641px]:gap-4 min-[1101px]:grid-cols-4">
       {STAT_TILES.map(({ key, label }) => (
-        <div key={key} className="rounded-xl border border-border bg-white p-4">
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-navy">{stats ? stats[key] : "—"}</p>
-        </div>
+        <Card key={key} className="gap-0 p-4 min-[641px]:p-5">
+          <span className="text-sm text-muted-foreground">{label}</span>
+          {stats ? (
+            <b className="mt-1 font-display text-3xl font-semibold tracking-[-0.03em] text-ink tabular-nums">
+              {stats[key]}
+            </b>
+          ) : (
+            <span
+              role="status"
+              aria-label={`Loading ${label}`}
+              className="mt-2 block h-9 w-14 animate-pulse rounded-md bg-weak-soft"
+            />
+          )}
+        </Card>
       ))}
     </div>
   );
 }
 
-function ActiveListings() {
+function YourListings() {
   const { data, isPending, error } = useListings();
 
   let body: React.ReactNode;
@@ -83,27 +97,29 @@ function ActiveListings() {
   } else if (error) {
     body = <SectionMessage message={error.message} isError />;
   } else {
-    const open = data.filter((listing) => listing.status === "open").slice(0, MAX_ACTIVE_LISTINGS);
+    const shown = data
+      .filter((listing) => listing.status !== "removed")
+      .slice(0, MAX_LISTINGS_SHOWN);
     body =
-      open.length === 0 ? (
-        <SectionMessage message="No active listings." />
+      shown.length === 0 ? (
+        <SectionMessage message="No listings yet. Create one to start receiving applications." />
       ) : (
-        <ul className="space-y-3">
-          {open.map((listing) => (
+        <ul>
+          {shown.map((listing) => (
             <li key={listing.id}>
               <Link
-                href={`${LISTINGS_PATH}/${listing.id}`}
-                className="block rounded-lg border border-border p-3 transition-colors hover:border-primary"
+                href={`${APPLICANTS_PATH}?listing=${listing.id}`}
+                className="flex items-center justify-between gap-3 border-t border-line px-5 py-4 transition-colors hover:bg-primary-soft/30"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="text-sm font-medium text-navy">{listing.title}</span>
-                  <ListingStatusBadge status={listing.status} />
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {listing.applicantCount}{" "}
-                  {listing.applicantCount === 1 ? "applicant" : "applicants"}
-                  {" · "}Posted {formatDate(listing.createdAt)}
-                </p>
+                <span className="min-w-0">
+                  <b className="block font-semibold break-words text-ink">{listing.title}</b>
+                  <small className="text-muted-foreground">
+                    {listing.applicantCount}{" "}
+                    {listing.applicantCount === 1 ? "applicant" : "applicants"}
+                    {listing.topMatchScore !== null && ` · Top match ${listing.topMatchScore}/100`}
+                  </small>
+                </span>
+                <ListingStatusBadge status={listing.status} />
               </Link>
             </li>
           ))}
@@ -112,9 +128,9 @@ function ActiveListings() {
   }
 
   return (
-    <Section title="Active listings" href={LISTINGS_PATH}>
+    <SectionCard title="Your listings" href={LISTINGS_PATH}>
       {body}
-    </Section>
+    </SectionCard>
   );
 }
 
@@ -133,86 +149,99 @@ function RecentApplications({
   } else if (errorMessage || !items) {
     body = <SectionMessage message={errorMessage ?? "Could not load applications."} isError />;
   } else if (items.length === 0) {
-    body = <SectionMessage message="No applications yet." />;
+    body = (
+      <SectionMessage message="No applications yet. They show up here as soon as someone applies." />
+    );
   } else {
     body = (
-      <div role="table" aria-label="Recent applications" className="space-y-3">
-        <div
-          role="row"
-          className={cn(
-            rowGrid,
-            "hidden text-xs font-medium tracking-wide text-muted-foreground uppercase xl:px-[calc(1rem+1px)]",
-          )}
-        >
-          <span role="columnheader">Name</span>
-          <span role="columnheader">Job</span>
-          <span role="columnheader">Match</span>
-          <span role="columnheader">Status</span>
-        </div>
-        <div role="rowgroup" className="space-y-3">
-          {items.map((application) => (
-            <div
-              key={application.id}
-              role="row"
-              className={cn(
-                rowGrid,
-                "relative space-y-3 rounded-xl border border-border bg-white p-4 transition-colors focus-within:border-primary hover:border-primary xl:space-y-0",
-              )}
-            >
-              <div role="cell" className="min-w-0 text-sm font-medium text-navy">
-                <Link
-                  href={`${CANDIDATES_PATH}/${application.id}?listing=${application.jobId}`}
-                  className="text-left break-words outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-3 focus-visible:after:ring-ring"
-                >
-                  {application.applicantName ?? "Unnamed applicant"}
-                </Link>
-              </div>
-              <div role="cell" className="min-w-0 text-sm break-words text-navy">
-                {application.jobTitle}
-              </div>
-              <div role="cell" className="text-sm text-navy">
-                <span className="text-muted-foreground xl:hidden">Match: </span>
-                {application.matchScore === null ? "—" : `${application.matchScore}%`}
-              </div>
-              <div role="cell" className="text-sm text-navy">
-                <ApplicationStatusBadge status={application.status} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <DataTable label="Recent applications" className="min-w-0">
+        <thead>
+          <tr>
+            <Th>Applicant</Th>
+            <Th className="max-sm:hidden">Listing</Th>
+            <Th>Match</Th>
+            <Th>Status</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((application) => {
+            const name = application.applicantName ?? "Unnamed applicant";
+            return (
+              <tr
+                key={application.id}
+                className="relative transition-colors focus-within:bg-primary-soft/30 hover:bg-primary-soft/30"
+              >
+                <Td>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar name={name} />
+                    <div className="min-w-0">
+                      <Link
+                        href={`${APPLICANTS_PATH}/${application.id}?listing=${application.jobId}`}
+                        className="block font-semibold break-words text-ink outline-none after:absolute after:inset-0 focus-visible:after:outline-3 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary"
+                      >
+                        {name}
+                      </Link>
+                      <small className="text-xs text-muted-foreground">
+                        {formatDate(application.createdAt)}
+                      </small>
+                    </div>
+                  </div>
+                </Td>
+                <Td className="max-sm:hidden">{application.jobTitle}</Td>
+                <Td>
+                  <ScoreCell score={application.matchScore} />
+                </Td>
+                <Td>
+                  <ApplicationStatusPill status={application.status} />
+                </Td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </DataTable>
     );
   }
 
   return (
-    <Section title="Recent applications" href={CANDIDATES_PATH}>
+    <SectionCard title="Recent applications" href={APPLICANTS_PATH}>
       {body}
-    </Section>
+    </SectionCard>
   );
 }
 
 export function RecruiterDashboard({ name }: { name: string }) {
   const { data, isPending, error } = useDashboard();
+  const firstName = name.trim().split(/\s+/)[0] || "there";
+  const waiting = data?.stats.awaitingReview ?? 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">Welcome back, {name}</h1>
-          <p className="text-sm text-muted-foreground">
-            Here&apos;s what&apos;s happening with your hiring pipeline.
-          </p>
+    <div>
+      <PageHeader
+        title={`Welcome back, ${firstName}`}
+        description="Here is what is happening with your listings."
+        action={
+          <Link href={`${LISTINGS_PATH}/new`} className={buttonVariants({ size: "sm" })}>
+            <Plus aria-hidden="true" />
+            Create job listing
+          </Link>
+        }
+      />
+      {waiting > 0 && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-primary-soft px-5 py-4 font-medium text-ink">
+          <span>
+            {waiting} {waiting === 1 ? "application is" : "applications are"} waiting to be viewed.
+          </span>
+          <Link
+            href={`${APPLICANTS_PATH}?status=submitted`}
+            className={buttonVariants({ size: "xs" })}
+          >
+            Review now
+          </Link>
         </div>
-        <Link
-          href={`${LISTINGS_PATH}/new`}
-          className={cn(buttonVariants({ size: "lg" }), "h-10 px-4")}
-        >
-          + Create Job Listing
-        </Link>
-      </div>
+      )}
       <StatTiles stats={data?.stats} />
-      <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <ActiveListings />
+      <div className="grid items-start gap-6 min-[1101px]:grid-cols-[1fr_1.6fr]">
+        <YourListings />
         <RecentApplications
           items={data?.recentApplications}
           isPending={isPending}

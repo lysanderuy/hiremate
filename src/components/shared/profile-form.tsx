@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { FieldLabel } from "@/components/shared/field-label";
+import { FIELD_CLASS, FieldLabel } from "@/components/shared/field-label";
 import { Button } from "@/components/ui/button";
 import { useCompany } from "@/hooks/use-company";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
@@ -11,21 +11,18 @@ import { useFormGuardStore } from "@/stores/form-guard.store";
 import { updateCompanySchema } from "@/validators/company.validator";
 import { updateProfileSchema } from "@/validators/profile.validator";
 
-const fieldClassName =
-  "h-11 w-full rounded-lg border border-border bg-white px-3 text-sm text-navy outline-none transition-colors placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring read-only:bg-slate-50 read-only:text-slate-600";
-
 export function ProfileForm() {
   const profile = useProfile();
   const company = useCompany();
 
   if (profile.isPending || company.isPending) {
-    return <p className="text-sm text-muted-foreground">Loading...</p>;
+    return <p className="text-muted-foreground">Loading...</p>;
   }
 
   const error = profile.error ?? company.error;
   if (error || !profile.data) {
     return (
-      <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+      <p role="alert" className="rounded-md bg-error-soft px-4 py-3 text-error">
         {error?.message ?? "Profile not found."}
       </p>
     );
@@ -54,8 +51,6 @@ function ProfileFields({ initialName, email, jobTitle, initialCompany }: Profile
   const updateCompany = useUpdateCompany();
   const [displayName, setDisplayName] = useState(initialName);
   const [companyName, setCompanyName] = useState(initialCompany);
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [companyError, setCompanyError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   const nameChanged = displayName !== initialName;
@@ -63,6 +58,14 @@ function ProfileFields({ initialName, email, jobTitle, initialCompany }: Profile
   const pending = updateProfile.isPending || updateCompany.isPending;
   const saveError = updateProfile.error ?? updateCompany.error;
   const dirty = nameChanged || companyChanged;
+  const nameError =
+    nameChanged && !updateProfileSchema.safeParse({ displayName }).success
+      ? "Enter a display name of 2 to 80 characters."
+      : null;
+  const companyError =
+    companyChanged && !updateCompanySchema.safeParse({ name: companyName }).success
+      ? "Enter a company name of 2 to 120 characters."
+      : null;
   const setGuardDirty = useFormGuardStore((state) => state.setDirty);
 
   useEffect(() => {
@@ -88,17 +91,6 @@ function ProfileFields({ initialName, email, jobTitle, initialCompany }: Profile
     const parsedCompany = companyChanged
       ? updateCompanySchema.safeParse({ name: companyName })
       : null;
-
-    setNameError(
-      parsedProfile && !parsedProfile.success
-        ? "Enter a display name of 2 to 80 characters."
-        : null,
-    );
-    setCompanyError(
-      parsedCompany && !parsedCompany.success
-        ? "Enter a company name of 2 to 120 characters."
-        : null,
-    );
     if (parsedProfile?.success === false || parsedCompany?.success === false) return;
 
     try {
@@ -113,8 +105,8 @@ function ProfileFields({ initialName, email, jobTitle, initialCompany }: Profile
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-4">
-      <div className="space-y-2">
+    <form onSubmit={handleSubmit} noValidate className="grid gap-5">
+      <div className="grid gap-1.5">
         <FieldLabel htmlFor="display-name" required>
           Display name
         </FieldLabel>
@@ -131,30 +123,35 @@ function ProfileFields({ initialName, email, jobTitle, initialCompany }: Profile
           autoComplete="name"
           aria-invalid={Boolean(nameError)}
           aria-describedby={nameError ? "display-name-error" : undefined}
-          className={fieldClassName}
+          className={FIELD_CLASS}
         />
         {nameError && (
-          <p id="display-name-error" role="alert" className="text-sm text-red-600">
+          <p id="display-name-error" role="alert" className="text-xs text-error">
             {nameError}
           </p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="profile-email" className="block text-sm font-medium text-navy">
-          Email
-        </label>
-        <input id="profile-email" value={email} readOnly className={fieldClassName} />
+      <div className="grid gap-1.5">
+        <FieldLabel htmlFor="profile-email">Email</FieldLabel>
+        <input
+          id="profile-email"
+          value={email}
+          readOnly
+          aria-describedby="profile-email-help"
+          className={FIELD_CLASS}
+        />
+        <p id="profile-email-help" className="text-xs text-muted-foreground">
+          Your email is your login and cannot be changed here.
+        </p>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="profile-job-title" className="block text-sm font-medium text-navy">
-          Job title
-        </label>
-        <input id="profile-job-title" value={jobTitle} readOnly className={fieldClassName} />
+      <div className="grid gap-1.5">
+        <FieldLabel htmlFor="profile-job-title">Job title</FieldLabel>
+        <input id="profile-job-title" value={jobTitle} readOnly className={FIELD_CLASS} />
       </div>
 
-      <div className="space-y-2">
+      <div className="grid gap-1.5">
         <FieldLabel htmlFor="company-name" required>
           Company name
         </FieldLabel>
@@ -171,32 +168,30 @@ function ProfileFields({ initialName, email, jobTitle, initialCompany }: Profile
           autoComplete="organization"
           aria-invalid={Boolean(companyError)}
           aria-describedby={companyError ? "company-name-error" : undefined}
-          className={fieldClassName}
+          className={FIELD_CLASS}
         />
         {companyError && (
-          <p id="company-name-error" role="alert" className="text-sm text-red-600">
+          <p id="company-name-error" role="alert" className="text-xs text-error">
             {companyError}
           </p>
         )}
       </div>
 
       {saveError && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+        <p role="alert" className="rounded-md bg-error-soft px-4 py-3 text-error">
           {saveError.message}
         </p>
       )}
 
       <div className="flex items-center justify-end gap-3">
         {saved && (
-          <p role="status" className="text-sm text-emerald-700">
-            Saved.
+          <p role="status" className="text-sm text-ink">
+            Profile saved.
           </p>
         )}
         <Button
           type="submit"
-          size="lg"
-          disabled={pending || (!nameChanged && !companyChanged)}
-          className="h-11 px-5 text-base"
+          disabled={pending || !dirty || Boolean(nameError) || Boolean(companyError)}
         >
           {pending ? "Saving..." : "Save"}
         </Button>

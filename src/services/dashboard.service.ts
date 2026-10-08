@@ -19,6 +19,8 @@ export const dashboardService = {
           total: count(),
           shortlisted: countWhere(sql`${applications.status} = 'shortlisted'`),
           interviews: countWhere(sql`${applications.status} = 'interview'`),
+          awaitingReview: countWhere(sql`${applications.status} = 'submitted'`),
+          last7Days: countWhere(sql`${applications.createdAt} >= now() - interval '7 days'`),
         })
         .from(applications)
         .innerJoin(jobs, eq(jobs.id, applications.jobId))
@@ -35,6 +37,7 @@ export const dashboardService = {
           applicantName: profiles.displayName,
           matchScore: applications.matchScore,
           status: applications.status,
+          createdAt: applications.createdAt,
         })
         .from(applications)
         .innerJoin(jobs, eq(jobs.id, applications.jobId))
@@ -50,8 +53,10 @@ export const dashboardService = {
         totalApplicants: applicationStats.total,
         shortlisted: applicationStats.shortlisted,
         interviews: applicationStats.interviews,
+        awaitingReview: applicationStats.awaitingReview,
+        last7Days: applicationStats.last7Days,
       },
-      recentApplications: recent,
+      recentApplications: recent.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })),
     };
   },
 };

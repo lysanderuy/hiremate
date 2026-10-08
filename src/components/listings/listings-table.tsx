@@ -1,80 +1,126 @@
 "use client";
 
-import { Briefcase } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { DataTable, Td, Th } from "@/components/shared/data-table";
+import { TopScore } from "@/components/shared/match-score";
 import { ListingRowMenu } from "@/components/listings/listing-row-menu";
 import { ListingStatusBadge } from "@/components/listings/listing-status-badge";
 import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useListings } from "@/hooks/use-listings";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatSalaryRange } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { EMPLOYMENT_TYPE_LABELS } from "@/types/jobs";
 import type { ListingResponse } from "@/validators/listing.validator";
 
 const NEW_LISTING_PATH = "/dashboard/recruiter/listings/new";
 
-const rowGrid =
-  "lg:grid lg:grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_7rem_2.5rem] lg:items-center lg:gap-4";
+const TABS = ["all", "open", "closed"] as const;
+type Tab = (typeof TABS)[number];
+
+const TAB_LABELS: Record<Tab, string> = { all: "All", open: "Open", closed: "Closed" };
+
+function matchesTab(listing: ListingResponse, tab: Tab) {
+  return tab === "all" || listing.status === tab;
+}
 
 export function ListingsTable() {
   const { data, isPending, error } = useListings();
+  const [tab, setTab] = useState<Tab>("all");
 
   if (isPending) {
     return (
-      <div className="space-y-3" role="status" aria-label="Loading listings">
-        {[0, 1, 2].map((key) => (
-          <div key={key} className="h-24 animate-pulse rounded-xl border border-border bg-white" />
-        ))}
+      <div role="status" aria-label="Loading listings">
+        <div className="h-72 animate-pulse rounded-xl border border-line bg-white" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+      <p role="alert" className="rounded-md bg-error-soft px-4 py-3 text-error">
         {error.message}
       </p>
     );
   }
 
-  if (data.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-white px-6 py-16 text-center">
-        <span className="flex size-12 items-center justify-center rounded-full bg-tint text-primary">
-          <Briefcase className="size-6" />
-        </span>
-        <p className="mt-4 text-sm text-muted-foreground">You have no listings yet.</p>
-        <Link href={NEW_LISTING_PATH} className={cn(buttonVariants(), "mt-4 h-9 px-4")}>
-          + Create Job Listing
-        </Link>
-      </div>
-    );
-  }
+  const rows = data.filter((listing) => matchesTab(listing, tab));
 
   return (
-    <div role="table" aria-label="Listings" className="space-y-3">
+    <div>
       <div
-        role="row"
-        className={cn(
-          rowGrid,
-          "hidden px-4 text-xs font-medium tracking-wide text-muted-foreground uppercase",
-        )}
+        role="group"
+        aria-label="Filter listings by status"
+        className="mb-4 inline-flex gap-1 rounded-md border border-line bg-white p-1"
       >
-        <span role="columnheader">Title</span>
-        <span role="columnheader">Status</span>
-        <span role="columnheader">Applicants</span>
-        <span role="columnheader">Posted</span>
-        <span role="columnheader" className="sr-only">
-          Actions
-        </span>
+        {TABS.map((key) => {
+          const selected = tab === key;
+          const total = data.filter((listing) => matchesTab(listing, key)).length;
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => setTab(key)}
+              className={cn(
+                "h-9 rounded-lg px-4 text-sm font-medium transition-colors",
+                selected ? "bg-primary-soft text-primary" : "text-text hover:bg-page",
+              )}
+            >
+              {TAB_LABELS[key]}
+              <small
+                className={cn(
+                  "ml-1.5 font-medium",
+                  selected ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                {total}
+              </small>
+            </button>
+          );
+        })}
       </div>
-      <div role="rowgroup" className="space-y-3">
-        {data.map((listing) => (
-          <ListingRow key={listing.id} listing={listing} />
-        ))}
-      </div>
+
+      <Card className="gap-0 py-0">
+        {rows.length === 0 ? (
+          <div className="px-5 py-12 text-center">
+            <h3 className="mb-2 text-base font-semibold">
+              {data.length === 0
+                ? "No listings yet"
+                : `No ${TAB_LABELS[tab].toLowerCase()} listings`}
+            </h3>
+            <p className="mb-4">Listings you create show up here.</p>
+            <Link href={NEW_LISTING_PATH} className={buttonVariants({ size: "sm" })}>
+              <Plus aria-hidden="true" />
+              Create job listing
+            </Link>
+          </div>
+        ) : (
+          <DataTable label="Listings">
+            <thead>
+              <tr>
+                <Th>Title</Th>
+                <Th>Status</Th>
+                <Th className="max-sm:hidden">Pay</Th>
+                <Th className="text-right">Applicants</Th>
+                <Th className="text-right max-sm:hidden">Top match</Th>
+                <Th className="max-sm:hidden">Posted</Th>
+                <Th>
+                  <span className="sr-only">Actions</span>
+                </Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((listing) => (
+                <ListingRow key={listing.id} listing={listing} />
+              ))}
+            </tbody>
+          </DataTable>
+        )}
+      </Card>
     </div>
   );
 }
@@ -84,49 +130,47 @@ function ListingRow({ listing }: { listing: ListingResponse }) {
   const isRemoved = listing.status === "removed";
 
   return (
-    <div
-      role="row"
-      className={cn(
-        rowGrid,
-        "relative space-y-3 rounded-xl border border-border bg-white p-4 lg:space-y-0",
-      )}
-    >
-      <div role="cell" className="min-w-0 pr-12 lg:pr-0">
+    <tr className="relative transition-colors focus-within:bg-primary-soft/30 hover:bg-primary-soft/30">
+      <Td className="max-w-80">
         <Link
           href={`/dashboard/recruiter/listings/${listing.id}`}
-          className="text-sm font-semibold break-words text-navy hover:text-primary hover:underline"
+          className="font-semibold break-words text-ink outline-none after:absolute after:inset-0 hover:text-primary hover:underline focus-visible:after:outline-3 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary"
         >
           {listing.title}
         </Link>
-        <p className="mt-0.5 text-sm break-words text-muted-foreground">
+        <small className="block text-xs break-words text-muted-foreground">
           {listing.location} · {EMPLOYMENT_TYPE_LABELS[listing.employmentType]}
-        </p>
+        </small>
         {isRemoved && (
-          <p className="mt-1 text-sm text-red-600">
+          <small className="block text-xs text-error">
             Removed by an administrator.
             {listing.removalReason ? ` ${listing.removalReason}` : ""}
-          </p>
+          </small>
         )}
         {actionError && (
-          <p role="alert" className="mt-1 text-sm text-red-600">
+          <small role="alert" className="block text-xs text-error">
             {actionError}
-          </p>
+          </small>
         )}
-      </div>
-      <div role="cell">
+      </Td>
+      <Td>
         <ListingStatusBadge status={listing.status} />
-      </div>
-      <div role="cell" className="text-sm text-navy">
-        <span className="text-muted-foreground lg:hidden">Applicants: </span>
-        {listing.applicantCount}
-      </div>
-      <div role="cell" className="text-sm text-navy">
-        <span className="text-muted-foreground lg:hidden">Posted: </span>
-        {formatDate(listing.createdAt)}
-      </div>
-      <div role="cell" className="absolute top-4 right-4 lg:static lg:justify-self-end">
+      </Td>
+      <Td className="whitespace-nowrap max-sm:hidden">
+        {listing.salaryMin === null || listing.salaryMax === null ? (
+          <span className="text-muted-foreground">Not specified</span>
+        ) : (
+          formatSalaryRange(listing.salaryMin, listing.salaryMax)
+        )}
+      </Td>
+      <Td className="text-right tabular-nums">{listing.applicantCount}</Td>
+      <Td className="text-right tabular-nums max-sm:hidden">
+        <TopScore score={listing.topMatchScore} />
+      </Td>
+      <Td className="whitespace-nowrap max-sm:hidden">{formatDate(listing.createdAt)}</Td>
+      <Td className="relative text-right">
         <ListingRowMenu listing={listing} onError={setActionError} />
-      </div>
-    </div>
+      </Td>
+    </tr>
   );
 }

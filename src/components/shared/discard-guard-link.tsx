@@ -4,14 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogClose,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useFormGuardStore } from "@/stores/form-guard.store";
 
 type DiscardGuardLinkProps = Omit<React.ComponentProps<typeof Link>, "onClick" | "href"> & {
@@ -49,22 +42,16 @@ export function DiscardGuardLink({
       <Link href={href} onClick={handleClick} {...linkProps}>
         {children}
       </Link>
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent>
-          <AlertDialogTitle>Discard your changes?</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes. If you leave now, they will be lost.
-          </AlertDialogDescription>
-          <div className="flex justify-end gap-2">
-            <AlertDialogClose className={buttonVariants({ variant: "outline", size: "lg" })}>
-              Keep editing
-            </AlertDialogClose>
-            <Button type="button" variant="destructive" size="lg" onClick={discard}>
-              Discard
-            </Button>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Discard your changes?"
+        description="You have unsaved changes. If you leave now, they will be lost."
+        confirmLabel="Discard"
+        cancelLabel="Keep editing"
+        danger
+        onConfirm={discard}
+      />
     </>
   );
 }

@@ -13,7 +13,7 @@ export function LogoutButton({ className, children = "Sign out" }: LogoutButtonP
       <button
         type="submit"
         className={cn(
-          "rounded-md border border-foreground/20 px-3 py-1.5 text-sm hover:bg-foreground/5",
+          "rounded-md border border-line px-3 py-1.5 text-sm text-ink hover:bg-page",
           className,
         )}
       >

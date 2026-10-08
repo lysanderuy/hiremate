@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, notInArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, max, notInArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import { applications, companies, jobSkills, jobs, skills, type Job } from "@/db/schema";
@@ -14,17 +14,22 @@ export type ListingView = Omit<Job, "employmentType"> & {
   employmentType: EmploymentType;
   skills: SkillResponse[];
   applicantCount: number;
+  topMatchScore: number | null;
 };
+
+type ApplicantStats = { total: number; topMatchScore: number | null };
+const NO_APPLICANTS: ApplicantStats = { total: 0, topMatchScore: null };
 
 const REMOVED_MESSAGE = "Removed by an administrator.";
 const SKILLS_INVALID_MESSAGE = "One or more skills are not in the skills list.";
 
-function toView(job: Job, jobSkillList: SkillResponse[], applicantCount: number): ListingView {
+function toView(job: Job, jobSkillList: SkillResponse[], stats: ApplicantStats): ListingView {
   return {
     ...job,
     employmentType: job.employmentType as EmploymentType,
     skills: jobSkillList,
-    applicantCount,
+    applicantCount: stats.total,
+    topMatchScore: stats.topMatchScore,
   };
 }
 
@@ -50,16 +55,20 @@ async function loadSkillsByJobIds(
   return byJob;
 }
 
-async function loadApplicantCounts(jobIds: string[]): Promise<Map<string, number>> {
+async function loadApplicantStats(jobIds: string[]): Promise<Map<string, ApplicantStats>> {
   if (jobIds.length === 0) return new Map();
 
   const rows = await db
-    .select({ jobId: applications.jobId, total: count() })
+    .select({
+      jobId: applications.jobId,
+      total: count(),
+      topMatchScore: max(applications.matchScore),
+    })
     .from(applications)
     .where(inArray(applications.jobId, jobIds))
     .groupBy(applications.jobId);
 
-  return new Map(rows.map((row) => [row.jobId, row.total]));
+  return new Map(rows.map((row) => [row.jobId, row]));
 }
 
 async function assertSkillsActive(ids: string[], executor: DbExecutor): Promise<void> {
@@ -110,13 +119,13 @@ export const listingService = {
       .orderBy(desc(jobs.createdAt));
 
     const jobIds = rows.map((job) => job.id);
-    const [skillsByJob, countsByJob] = await Promise.all([
+    const [skillsByJob, statsByJob] = await Promise.all([
       loadSkillsByJobIds(jobIds),
-      loadApplicantCounts(jobIds),
+      loadApplicantStats(jobIds),
     ]);
 
     return rows.map((job) =>
-      toView(job, skillsByJob.get(job.id) ?? [], countsByJob.get(job.id) ?? 0),
+      toView(job, skillsByJob.get(job.id) ?? [], statsByJob.get(job.id) ?? NO_APPLICANTS),
     );
   },
 
@@ -127,12 +136,12 @@ export const listingService = {
       .where(and(eq(jobs.id, id), eq(jobs.recruiterId, userId)));
     if (!job) throw new HttpError("Listing not found", 404);
 
-    const [skillsByJob, countsByJob] = await Promise.all([
+    const [skillsByJob, statsByJob] = await Promise.all([
       loadSkillsByJobIds([id]),
-      loadApplicantCounts([id]),
+      loadApplicantStats([id]),
     ]);
 
-    return toView(job, skillsByJob.get(id) ?? [], countsByJob.get(id) ?? 0);
+    return toView(job, skillsByJob.get(id) ?? [], statsByJob.get(id) ?? NO_APPLICANTS);
   },
 
   async update(userId: string, id: string, input: UpdateListingInput): Promise<ListingView> {

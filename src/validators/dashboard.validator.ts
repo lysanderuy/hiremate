@@ -28,6 +28,10 @@ export const recentApplicationSchema = z.object({
     description: "Application status.",
     example: "submitted",
   }),
+  createdAt: z.string().datetime().meta({
+    description: "Timestamp the application was submitted.",
+    example: "2026-10-06T09:30:00.000Z",
+  }),
 });
 
 export const dashboardResponseSchema = z
@@ -37,6 +41,8 @@ export const dashboardResponseSchema = z
       totalApplicants: statField("Applications across all listings.", 148),
       shortlisted: statField("Applications with status shortlisted.", 32),
       interviews: statField("Applications with status interview.", 8),
+      awaitingReview: statField("Applications with status submitted, not yet viewed.", 5),
+      last7Days: statField("Applications received in the last 7 days.", 21),
     }),
     recentApplications: z.array(recentApplicationSchema).meta({
       description: "The most recent applications across all listings.",

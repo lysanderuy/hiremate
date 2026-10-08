@@ -7,15 +7,15 @@ import { ApiError } from "@/lib/api/client";
 export function ListingEdit({ id }: { id: string }) {
   const { data, isPending, error } = useListing(id);
 
-  if (isPending) return <p className="text-sm text-muted-foreground">Loading listing...</p>;
+  if (isPending) return <p className="text-muted-foreground">Loading listing...</p>;
 
   if (error instanceof ApiError && error.status === 404) {
-    return <p className="text-sm text-muted-foreground">Listing not found.</p>;
+    return <p className="text-muted-foreground">Listing not found.</p>;
   }
 
   if (error || !data) {
     return (
-      <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+      <p role="alert" className="rounded-md bg-error-soft px-4 py-3 text-error">
         {error?.message ?? "Listing not found."}
       </p>
     );

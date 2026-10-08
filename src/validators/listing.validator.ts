@@ -151,6 +151,10 @@ export const listingResponseSchema = z
       description: "Number of applications received.",
       example: 0,
     }),
+    topMatchScore: z.number().int().nullable().meta({
+      description: "Highest applicant match score from 0 to 100, or null if none is scored.",
+      example: 88,
+    }),
     createdAt: z.string().datetime().meta({
       description: "Timestamp the listing was created.",
       example: "2026-01-01T00:00:00.000Z",
