@@ -1,5 +1,12 @@
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
+import {
+  applicationDetailResponseSchema,
+  applicationIdSchema,
+  applicationListResponseSchema,
+  listApplicationsQuerySchema,
+  updateApplicationStatusSchema,
+} from "@/validators/application.validator";
 import { companyResponseSchema, updateCompanySchema } from "@/validators/company.validator";
 import {
   createListingSchema,
@@ -51,6 +58,8 @@ const listingIdParams = z.object({
     example: "7c1f2b0a-5d4e-4a63-9b8c-1e2d3f4a5b6c",
   }),
 });
+
+const applicationIdParams = z.object({ id: applicationIdSchema });
 
 export const openApiDocument = createDocument({
   openapi: "3.1.0",
@@ -183,6 +192,58 @@ export const openApiDocument = createDocument({
           "403": errorResponse("Account is not an approved recruiter, or the listing was removed."),
           "404": errorResponse("Listing not found."),
           "409": errorResponse("The listing has applications and can only be closed."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/listings/{id}/applications": {
+      get: {
+        summary: "List applications to one of the authenticated recruiter's listings",
+        requestParams: { path: listingIdParams, query: listApplicationsQuerySchema },
+        responses: {
+          "200": successResponse(
+            "Applications retrieved successfully.",
+            applicationListResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an approved recruiter."),
+          "404": errorResponse("Listing not found."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/applications/{id}": {
+      get: {
+        summary: "Get one application. A submitted application is marked as viewed.",
+        requestParams: { path: applicationIdParams },
+        responses: {
+          "200": successResponse(
+            "Application retrieved successfully.",
+            applicationDetailResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an approved recruiter."),
+          "404": errorResponse("Application not found."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+      patch: {
+        summary: "Set the status of an application",
+        requestParams: { path: applicationIdParams },
+        requestBody: {
+          content: {
+            "application/json": { schema: updateApplicationStatusSchema },
+          },
+        },
+        responses: {
+          "200": successResponse(
+            "Application updated successfully.",
+            applicationDetailResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an approved recruiter."),
+          "404": errorResponse("Application not found."),
+          "409": errorResponse("The applicant withdrew this application."),
           "422": errorResponse("Validation error."),
         },
       },

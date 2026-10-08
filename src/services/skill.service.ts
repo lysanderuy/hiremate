@@ -4,6 +4,7 @@ import { and, asc, eq, ilike, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import { skills } from "@/db/schema";
+import { escapeLike } from "@/lib/escape-like";
 import { createSkillMatcher } from "@/lib/skills/extract-skills";
 import type {
   ListSkillsQuery,
@@ -16,8 +17,7 @@ export type DbExecutor = Pick<typeof db, "select">;
 export const skillService = {
   async listActive({ q, limit }: ListSkillsQuery): Promise<SkillResponse[]> {
     const search = q?.trim();
-    // Escape LIKE wildcards so user input is matched literally.
-    const pattern = search ? `%${search.replace(/[\\%_]/g, "\\$&")}%` : undefined;
+    const pattern = search ? `%${escapeLike(search)}%` : undefined;
 
     return db
       .select({ id: skills.id, name: skills.name })
