@@ -171,7 +171,7 @@ export function RecruiterSidebar() {
       <aside
         className={cn(
           "sticky top-0 hidden h-screen shrink-0 bg-navy transition-[width] duration-200 md:block",
-          collapsed ? "w-16" : "w-64",
+          collapsed ? "w-16" : "w-70",
         )}
       >
         <SidebarContent collapsed={collapsed} onToggleCollapse={toggleCollapsed} />
@@ -181,7 +181,7 @@ export function RecruiterSidebar() {
         <SheetContent
           side="left"
           showCloseButton={false}
-          className="w-64 max-w-[85vw] gap-0 border-0 bg-navy p-0 md:hidden"
+          className="w-70 max-w-[85vw] gap-0 border-0 bg-navy p-0 md:hidden"
         >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SidebarContent onNavigate={() => setSidebarOpen(false)} />
