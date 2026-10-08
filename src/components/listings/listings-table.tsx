@@ -47,7 +47,7 @@ export function ListingsTable() {
         </span>
         <p className="mt-4 text-sm text-muted-foreground">You have no listings yet.</p>
         <Link href={NEW_LISTING_PATH} className={cn(buttonVariants(), "mt-4 h-9 px-4")}>
-          Post listing
+          + Create Job Listing
         </Link>
       </div>
     );

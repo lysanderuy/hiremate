@@ -19,7 +19,7 @@ export default async function RecruiterListingsPage() {
           href="/dashboard/recruiter/listings/new"
           className={cn(buttonVariants({ size: "lg" }), "h-10 px-4")}
         >
-          Post listing
+          + Create Job Listing
         </Link>
       </div>
       <ListingsTable />
