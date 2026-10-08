@@ -1,7 +1,7 @@
 "use client";
 
-// Catches errors in the root layout itself — must render its own <html>/<body>,
-// and app CSS isn't available (hence inline styles).
+// Catches errors in the root layout itself: must render its own <html>/<body>,
+// and app CSS isn't available (hence inline styles with the brand token values).
 export default function GlobalError({
   error,
   reset,
@@ -18,25 +18,41 @@ export default function GlobalError({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: "1rem",
-          fontFamily: "system-ui, sans-serif",
-          textAlign: "center",
+          margin: 0,
           padding: "1rem",
+          background: "#f7f8fa",
+          color: "#475467",
+          fontFamily: "system-ui, sans-serif",
+          fontSize: "14px",
+          lineHeight: 1.5,
+          textAlign: "center",
         }}
       >
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>Something went wrong</h1>
+        <h1 style={{ margin: 0, color: "#101828", fontSize: "26px", fontWeight: 600 }}>
+          Something went wrong
+        </h1>
+        <p style={{ margin: "12px 0 0", maxWidth: "24rem", color: "#667085" }}>
+          This page could not be loaded. Try again. If it keeps happening, come back later.
+        </p>
         {error.digest && (
-          <p style={{ fontSize: "0.75rem", color: "#888" }}>Error ID: {error.digest}</p>
+          <p style={{ margin: "12px 0 0", fontSize: "12px", color: "#667085" }}>
+            Error ID: {error.digest}
+          </p>
         )}
         <button
           onClick={reset}
           style={{
-            padding: "0.5rem 1rem",
-            borderRadius: "0.375rem",
-            border: "1px solid #ccc",
-            background: "transparent",
+            marginTop: "24px",
+            height: "44px",
+            padding: "0 24px",
+            border: 0,
+            borderRadius: "10px",
+            background: "#4f39f6",
+            color: "#ffffff",
             cursor: "pointer",
-            fontSize: "0.875rem",
+            fontFamily: "inherit",
+            fontSize: "14px",
+            fontWeight: 600,
           }}
         >
           Try again
