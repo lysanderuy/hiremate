@@ -9,6 +9,7 @@ type AuthInputProps = React.ComponentProps<"input"> & {
   label: string;
   icon: LucideIcon;
   labelAction?: React.ReactNode;
+  requiredMark?: boolean;
 };
 
 const inputClassName =
@@ -18,6 +19,7 @@ export function AuthInput({
   label,
   icon: Icon,
   labelAction,
+  requiredMark,
   type,
   className,
   ...props
@@ -28,7 +30,14 @@ export function AuthInput({
   return (
     <label className="block space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-navy">{label}</span>
+        <span className="text-sm font-medium text-navy">
+          {label}
+          {requiredMark && (
+            <span aria-hidden="true" className="ml-1 text-red-600">
+              *
+            </span>
+          )}
+        </span>
         {labelAction}
       </div>
       <div className="relative">

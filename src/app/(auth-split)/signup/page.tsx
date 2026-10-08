@@ -256,6 +256,7 @@ function SignupForm({ step, setStep, role, setRole }: SignupFormProps) {
           autoComplete="name"
           placeholder="Enter your full name"
           required
+          requiredMark
         />
 
         {role === "recruiter" && (
@@ -267,6 +268,7 @@ function SignupForm({ step, setStep, role, setRole }: SignupFormProps) {
               autoComplete="organization"
               placeholder="Enter your company name"
               required
+              requiredMark
             />
             <AuthInput
               label="Job title"
@@ -275,6 +277,7 @@ function SignupForm({ step, setStep, role, setRole }: SignupFormProps) {
               autoComplete="organization-title"
               placeholder="Enter your job title"
               required
+              requiredMark
             />
           </>
         )}
@@ -287,6 +290,7 @@ function SignupForm({ step, setStep, role, setRole }: SignupFormProps) {
           autoComplete="email"
           placeholder="Enter your email address"
           required
+          requiredMark
         />
 
         <AuthInput
@@ -298,6 +302,7 @@ function SignupForm({ step, setStep, role, setRole }: SignupFormProps) {
           placeholder="Enter your password"
           minLength={8}
           required
+          requiredMark
         />
 
         {error && (
