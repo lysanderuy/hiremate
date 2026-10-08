@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { FieldLabel } from "@/components/shared/field-label";
 import { Button } from "@/components/ui/button";
 import { useCompany } from "@/hooks/use-company";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
 import { useUpdateCompany } from "@/hooks/use-update-company";
+import { useFormGuardStore } from "@/stores/form-guard.store";
 import { updateCompanySchema } from "@/validators/company.validator";
 import { updateProfileSchema } from "@/validators/profile.validator";
 
@@ -61,6 +62,23 @@ function ProfileFields({ initialName, email, jobTitle, initialCompany }: Profile
   const companyChanged = companyName !== initialCompany;
   const pending = updateProfile.isPending || updateCompany.isPending;
   const saveError = updateProfile.error ?? updateCompany.error;
+  const dirty = nameChanged || companyChanged;
+  const setGuardDirty = useFormGuardStore((state) => state.setDirty);
+
+  useEffect(() => {
+    setGuardDirty(dirty);
+  }, [dirty, setGuardDirty]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [dirty]);
+
+  useEffect(() => () => setGuardDirty(false), [setGuardDirty]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { Logo } from "@/components/landing/logo";
+import { DiscardGuardLink } from "@/components/shared/discard-guard-link";
 import { LogoutButton } from "@/components/shared/logout-button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -113,10 +114,10 @@ function SidebarContent({
         {NAV_ITEMS.map((item) => {
           const active = isActive(pathname, item);
           return (
-            <Link
+            <DiscardGuardLink
               key={item.href}
               href={item.href}
-              onClick={onNavigate}
+              onNavigate={onNavigate}
               aria-current={active ? "page" : undefined}
               aria-label={collapsed ? item.label : undefined}
               title={collapsed ? item.label : undefined}
@@ -128,7 +129,7 @@ function SidebarContent({
             >
               <item.icon className="size-5 shrink-0" />
               {!collapsed && <span className="truncate">{item.label}</span>}
-            </Link>
+            </DiscardGuardLink>
           );
         })}
       </nav>

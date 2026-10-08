@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SkillPicker } from "@/components/listings/skill-picker";
+import { DiscardGuardLink } from "@/components/shared/discard-guard-link";
 import { FieldLabel } from "@/components/shared/field-label";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useCreateListing } from "@/hooks/use-create-listing";
@@ -16,6 +17,7 @@ import {
   updateListingSchema,
   type ListingResponse,
 } from "@/validators/listing.validator";
+import { useFormGuardStore } from "@/stores/form-guard.store";
 import type { SkillResponse } from "@/validators/skill.validator";
 
 const LISTINGS_PATH = "/dashboard/recruiter/listings";
@@ -86,7 +88,48 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
   const needsCompany = apiMessage?.includes("company name in Profile") ?? false;
   const descriptionLength = description.trim().length;
 
+  const setGuardDirty = useFormGuardStore((state) => state.setDirty);
+  const skillIds = skills.map((skill) => skill.id);
+  const dirty =
+    title !== (listing?.title ?? "") ||
+    description !== (listing?.description ?? "") ||
+    location !== (listing?.location ?? "") ||
+    employmentType !== (listing?.employmentType ?? "full_time") ||
+    salaryMin !== (listing?.salaryMin?.toString() ?? "") ||
+    salaryMax !== (listing?.salaryMax?.toString() ?? "") ||
+    skillIds.join() !== (listing?.skills ?? []).map((skill) => skill.id).join();
+
+  const draft = {
+    title,
+    description,
+    location,
+    employmentType,
+    skillIds,
+    salaryMin: parseAmount(salaryMin) ?? (mode === "edit" ? null : undefined),
+    salaryMax: parseAmount(salaryMax) ?? (mode === "edit" ? null : undefined),
+  };
+  const complete = (mode === "create" ? createListingSchema : updateListingSchema).safeParse(
+    draft,
+  ).success;
+  const canSubmit = complete && (mode === "create" || dirty);
+
+  useEffect(() => {
+    setGuardDirty(dirty);
+  }, [dirty, setGuardDirty]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [dirty]);
+
+  useEffect(() => () => setGuardDirty(false), [setGuardDirty]);
+
   function handleSuccess() {
+    setGuardDirty(false);
     router.push(LISTINGS_PATH);
   }
 
@@ -297,15 +340,28 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
         </p>
       )}
 
+      {!isRemoved && !canSubmit && (
+        <p className="text-right text-xs text-muted-foreground">
+          {mode === "create"
+            ? "Complete the title, description, and location to publish."
+            : "Make a valid change to save."}
+        </p>
+      )}
+
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <Link
+        <DiscardGuardLink
           href={LISTINGS_PATH}
           className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 px-5 text-base")}
         >
           Cancel
-        </Link>
+        </DiscardGuardLink>
         {!isRemoved && (
-          <Button type="submit" size="lg" disabled={pending} className="h-11 px-5 text-base">
+          <Button
+            type="submit"
+            size="lg"
+            disabled={pending || !canSubmit}
+            className="h-11 px-5 text-base"
+          >
             {pending
               ? mode === "create"
                 ? "Publishing..."
