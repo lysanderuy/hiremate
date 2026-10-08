@@ -18,6 +18,8 @@
     "db:verify": "node scripts/verify-db.mjs",
     "db:auth-users": "node scripts/check-auth-users.mjs",
     "db:seed-skills": "node scripts/seed-skills.mjs",
+    "db:seed-applicants": "node --experimental-strip-types scripts/seed-applicants.mjs",
+    "db:cleanup-applicants": "node scripts/cleanup-seeded-applicants.mjs",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
