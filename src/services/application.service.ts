@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, arrayContains, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { applications, jobs, profiles, type Application } from "@/db/schema";
@@ -84,6 +84,13 @@ function selectDetail(executor: Pick<typeof db, "select">, userId: string, id: s
     .where(and(eq(applications.id, id), eq(jobs.recruiterId, userId)));
 }
 
+function orderBy(sort: ListApplicationsQuery["sort"]) {
+  if (sort === "newest") return [desc(applications.createdAt)];
+  if (sort === "name")
+    return [sql`${profiles.displayName} asc nulls last`, desc(applications.createdAt)];
+  return [sql`${applications.matchScore} desc nulls last`, desc(applications.createdAt)];
+}
+
 function notFound(): HttpError {
   return new HttpError("Application not found", 404);
 }
@@ -92,7 +99,7 @@ export const applicationService = {
   async listForListing(
     userId: string,
     listingId: string,
-    { status, search, skills, sort }: ListApplicationsQuery,
+    { status, search, band, sort }: ListApplicationsQuery,
   ): Promise<ApplicationListResponse> {
     const [job] = await db
       .select({ id: jobs.id })
@@ -105,7 +112,7 @@ export const applicationService = {
     const baseConditions = [
       eq(applications.jobId, listingId),
       pattern ? ilike(profiles.displayName, pattern) : undefined,
-      skills && skills.length > 0 ? arrayContains(applications.skillsMatched, skills) : undefined,
+      band ? eq(applications.band, band) : undefined,
     ];
 
     const [rows, countRows] = await Promise.all([
@@ -114,7 +121,7 @@ export const applicationService = {
         .from(applications)
         .innerJoin(profiles, eq(profiles.id, applications.applicantId))
         .where(and(...baseConditions, status ? eq(applications.status, status) : undefined))
-        .orderBy(sort === "oldest" ? asc(applications.createdAt) : desc(applications.createdAt)),
+        .orderBy(...orderBy(sort)),
       db
         .select({ status: applications.status, total: count() })
         .from(applications)

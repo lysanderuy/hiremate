@@ -16,9 +16,9 @@ describe("applicationIdSchema", () => {
 });
 
 describe("listApplicationsQuerySchema", () => {
-  it("defaults sort to newest", () => {
+  it("defaults sort to match", () => {
     const result = listApplicationsQuerySchema.safeParse({});
-    expect(result.success && result.data.sort).toBe("newest");
+    expect(result.success && result.data.sort).toBe("match");
   });
 
   it("trims search", () => {
@@ -41,33 +41,20 @@ describe("listApplicationsQuerySchema", () => {
   });
 
   it("rejects an unknown sort", () => {
-    expect(listApplicationsQuerySchema.safeParse({ sort: "score" }).success).toBe(false);
+    expect(listApplicationsQuerySchema.safeParse({ sort: "oldest" }).success).toBe(false);
   });
 
-  it("splits skills, trimming, lowercasing and deduping", () => {
-    const result = listApplicationsQuerySchema.safeParse({ skills: " React, typescript ,REACT,," });
-    expect(result.success && result.data.skills).toEqual(["react", "typescript"]);
+  it("accepts every sort", () => {
+    for (const sort of ["match", "newest", "name"]) {
+      expect(listApplicationsQuerySchema.safeParse({ sort }).success).toBe(true);
+    }
   });
 
-  it("lowercases a mixed-case skills query", () => {
-    const result = listApplicationsQuerySchema.safeParse({ skills: "ReAcT,TypeScript" });
-    expect(result.success && result.data.skills).toEqual(["react", "typescript"]);
-  });
-
-  it("returns an empty list for blank skills and undefined when omitted", () => {
-    const blank = listApplicationsQuerySchema.safeParse({ skills: " , " });
-    expect(blank.success && blank.data.skills).toEqual([]);
-    const omitted = listApplicationsQuerySchema.safeParse({});
-    expect(omitted.success && omitted.data.skills).toBeUndefined();
-  });
-
-  it("rejects more than 30 skills", () => {
-    const skills = Array.from({ length: 31 }, (_, i) => `skill${i}`).join(",");
-    expect(listApplicationsQuerySchema.safeParse({ skills }).success).toBe(false);
-  });
-
-  it("rejects a skill over 60 characters", () => {
-    expect(listApplicationsQuerySchema.safeParse({ skills: "a".repeat(61) }).success).toBe(false);
+  it("accepts every band and rejects unknown ones", () => {
+    for (const band of ["strong", "fair", "weak"]) {
+      expect(listApplicationsQuerySchema.safeParse({ band }).success).toBe(true);
+    }
+    expect(listApplicationsQuerySchema.safeParse({ band: "great" }).success).toBe(false);
   });
 });
 

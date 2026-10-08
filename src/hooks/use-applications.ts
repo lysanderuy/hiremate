@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
 import type { ApplicationStatus } from "@/types/applications";
-import type { ApplicationListResponse } from "@/validators/application.validator";
+import type { ApplicationListResponse, MatchBand } from "@/validators/application.validator";
 
 export type ApplicationFilters = {
   status?: ApplicationStatus;
   search?: string;
-  skills?: string[];
-  sort?: "newest" | "oldest";
+  band?: MatchBand;
+  sort?: "match" | "newest" | "name";
 };
 
 export const applicationKeys = {
@@ -28,9 +28,7 @@ export function useApplications(listingId: string, filters: ApplicationFilters =
       const params = new URLSearchParams();
       if (filters.status) params.set("status", filters.status);
       if (filters.search) params.set("search", filters.search);
-      if (filters.skills && filters.skills.length > 0) {
-        params.set("skills", filters.skills.join(","));
-      }
+      if (filters.band) params.set("band", filters.band);
       if (filters.sort) params.set("sort", filters.sort);
       const qs = params.toString();
       return api.get<ApplicationListResponse>(

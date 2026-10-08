@@ -9,7 +9,9 @@ export const RECRUITER_SETTABLE_STATUSES = [
   "rejected",
 ] as const;
 
-export const APPLICATION_SORTS = ["newest", "oldest"] as const;
+export const APPLICATION_SORTS = ["match", "newest", "name"] as const;
+export const APPLICATION_BANDS = ["strong", "fair", "weak"] as const;
+export type MatchBand = (typeof APPLICATION_BANDS)[number];
 
 export const applicationIdSchema = z.string().uuid().meta({
   description: "Application ID.",
@@ -25,27 +27,14 @@ export const listApplicationsQuerySchema = z.object({
     description: "Case-insensitive text to match against the applicant's name.",
     example: "maria",
   }),
-  skills: z
-    .string()
-    .max(2000)
-    .transform((value) => [
-      ...new Set(
-        value
-          .split(",")
-          .map((skill) => skill.trim().toLowerCase())
-          .filter(Boolean),
-      ),
-    ])
-    .pipe(z.array(z.string().max(60)).max(30))
-    .optional()
-    .meta({
-      description:
-        "Comma-separated skill names. Only applications that match all of them are returned.",
-      example: "react,typescript",
-    }),
-  sort: z.enum(APPLICATION_SORTS).default("newest").meta({
-    description: "Order by submission date.",
-    example: "newest",
+  band: z.enum(APPLICATION_BANDS).optional().meta({
+    description: "Only return applications in this match band.",
+    example: "strong",
+  }),
+  sort: z.enum(APPLICATION_SORTS).default("match").meta({
+    description:
+      "Order by match score (highest first), submission date (newest first) or applicant name (A to Z).",
+    example: "match",
   }),
 });
 
@@ -94,7 +83,7 @@ const summaryShape = {
     description: "Match score from 0 to 100, or null if not scored.",
     example: 82,
   }),
-  band: z.enum(["strong", "fair", "weak"]).nullable().meta({
+  band: z.enum(APPLICATION_BANDS).nullable().meta({
     description: "Match band, or null if not scored.",
     example: "strong",
   }),
@@ -125,8 +114,7 @@ export const applicationListResponseSchema = z
         withdrawn: countField("Applications with status withdrawn.", 1),
       })
       .meta({
-        description:
-          "Applications per status. Honours search and skills, ignores the status filter.",
+        description: "Applications per status. Honours search and band, ignores the status filter.",
       }),
   })
   .meta({ id: "ApplicationList", description: "A page of applications with per-status counts." });
