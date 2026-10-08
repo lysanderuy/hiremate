@@ -1,0 +1,142 @@
+/* =========================================================
+   TalentFlow AI: design tokens
+   Source of truth for the web app and landing page.
+   Matches talentflow-ai_design.yaml. Change values in both.
+   Tailwind: map these in tailwind config or @theme.
+   ========================================================= */
+
+:root {
+  /* ---------- Typography ---------- */
+  --font-display: "Space Grotesk", system-ui, sans-serif; /* headings, wordmark, score numerals */
+  --font-body: "Inter", system-ui, sans-serif; /* body, UI, forms */
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; /* resume text preview only */
+
+  --text-xs: 0.75rem; /* 12px: badges, pills, helper and error text, table headers, eyebrow */
+  --text-chip: 0.8125rem; /* 13px: skill chips */
+  --text-sm: 0.875rem; /* 14px: app body, inputs, buttons, table cells, menu items */
+  --text-md: 0.9375rem; /* 15px: landing body, landing large buttons */
+  --text-base: 1rem; /* 16px: card titles, h2, brand text, FAQ questions, step titles */
+  --text-lead: 1.0625rem; /* 17px: landing lead and hero sub */
+  --text-lg: 1.125rem; /* 18px: modal title, table score numeral, "/100" on detail */
+  --text-xl: 1.25rem; /* 20px: page h1 on phones */
+  --text-2xl: 1.5rem; /* 24px: page h1, step numerals, proof numbers, CTA card h3 */
+  --text-3xl: 1.75rem; /* 28px: stat numerals */
+  --text-auth-h1: 1.625rem; /* 26px: auth h1 */
+  --text-numeral: 2.25rem; /* 36px: hero preview score numeral */
+  --text-score-sm: 2.75rem; /* 44px: score hero numeral on phones */
+  --text-score: 3.5rem; /* 56px: score hero numeral */
+  --text-section: clamp(1.5rem, 2.8vw, 2rem); /* 24 to 32px: landing section h2 */
+  --text-hero: clamp(2.125rem, 4.4vw, 3rem); /* 34 to 48px: hero headline */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.1; /* display headings */
+  --leading-snug: 1.3;
+  --leading-ui: 1.5; /* app body */
+  --leading-body: 1.6; /* landing body */
+
+  --tracking-display: -0.025em;
+  --tracking-tight: -0.01em;
+  --tracking-eyebrow: 0.08em;
+
+  /* ---------- Color: brand ---------- */
+  --color-primary: #4f39f6;
+  --color-primary-hover: #3f2bd6;
+  --color-primary-active: #3322b8;
+  --color-primary-soft: #eeebff; /* tints, chips, hero panel */
+  --color-primary-soft-line: #cfc8ff; /* dividers on soft tint */
+  --color-on-primary: #ffffff;
+  --color-on-primary-muted: #e6e2ff; /* body text on primary */
+  --color-on-primary-eyebrow: #e0dbff;
+  --color-night: #0f172a; /* recruiter card, footer */
+  --color-on-night: #d0d5e2;
+  --color-on-night-muted: #98a2b3;
+
+  /* ---------- Color: neutrals ---------- */
+  --color-ink: #101828; /* headings */
+  --color-text: #475467; /* body */
+  --color-muted: #667085; /* meta, helper text */
+  --color-line: #e4e7ec; /* borders, dividers */
+  --color-line-dashed: #c0c5cf; /* missing-skill chips */
+  --color-page: #f7f8fa; /* alternate section background */
+  --color-surface: #ffffff;
+
+  /* ---------- Color: score bands (semantic, used only for scores) ---------- */
+  --color-strong: #0f6b4c;
+  --color-strong-soft: #e3f5ee;
+  --color-fair: #975004;
+  --color-fair-soft: #fdf1df;
+  --color-weak: #566074;
+  --color-weak-soft: #eef0f3;
+
+  /* ---------- Color: feedback ---------- */
+  --color-error: #d92d20;
+  --color-error-soft: #fef3f2;
+  --color-error-strong: #b42318;
+  --color-focus: var(--color-primary);
+
+  /* ---------- Spacing (4px base) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 56px;
+  --space-9: 104px;
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 6px; /* small tags */
+  --radius-md: 10px; /* buttons, inputs, list rows */
+  --radius-lg: 16px; /* cards */
+  --radius-xl: 24px; /* feature panels, CTA cards */
+  --radius-pill: 999px; /* badges, chips */
+
+  /* ---------- Shadows ---------- */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.08);
+  --shadow-focus: 0 0 0 3px rgba(79, 57, 246, 0.35);
+
+  /* ---------- Layout ---------- */
+  --container: 1120px;
+  --container-narrow: 760px;
+  --gutter: 24px;
+  --gutter-mobile: 16px;
+  --nav-height: 64px;
+  --control-height: 40px; /* buttons, inputs, icon buttons */
+  --control-height-lg: 44px; /* landing hero and CTA buttons, auth inputs and submit */
+  --control-height-sm: 36px; /* nav button */
+  --control-height-xs: 32px; /* compact buttons */
+  --touch-target-mobile: 44px; /* under 640px: primary tap targets and inputs; 40px minimum on desktop */
+
+  /* ---------- Motion ---------- */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---------- Breakpoints (reference; custom properties cannot be used in @media) ---------- */
+  --bp-sm: 640px; /* phones */
+  --bp-md: 960px; /* tablets, nav collapses, grids stack */
+  --bp-lg: 1280px; /* wide desktop */
+
+  /* ---------- Z-index ---------- */
+  --z-nav: 10;
+  --z-overlay: 50;
+}
+
+/* Breakpoints in use:
+   @media (max-width: 960px) { ... }  tablet and below
+   @media (max-width: 640px) { ... }  phone
+   @media (min-width: 961px) and (min-height: 640px) { ... }  one-screen sections on desktop
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}

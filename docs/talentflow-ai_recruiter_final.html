@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalentFlow AI: Recruiter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TOKENS (same values as talentflow-ai_tokens.css)
+   ========================================================= */
+:root {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --color-primary: #4f39f6; --color-primary-hover: #3f2bd6; --color-primary-active: #3322b8;
+  --color-primary-soft: #eeebff; --color-primary-soft-line: #cfc8ff;
+  --color-night: #0f172a; --color-on-night: #d0d5e2; --color-on-night-muted: #98a2b3;
+  --color-ink: #101828; --color-text: #475467; --color-muted: #667085;
+  --color-line: #e4e7ec; --color-page: #f7f8fa; --color-surface: #ffffff;
+  --color-strong: #0f6b4c; --color-strong-soft: #e3f5ee;
+  --color-fair: #975004; --color-fair-soft: #fdf1df;
+  --color-weak: #566074; --color-weak-soft: #eef0f3;
+  --color-error: #d92d20; --color-error-soft: #fef3f2;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,.06); --shadow-md: 0 8px 24px rgba(16,24,40,.08); --shadow-lg: 0 16px 40px rgba(16,24,40,.18);
+  --shadow-focus: 0 0 0 3px rgba(79,57,246,.35);
+  --sidebar-w: 264px; --sidebar-w-collapsed: 76px;
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); font-size: 16px; line-height: 1.5; color: var(--color-text); background: var(--color-page); -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--font-display); color: var(--color-ink); letter-spacing: -0.02em; line-height: 1.15; }
+h1 { font-size: 1.875rem; font-weight: 600; }
+h2 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+ul { list-style: none; }
+svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* =========================================================
+   SHELL  (components: Sidebar, PageHeader)
+   ========================================================= */
+.app { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; transition: grid-template-columns .2s cubic-bezier(.2,0,0,1); }
+.app.is-collapsed { grid-template-columns: var(--sidebar-w-collapsed) 1fr; }
+.sidebar { background: var(--color-night); color: var(--color-on-night); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; padding: var(--space-5) var(--space-4); z-index: 30; }
+.sidebar__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-6); min-height: 44px; }
+.brand { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.brand__mark { width: 40px; height: 40px; border-radius: 10px; background: var(--color-primary); display: grid; place-items: center; color: #fff; flex: none; }
+.brand__text b { display: block; font-family: var(--font-display); color: #fff; font-weight: 600; font-size: 1.125rem; line-height: 1.2; white-space: nowrap; }
+.brand__text small { font-size: .8125rem; color: var(--color-on-night-muted); }
+.icon-btn { width: 40px; height: 40px; border-radius: var(--radius-md); display: grid; place-items: center; color: var(--color-on-night-muted); flex: none; }
+.icon-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+.nav { display: grid; gap: var(--space-1); }
+.nav a { display: flex; align-items: center; gap: var(--space-3); height: 48px; padding: 0 var(--space-4); border-radius: var(--radius-md); font-weight: 500; color: var(--color-on-night); white-space: nowrap; }
+.nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+.nav a.is-active { background: var(--color-primary); color: #fff; }
+.sidebar__bottom { margin-top: auto; border-top: 1px solid rgba(255,255,255,.1); padding-top: var(--space-4); display: grid; gap: var(--space-2); }
+.me { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-4); min-width: 0; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; font-family: var(--font-display); font-weight: 600; font-size: .875rem; flex: none; }
+.me .avatar { background: rgba(255,255,255,.12); color: #fff; }
+.me__text { min-width: 0; }
+.me__text b { display: block; color: #fff; font-size: .9375rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.me__text small { color: var(--color-on-night-muted); font-size: .8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.is-collapsed .brand__text, .is-collapsed .nav a span, .is-collapsed .me__text, .is-collapsed .logout span { display: none; }
+.is-collapsed .nav a, .is-collapsed .logout { justify-content: center; padding: 0; }
+.is-collapsed .sidebar__top { flex-direction: column; gap: var(--space-3); }
+.is-collapsed .me { justify-content: center; padding: var(--space-2) 0; }
+.main { min-width: 0; }
+.topbar { display: none; }
+.scrim { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 25; }
+.content { max-width: 1240px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-7); }
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); margin-bottom: var(--space-5); flex-wrap: wrap; }
+.page-head p { margin-top: var(--space-1); }
+.crumb { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 500; color: var(--color-muted); margin-bottom: var(--space-4); }
+.crumb:hover { color: var(--color-ink); }
+.crumb svg { width: 18px; height: 18px; }
+
+/* =========================================================
+   PRIMITIVES  (Button, Badge, Chip, Card, Input, Select, Tabs)
+   ========================================================= */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-md); font-weight: 600; font-size: .9375rem; border: 1px solid transparent; white-space: nowrap; transition: background .15s, border-color .15s; }
+.btn svg { width: 18px; height: 18px; }
+.btn--primary { background: var(--color-primary); color: #fff; }
+.btn--primary:hover { background: var(--color-primary-hover); }
+.btn--primary:active { background: var(--color-primary-active); }
+.btn--secondary { background: #fff; color: var(--color-ink); border-color: var(--color-line); }
+.btn--secondary:hover { border-color: var(--color-muted); }
+.btn--danger { background: var(--color-error); color: #fff; }
+.btn--danger:hover { background: #b42318; }
+.btn--ghost { color: var(--color-text); }
+.btn--ghost:hover { background: rgba(16,24,40,.05); }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; pointer-events: none; }
+.btn--sm { height: 36px; padding: 0 var(--space-3); font-size: .875rem; }
+.logout { display: flex; align-items: center; gap: var(--space-3); height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-md); color: var(--color-on-night); font-weight: 500; width: 100%; }
+.logout:hover { background: rgba(255,255,255,.07); color: #fff; }
+
+.badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.badge--strong { background: var(--color-strong-soft); color: var(--color-strong); }
+.badge--fair { background: var(--color-fair-soft); color: var(--color-fair); }
+.badge--weak { background: var(--color-weak-soft); color: var(--color-weak); }
+/* status pills: no green, green is only for scores */
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); font-size: .8125rem; font-weight: 500; white-space: nowrap; }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill--submitted { background: #fff; color: var(--color-text); border: 1px solid var(--color-line-strong, #c0c5cf); }
+.pill--viewed { background: var(--color-weak-soft); color: var(--color-weak); }
+.pill--shortlisted { background: var(--color-primary-soft); color: var(--color-primary); }
+.pill--rejected { background: var(--color-error-soft); color: #b42318; }
+.pill--withdrawn { background: #fff; color: var(--color-muted); border: 1px dashed #c0c5cf; }
+.pill--open { background: var(--color-primary-soft); color: var(--color-primary); }
+.pill--closed { background: var(--color-weak-soft); color: var(--color-weak); }
+
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 var(--space-3); border-radius: var(--radius-pill); font-size: .8125rem; font-weight: 500; background: var(--color-primary-soft); color: var(--color-primary); }
+.chip--miss { background: #fff; color: var(--color-muted); border: 1px dashed #c0c5cf; }
+.chip--more { background: var(--color-weak-soft); color: var(--color-weak); }
+.chip button { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; margin-right: -6px; }
+.chip button:hover { background: rgba(79,57,246,.15); }
+.chip button svg { width: 12px; height: 12px; }
+
+.card { background: #fff; border: 1px solid var(--color-line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.card__pad { padding: var(--space-5); }
+.card__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-5) var(--space-3); }
+.link { color: var(--color-primary); font-weight: 500; font-size: .9375rem; }
+.link:hover { text-decoration: underline; }
+.muted { color: var(--color-muted); }
+
+.field { display: grid; gap: 6px; }
+.field > label, .label { font-weight: 500; color: var(--color-ink); font-size: .9375rem; }
+.label .opt { color: var(--color-muted); font-weight: 400; font-size: .8125rem; margin-left: var(--space-2); }
+.label .req { color: var(--color-error); margin-left: 2px; }
+.input, .select, .textarea { width: 100%; height: 48px; padding: 0 var(--space-4); border: 1px solid var(--color-line); border-radius: var(--radius-md); background: #fff; color: var(--color-ink); font: inherit; font-size: 1rem; }
+.textarea { height: auto; min-height: 220px; padding: var(--space-3) var(--space-4); resize: vertical; line-height: 1.6; }
+.select { appearance: none; padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+.input::placeholder, .textarea::placeholder { color: #98a2b3; }
+.input:focus, .select:focus, .textarea:focus { outline: 0; border-color: var(--color-primary); box-shadow: var(--shadow-focus); }
+.input[readonly] { background: var(--color-page); color: var(--color-muted); }
+.input.is-error, .textarea.is-error { border-color: var(--color-error); }
+.help { font-size: .8125rem; color: var(--color-muted); }
+.error { font-size: .8125rem; color: var(--color-error); }
+.prefix { position: relative; }
+.prefix span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--color-muted); font-size: .9375rem; font-weight: 500; }
+.prefix .input { padding-left: 52px; }
+.search { position: relative; }
+.search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--color-muted); width: 18px; height: 18px; }
+.search .input { padding-left: 42px; }
+
+.tabs { display: inline-flex; gap: var(--space-1); padding: var(--space-1); background: #fff; border: 1px solid var(--color-line); border-radius: var(--radius-md); }
+.tabs button { height: 36px; padding: 0 var(--space-4); border-radius: 8px; font-weight: 500; font-size: .9375rem; color: var(--color-text); }
+.tabs button:hover { background: var(--color-page); }
+.tabs button[aria-selected="true"] { background: var(--color-primary-soft); color: var(--color-primary); }
+.tabs small { margin-left: 6px; color: var(--color-muted); font-weight: 500; }
+.tabs button[aria-selected="true"] small { color: var(--color-primary); }
+
+.filter-chip { display: inline-flex; align-items: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-4); border-radius: var(--radius-pill); border: 1px solid var(--color-line); background: #fff; font-weight: 500; font-size: .9375rem; }
+.filter-chip small { color: var(--color-muted); font-weight: 500; }
+.filter-chip:hover { border-color: var(--color-muted); }
+.filter-chip[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary); }
+.filter-chip[aria-pressed="true"] small { color: var(--color-primary); }
+
+/* =========================================================
+   DATA TABLE  (component: DataTable)
+   One card, header row, hairline dividers, hover tint.
+   ========================================================= */
+.table-wrap { overflow-x: auto; }
+table.table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.table th { text-align: left; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted); padding: var(--space-3) var(--space-5); background: var(--color-page); border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); white-space: nowrap; }
+.table td { padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-line); vertical-align: middle; height: 64px; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr.is-link { cursor: pointer; }
+.table tbody tr:hover { background: #fafaff; }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.who { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.who b { display: block; color: var(--color-ink); font-weight: 600; }
+.who small { color: var(--color-muted); font-size: .8125rem; }
+.score { font-family: var(--font-display); font-weight: 700; font-size: 1.375rem; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-right: var(--space-2); }
+.score--strong { color: var(--color-strong); } .score--fair { color: var(--color-fair); } .score--weak { color: var(--color-weak); }
+.table-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--color-line); font-size: .875rem; color: var(--color-muted); flex-wrap: wrap; }
+.pager { display: flex; gap: var(--space-2); }
+.empty { text-align: center; padding: var(--space-7) var(--space-5); }
+.empty h3 { margin-bottom: var(--space-2); }
+.empty p { margin-bottom: var(--space-4); }
+
+.menu { position: relative; display: inline-block; }
+.menu__btn { width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-items: center; color: var(--color-muted); }
+.menu__btn:hover { background: var(--color-page); color: var(--color-ink); }
+.menu__list { position: absolute; right: 0; top: 40px; min-width: 232px; background: #fff; border: 1px solid var(--color-line); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: var(--space-1); z-index: 20; display: none; }
+.menu.is-open .menu__list { display: block; }
+.menu__list button, .menu__list a { display: flex; width: 100%; align-items: center; gap: var(--space-3); padding: 10px var(--space-3); border-radius: 8px; text-align: left; font-size: .9375rem; font-weight: 500; color: var(--color-ink); }
+.menu__list button:hover, .menu__list a:hover { background: var(--color-page); }
+.titlelink { color: var(--color-ink); font-weight: 600; }
+.titlelink:hover { color: var(--color-primary); text-decoration: underline; }
+.lv-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.lv-head { align-items: flex-start; flex-wrap: nowrap; }
+@media (max-width: 960px) { .lv-head { flex-wrap: wrap; } .lv-actions { justify-content: flex-start; } .lv-note { text-align: left; } }
+.lv-note { font-size: .8125rem; color: var(--color-muted); text-align: right; margin-top: 6px; }
+.lv-meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-top: var(--space-3); color: var(--color-muted); }
+.lv-sum { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; }
+.lv-sum__stats { display: flex; gap: var(--space-6); flex-wrap: wrap; align-items: center; }
+.lv-sum__stats b { display: block; font-family: var(--font-display); font-size: 1.75rem; color: var(--color-ink); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.lv-sum__stats span { font-size: .875rem; color: var(--color-muted); }
+.desc { white-space: pre-wrap; line-height: 1.7; color: var(--color-text); }
+.menu__list .danger { color: #b42318; }
+.menu__list [aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.menu__list small { display: block; font-weight: 400; color: var(--color-muted); font-size: .75rem; }
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }
+.stat { padding: var(--space-5); }
+.stat span { color: var(--color-muted); font-size: .9375rem; }
+.stat b { display: block; font-family: var(--font-display); font-size: 2.25rem; font-weight: 600; color: var(--color-ink); letter-spacing: -0.03em; margin-top: var(--space-1); font-variant-numeric: tabular-nums; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1.6fr; gap: var(--space-5); align-items: start; }
+.listrow { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--color-line); }
+.listrow:hover { background: #fafaff; }
+.listrow b { color: var(--color-ink); font-weight: 600; display: block; }
+.listrow small { color: var(--color-muted); }
+.callout { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) var(--space-5); background: var(--color-primary-soft); border-radius: var(--radius-lg); margin-bottom: var(--space-5); color: var(--color-ink); font-weight: 500; flex-wrap: wrap; }
+
+/* =========================================================
+   APPLICANTS + DETAIL
+   ========================================================= */
+.filters { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4); }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin: var(--space-4) 0; flex-wrap: wrap; }
+.toolbar__right { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.toolbar .select { height: 44px; width: auto; min-width: 190px; }
+.chiprow { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.detail { display: grid; grid-template-columns: 1fr 340px; gap: var(--space-5); align-items: start; }
+.stack { display: grid; gap: var(--space-5); }
+.person { display: flex; gap: var(--space-4); align-items: center; }
+.person .avatar { width: 64px; height: 64px; font-size: 1.25rem; }
+.person h1 { font-size: 1.625rem; }
+.person a.mail { display: inline-flex; align-items: center; gap: 6px; color: var(--color-primary); font-weight: 500; }
+.score-hero { display: flex; gap: var(--space-6); align-items: center; flex-wrap: wrap; }
+.score-hero__num { font-family: var(--font-display); font-weight: 700; font-size: 4.5rem; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.score-hero__num small { font-size: 1.5rem; color: var(--color-muted); font-weight: 500; letter-spacing: 0; }
+.score-hero__text { flex: 1; min-width: 220px; }
+.score-hero__text p { color: var(--color-ink); font-weight: 500; margin-top: var(--space-2); }
+.bars { display: grid; gap: var(--space-4); margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-line); }
+.bar__head { display: flex; justify-content: space-between; font-size: .9375rem; margin-bottom: 6px; }
+.bar__head b { color: var(--color-ink); font-weight: 600; }
+.bar__track { height: 8px; border-radius: var(--radius-pill); background: var(--color-weak-soft); overflow: hidden; }
+.bar__track span { display: block; height: 100%; background: var(--color-primary); border-radius: inherit; }
+.skill-group + .skill-group { margin-top: var(--space-4); }
+.skill-group h3 { font-size: .9375rem; margin-bottom: var(--space-2); font-family: var(--font-body); font-weight: 600; letter-spacing: 0; }
+.resume { white-space: pre-wrap; line-height: 1.7; color: var(--color-text); font-size: .9375rem; }
+.status-opt { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 48px; padding: 0 var(--space-4); border: 1px solid var(--color-line); border-radius: var(--radius-md); font-weight: 500; color: var(--color-ink); background: #fff; }
+.status-opt:hover { border-color: var(--color-muted); }
+.status-opt[aria-checked="true"] { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary); }
+.status-opt svg { width: 18px; height: 18px; }
+.status-opt[disabled] { opacity: .5; cursor: not-allowed; }
+.kv { display: grid; gap: var(--space-3); font-size: .9375rem; }
+.kv div { display: flex; justify-content: space-between; gap: var(--space-4); }
+.kv span { color: var(--color-muted); }
+.kv b { color: var(--color-ink); font-weight: 500; text-align: right; }
+.pn { display: flex; gap: var(--space-2); }
+.pn .btn { flex: 1; }
+
+/* =========================================================
+   LISTING FORM
+   ========================================================= */
+.form-grid { display: grid; grid-template-columns: 1fr 360px; gap: var(--space-5); align-items: start; }
+.form-card { padding: var(--space-6); display: grid; gap: var(--space-6); }
+.section-title { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; color: var(--color-ink); margin-bottom: var(--space-4); }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.stackf { display: grid; gap: var(--space-4); }
+.hr { height: 1px; background: var(--color-line); }
+.combo { position: relative; }
+.combo__list { position: absolute; left: 0; right: 0; top: 52px; background: #fff; border: 1px solid var(--color-line); border-radius: var(--radius-md); box-shadow: var(--shadow-md); max-height: 240px; overflow: auto; z-index: 15; display: none; padding: var(--space-1); }
+.combo.is-open .combo__list { display: block; }
+.combo__list button { display: block; width: 100%; text-align: left; padding: 10px var(--space-3); border-radius: 8px; font-size: .9375rem; }
+.combo__list button:hover { background: var(--color-page); }
+.combo__list p { padding: var(--space-3); color: var(--color-muted); font-size: .9375rem; }
+.actionbar { position: sticky; bottom: 0; display: flex; justify-content: flex-end; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-6); background: rgba(255,255,255,.96); backdrop-filter: blur(6px); border-top: 1px solid var(--color-line); border-radius: 0 0 var(--radius-lg) var(--radius-lg); margin: 0 calc(var(--space-6) * -1) calc(var(--space-6) * -1); }
+.actionbar .help { margin-right: auto; }
+.preview { position: sticky; top: var(--space-5); padding: var(--space-5); }
+.preview h3 { font-family: var(--font-body); font-size: .8125rem; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted); margin-bottom: var(--space-4); }
+.preview__title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; color: var(--color-ink); }
+.preview dl { display: grid; gap: var(--space-2); margin: var(--space-4) 0; font-size: .9375rem; }
+.preview dt { color: var(--color-muted); font-size: .8125rem; }
+.preview dd { color: var(--color-ink); font-weight: 500; }
+.profile-card { max-width: 760px; padding: var(--space-6); display: grid; gap: var(--space-5); }
+
+/* =========================================================
+   OVERLAYS  (Modal, Toast)
+   ========================================================= */
+.overlay { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none; place-items: center; z-index: 60; padding: var(--space-4); }
+.overlay.is-open { display: grid; }
+.modal { background: #fff; border-radius: var(--radius-xl); padding: var(--space-6); width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
+.modal h2 { font-size: 1.375rem; margin-bottom: var(--space-3); }
+.modal__actions { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-6); }
+.toast { position: fixed; left: 50%; bottom: var(--space-6); transform: translate(-50%, 20px); background: var(--color-night); color: #fff; padding: 12px var(--space-5); border-radius: var(--radius-md); font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 70; max-width: calc(100vw - 32px); }
+.toast.is-show { opacity: 1; transform: translate(-50%, 0); }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 1100px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .grid-2, .detail, .form-grid { grid-template-columns: 1fr; }
+  .preview { position: static; }
+}
+@media (max-width: 960px) {
+  .app, .app.is-collapsed { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-w); transform: translateX(-100%); transition: transform .2s; }
+  .app.menu-open .sidebar { transform: none; box-shadow: var(--shadow-lg); }
+  .is-collapsed .brand__text, .is-collapsed .nav a span, .is-collapsed .me__text, .is-collapsed .logout span { display: revert; }
+  .is-collapsed .nav a, .is-collapsed .logout { justify-content: flex-start; padding: 0 var(--space-4); }
+  .is-collapsed .sidebar__top { flex-direction: row; }
+  .collapse-btn { display: none; }
+  .topbar { display: flex; align-items: center; gap: var(--space-3); height: 64px; padding: 0 var(--space-4); background: #fff; border-bottom: 1px solid var(--color-line); position: sticky; top: 0; z-index: 20; }
+  .topbar .icon-btn { color: var(--color-ink); }
+  .topbar .icon-btn:hover { background: var(--color-page); }
+  .topbar b { font-family: var(--font-display); font-size: 1.125rem; color: var(--color-ink); }
+  .scrim { position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 25; display: none; }
+  .app.menu-open .scrim { display: block; }
+  .content { padding: var(--space-5) var(--space-4) var(--space-7); }
+}
+@media (max-width: 640px) {
+  h1 { font-size: 1.5rem; }
+  .stats { gap: var(--space-3); }
+  .stat { padding: var(--space-4); } .stat b { font-size: 1.75rem; }
+  .filters, .row-2 { grid-template-columns: 1fr; }
+  .hide-sm { display: none; }
+  .form-card, .profile-card { padding: var(--space-5); }
+  .actionbar { margin: 0 calc(var(--space-5) * -1) calc(var(--space-5) * -1); padding: var(--space-4) var(--space-5); flex-wrap: wrap; }
+  .score-hero__num { font-size: 3.5rem; }
+  .table th, .table td { padding-left: var(--space-4); padding-right: var(--space-4); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="spark" viewBox="0 0 24 24"><path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8z"/><path d="M18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></symbol>
+  <symbol id="dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="brief" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/></symbol>
+  <symbol id="users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><path d="M16 4.6a3.5 3.5 0 010 6.8M18 14.2a6.5 6.5 0 013.5 5.8"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></symbol>
+  <symbol id="out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M16 10l-2 2 2 2"/></symbol>
+  <symbol id="menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+  <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <div class="scrim" id="scrim"></div>
+
+  <!-- SHELL: Sidebar -->
+  <aside class="sidebar" id="sidebar" aria-label="Recruiter navigation">
+    <div class="sidebar__top">
+      <a href="#/dashboard" class="brand">
+        <span class="brand__mark"><svg class="i"><use href="#spark"/></svg></span>
+        <span class="brand__text"><b>TalentFlow AI</b><small>Recruiter</small></span>
+      </a>
+      <button class="icon-btn collapse-btn" id="collapse" aria-label="Collapse sidebar"><svg class="i"><use href="#panel"/></svg></button>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#/dashboard" data-route="dashboard"><svg class="i"><use href="#dash"/></svg><span>Dashboard</span></a>
+      <a href="#/listings" data-route="listings"><svg class="i"><use href="#brief"/></svg><span>Listings</span></a>
+      <a href="#/applicants" data-route="applicants"><svg class="i"><use href="#users"/></svg><span>Applicants</span></a>
+      <a href="#/profile" data-route="profile"><svg class="i"><use href="#user"/></svg><span>Profile</span></a>
+    </nav>
+    <div class="sidebar__bottom">
+      <div class="me"><span class="avatar" id="meAvatar">LU</span><span class="me__text"><b id="meName">Lysander Uy</b><small id="meCo">Northwind Labs</small></span></div>
+      <button class="logout"><svg class="i"><use href="#out"/></svg><span>Log out</span></button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn" id="openMenu" aria-label="Open menu"><svg class="i"><use href="#menu"/></svg></button>
+      <b>TalentFlow AI</b>
+    </div>
+    <main class="content" id="view"></main>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true" id="modal"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* =========================================================
+   SAMPLE DATA (replace with API calls when porting)
+   ========================================================= */
+const TODAY = new Date('2026-10-08T12:00:00');
+const SKILLS = ['accounting','agile','angular','aws','azure','bookkeeping','budgeting','c#','c++','copywriting','crm','css','customer service','data analysis','data entry','docker','excel','figma','git','golang','graphql','html','java','javascript','jira','kubernetes','linux','node.js','pandas','postgresql','power bi','python','react','rest api','selenium','sql','statistics','tableau','testing','typescript'];
+const ALIASES = { js:'javascript', ts:'typescript', node:'node.js', nodejs:'node.js', postgres:'postgresql', k8s:'kubernetes', 'rest apis':'rest api', 'power-bi':'power bi' };
+const ME = { name:'Lysander Uy', email:'lysander@northwind.example', company:'Northwind Labs' };
+
+const LISTINGS = [
+  { id:'l1', title:'Senior Frontend Engineer', location:'Remote, Philippines', type:'Full-time', min:80000, max:120000, status:'Open', posted:0,
+    skills:['react','typescript','javascript','html','css','node.js','postgresql','python','sql','aws','docker','git','jira'],
+    description:'We are hiring a senior frontend engineer to lead our web app. You will build with React and TypeScript, work with Node.js services and PostgreSQL, and ship through Docker on AWS. Daily work includes code review, planning in Jira and mentoring.' },
+  { id:'l2', title:'Junior Data Analyst', location:'Cebu City', type:'Full-time', min:25000, max:35000, status:'Open', posted:6,
+    skills:['python','sql','excel','pandas','tableau','git','statistics','data analysis'],
+    description:'Join our analytics team to clean data, build dashboards in Tableau and report weekly insights. You should know SQL, Python with pandas, Excel and basic statistics. Git is used for all analysis code.' },
+  { id:'l3', title:'QA Associate', location:'Manila', type:'Contract', min:null, max:null, status:'Closed', posted:21,
+    skills:['selenium','jira','sql','git','python','testing'],
+    description:'Test web releases, write automated checks in Selenium and Python, and log bugs in Jira. SQL is used to verify data and Git to share test code.' },
+  { id:'l4', title:'Customer Support Lead', location:'Cebu City', type:'Full-time', min:30000, max:40000, status:'Open', posted:2,
+    skills:['customer service','crm','excel'],
+    description:'Lead a small support team, handle escalations in our CRM and report weekly numbers in Excel. Strong customer service habits matter most.' }
+];
+const RAW = [
+  ['l1','Priya Nair',88,'Shortlisted',2],['l1','Hana Kobayashi',81,'Shortlisted',2],['l1','Noah Williams',77,'Viewed',3],['l1','Amara Okafor',72,'Viewed',2],
+  ['l1','Sofia Reyes',69,'Viewed',4],['l1','Liam Chen',66,'Viewed',9],['l1','Diego Santos',63,'Submitted',0],['l1','Mei Tanaka',58,'Submitted',1],
+  ['l1','Chloe Nguyen',52,'Rejected',3],['l1','Mateo Rossi',47,'Rejected',9],['l1','Zainab Ali',44,'Withdrawn',5],['l1','Ethan Cruz',38,'Withdrawn',8],
+  ['l1','Isabel Park',35,'Withdrawn',10],['l1','Omar Haddad',29,'Withdrawn',12],['l1','Grace Lim',22,'Viewed',6],
+  ['l2','Rina Dela Cruz',86,'Shortlisted',3],['l2','Jun Park',74,'Viewed',4],['l2','Aisha Khan',55,'Submitted',1],['l2','Carlo Mendoza',41,'Viewed',5],['l2','Tom Becker',33,'Rejected',5],['l2','Lea Navarro',18,'Withdrawn',6],
+  ['l3','Ken Ito',66,'Shortlisted',14],['l3','Ana Ruiz',48,'Viewed',15],['l3','Paul Ortega',27,'Rejected',16]
+];
+const PROPER = { 'node.js':'Node.js', aws:'AWS', sql:'SQL', css:'CSS', html:'HTML', crm:'CRM', 'c#':'C#', 'c++':'C++', graphql:'GraphQL', postgresql:'PostgreSQL', typescript:'TypeScript', javascript:'JavaScript', 'power bi':'Power BI', 'rest api':'REST API', 'data entry':'Data entry', 'customer service':'Customer service', 'data analysis':'Data analysis' };
+function hash(s){ let h=0; for (const c of s) h=(h*31+c.charCodeAt(0))>>>0; return h; }
+function pickSkills(listing, score, name){
+  const list = listing.skills.slice(), n = list.length, k = Math.max(0, Math.min(n, Math.round(score/100*n)));
+  const off = hash(name) % n, rot = list.slice(off).concat(list.slice(0,off));
+  const matched = rot.slice(0,k), missing = listing.skills.filter(s => !matched.includes(s));
+  return { matched: listing.skills.filter(s => matched.includes(s)), missing };
+}
+function dateOffset(d){ const x = new Date(TODAY); x.setDate(x.getDate()-d); return x; }
+const APPS = RAW.map((r,i) => {
+  const l = LISTINGS.find(x => x.id===r[0]), s = pickSkills(l, r[2], r[1]);
+  const slug = r[1].toLowerCase().replace(/[^a-z]+/g,'.');
+  return { id:'a'+(i+1), listing:r[0], name:r[1], email:slug+'@example.com', score:r[2], status:r[3], applied:r[4],
+    matched:s.matched, missing:s.missing,
+    firstViewed: r[3]==='Submitted' ? null : Math.max(0, r[4]-1),
+    updated: Math.max(0, r[4]-1),
+    resume: r[1]+'\n'+(r[2]>=60?'Experienced':'Early-career')+' professional applying for '+l.title+'.\n\n'
+      +'Summary\nWorks in small teams, owns work end to end and communicates clearly.\n\n'
+      +'Skills\n'+(s.matched.length? s.matched.join(', ') : 'General office tools')+'\n\n'
+      +'Experience\nBrightwave: built and maintained production features'+(s.matched[0]?' using '+s.matched.slice(0,3).join(', '):'')+', working closely with design and product.\nOrbital Works: improved delivery speed and quality and mentored junior colleagues.' };
+});
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const band = n => n>=70 ? 'strong' : n>=40 ? 'fair' : 'weak';
+const BAND = { strong:'Strong', fair:'Fair', weak:'Weak' };
+const initials = n => n.split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+const fmtDate = d => dateOffset(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+const money = n => 'PHP ' + Number(n).toLocaleString('en-US');
+const salary = l => l.min && l.max ? money(l.min)+' to '+Number(l.max).toLocaleString('en-US')+' per month' : 'Not specified';
+const sk = s => PROPER[s] || s.replace(/\b\w/g, c => c.toUpperCase());
+const icon = (n, cls='') => '<svg class="i '+cls+'"><use href="#'+n+'"/></svg>';
+const scoreCell = n => '<span style="white-space:nowrap"><span class="score score--'+band(n)+'">'+n+'</span><span class="badge badge--'+band(n)+'">'+BAND[band(n)]+'</span></span>';
+const pill = s => '<span class="pill pill--'+s.toLowerCase()+'">'+s+'</span>';
+const listingOf = id => LISTINGS.find(l => l.id===id);
+const appsOf = id => APPS.filter(a => a.listing===id);
+function skillChips(a, max){
+  const list = a.missing.slice(0, max), more = a.missing.length - list.length;
+  return '<div class="chips">'+list.map(s => '<span class="chip chip--miss">'+esc(sk(s))+'</span>').join('')+(more>0?'<span class="chip chip--more">+'+more+'</span>':'')+(a.missing.length===0?'<span class="muted">None</span>':'')+'</div>';
+}
+let toastT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('is-show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('is-show'), 2600); }
+function confirmModal({title, body, action, danger, onYes}){
+  $('#modal').innerHTML = '<h2>'+esc(title)+'</h2><p>'+esc(body)+'</p><div class="modal__actions"><button class="btn btn--secondary" data-x>Cancel</button><button class="btn '+(danger?'btn--danger':'btn--primary')+'" data-y>'+esc(action)+'</button></div>';
+  $('#overlay').classList.add('is-open');
+  $('#modal [data-x]').onclick = () => $('#overlay').classList.remove('is-open');
+  $('#modal [data-y]').onclick = () => { $('#overlay').classList.remove('is-open'); onYes(); };
+  $('#modal [data-x]').focus();
+}
+$('#overlay').addEventListener('click', e => { if (e.target.id==='overlay') $('#overlay').classList.remove('is-open'); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') { $('#overlay').classList.remove('is-open'); $$('.menu.is-open,.combo.is-open').forEach(m => m.classList.remove('is-open')); } });
+
+/* =========================================================
+   PAGE: DASHBOARD
+   ========================================================= */
+function pageDashboard(){
+  const open = LISTINGS.filter(l => l.status==='Open').length;
+  const week = APPS.filter(a => a.applied<=7).length;
+  const short = APPS.filter(a => a.status==='Shortlisted').length;
+  const review = APPS.filter(a => a.status==='Submitted').length;
+  const recent = APPS.slice().sort((a,b) => a.applied-b.applied).slice(0,5);
+  return `
+  <div class="page-head"><div><h1>Welcome back, ${esc(ME.name.split(' ')[0])}</h1><p>Here is what is happening with your listings.</p></div>
+    <a class="btn btn--primary" href="#/listings/new">${icon('plus')}Post a listing</a></div>
+  ${review ? `<div class="callout"><span>${review} application${review>1?'s are':' is'} waiting to be viewed.</span><a class="btn btn--primary btn--sm" href="#/applicants?status=Submitted">Review now</a></div>` : ''}
+  <div class="stats">
+    <div class="card stat"><span>Open listings</span><b>${open}</b></div>
+    <div class="card stat"><span>Total applications</span><b>${APPS.length}</b></div>
+    <div class="card stat"><span>Last 7 days</span><b>${week}</b></div>
+    <div class="card stat"><span>Shortlisted</span><b>${short}</b></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card__head"><h2>Your listings</h2><a class="link" href="#/listings">View all</a></div>
+      ${LISTINGS.map(l => { const as = appsOf(l.id), top = as.length ? Math.max(...as.map(a => a.score)) : null;
+        return `<a class="listrow" href="#/applicants?listing=${l.id}"><div><b>${esc(l.title)}</b><small>${as.length} applicant${as.length===1?'':'s'}${top!==null?' &middot; Top score '+top:''}</small></div>${pill(l.status)}</a>`; }).join('')}
+    </div>
+    <div class="card"><div class="card__head"><h2>Recent applications</h2><a class="link" href="#/applicants">View all</a></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Applicant</th><th class="hide-sm">Listing</th><th>Match</th><th>Status</th></tr></thead><tbody>
+      ${recent.map(a => `<tr class="is-link" data-go="#/applicants/${a.id}"><td><div class="who"><span class="avatar">${initials(a.name)}</span><div><b>${esc(a.name)}</b><small>${fmtDate(a.applied)}</small></div></div></td><td class="hide-sm">${esc(listingOf(a.listing).title)}</td><td>${scoreCell(a.score)}</td><td>${pill(a.status)}</td></tr>`).join('')}
+      </tbody></table></div></div>
+  </div>`;
+}
+
+/* =========================================================
+   PAGE: LISTINGS
+   ========================================================= */
+const LF = { tab:'All' };
+function pageListings(){
+  const counts = { All:LISTINGS.length, Open:LISTINGS.filter(l=>l.status==='Open').length, Closed:LISTINGS.filter(l=>l.status==='Closed').length };
+  const rows = LISTINGS.filter(l => LF.tab==='All' || l.status===LF.tab);
+  return `
+  <div class="page-head"><div><h1>Listings</h1><p>Post and manage your listings.</p></div>
+    <a class="btn btn--primary" href="#/listings/new">${icon('plus')}Post a listing</a></div>
+  <div style="margin-bottom:16px"><div class="tabs" role="tablist">${['All','Open','Closed'].map(t => `<button role="tab" aria-selected="${LF.tab===t}" data-tab="${t}">${t}<small>${counts[t]}</small></button>`).join('')}</div></div>
+  <div class="card">${rows.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Title</th><th>Status</th><th class="hide-sm">Pay</th><th class="num">Applicants</th><th class="hide-sm num">Top match</th><th class="hide-sm">Posted</th><th></th></tr></thead><tbody>
+    ${rows.map(l => { const as = appsOf(l.id), top = as.length ? Math.max(...as.map(a=>a.score)) : null;
+      return `<tr class="is-link" data-go="#/listings/${l.id}"><td><a class="titlelink" href="#/listings/${l.id}">${esc(l.title)}</a><br><small class="muted">${esc(l.location)} &middot; ${l.type}</small></td><td>${pill(l.status)}</td>
+      <td class="hide-sm" style="white-space:nowrap">${l.min?money(l.min)+' to '+money(l.max):'<span class="muted">Not specified</span>'}</td><td class="num">${as.length}</td>
+      <td class="hide-sm num">${top!==null? '<span class="score score--'+band(top)+'" style="font-size:1.125rem;margin:0">'+top+'</span>' : '<span class="muted">None</span>'}</td><td class="hide-sm">${fmtDate(l.posted)}</td>
+      <td class="num" data-stop><div class="menu"><button class="menu__btn" aria-label="Actions for ${esc(l.title)}" data-menu>${icon('dots')}</button><div class="menu__list">
+        <a href="#/listings/${l.id}">${icon('eye')}View</a>
+        <a href="#/applicants?listing=${l.id}">${icon('users')}View applicants</a>
+        <a href="#/listings/edit/${l.id}">${icon('edit')}Edit</a>
+        ${l.status==='Open' ? `<button data-act="close" data-id="${l.id}">${icon('lock')}Close listing</button>` : `<button data-act="reopen" data-id="${l.id}">${icon('eye')}Reopen listing</button>`}
+        ${as.length ? `<button class="danger" aria-disabled="true" disabled>${icon('x')}<span>Delete<small>Close this listing instead. It has applications.</small></span></button>` : `<button class="danger" data-act="delete" data-id="${l.id}">${icon('x')}Delete</button>`}
+      </div></div></td></tr>`; }).join('')}
+    </tbody></table></div>`
+    : `<div class="empty"><h3>No ${LF.tab.toLowerCase()} listings</h3><p>Listings you post show up here.</p><a class="btn btn--primary" href="#/listings/new">Post a listing</a></div>`}</div>`;
+}
+
+
+/* =========================================================
+   PAGE: LISTING VIEW
+   ========================================================= */
+function pageListingView(id){
+  const l = listingOf(id); if (!l) return '<div class="empty"><h3>Listing not found</h3><a class="btn btn--secondary" href="#/listings">Back to listings</a></div>';
+  const as = appsOf(id), top = as.length ? Math.max(...as.map(a => a.score)) : null;
+  const bc = b => as.filter(a => band(a.score)===b).length;
+  return `
+  <a class="crumb" href="#/listings">${icon('left')}Listings</a>
+  <div class="card card__pad" style="margin-bottom:20px"><div class="lv-sum lv-head">
+    <div style="min-width:0"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1>${esc(l.title)}</h1>${pill(l.status)}</div>
+      <div class="lv-meta"><span>${esc(l.location)}</span><span>${l.type}</span><span>${salary(l)}</span><span>Posted ${fmtDate(l.posted)}</span></div></div>
+    <div><div class="lv-actions"><a class="btn btn--secondary" href="#/listings/edit/${l.id}">${icon('edit')}Edit</a>
+      ${l.status==='Open' ? `<button class="btn btn--secondary" data-act="close" data-id="${l.id}">${icon('lock')}Close</button>` : `<button class="btn btn--secondary" data-act="reopen" data-id="${l.id}">${icon('eye')}Reopen</button>`}
+      <button class="btn btn--secondary" ${as.length?'disabled':''} data-act="delete" data-id="${l.id}" style="${as.length?'':'color:#b42318'}">Delete</button></div>
+      ${as.length ? '<p class="lv-note">Close this listing instead. It has applications.</p>' : ''}</div></div></div>
+  <div class="card card__pad" style="margin-bottom:20px"><div class="lv-sum">
+    <div class="lv-sum__stats"><div><b>${as.length}</b><span>Applicants</span></div><div><b>${top!==null?top:'None'}</b><span>Top match</span></div>
+      ${as.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="badge badge--strong">Strong ${bc('strong')}</span><span class="badge badge--fair">Fair ${bc('fair')}</span><span class="badge badge--weak">Weak ${bc('weak')}</span></div>` : ''}</div>
+    <a class="btn btn--primary" href="#/applicants?listing=${l.id}" ${as.length?'':'aria-disabled="true"'}>${icon('users')}View applicants (${as.length})</a></div></div>
+  <div class="card card__pad" style="margin-bottom:20px"><h2 style="margin-bottom:12px">Description</h2><div class="desc">${esc(l.description)}</div></div>
+  <div class="card card__pad"><h2 style="margin-bottom:12px">Skills</h2><div class="chips">${l.skills.map(s => '<span class="chip">'+esc(sk(s))+'</span>').join('') || '<span class="muted">No skills listed. Scores are based on meaning only.</span>'}</div></div>`;
+}
+
+/* =========================================================
+   PAGE: APPLICANTS
+   ========================================================= */
+const AF = { listing:'l1', q:'', status:'All', band:'All', sort:'match', page:1 };
+const PAGE = 10, STATUSES = ['Submitted','Viewed','Shortlisted','Rejected','Withdrawn'];
+function filtered(){
+  let r = appsOf(AF.listing);
+  if (AF.q) r = r.filter(a => a.name.toLowerCase().includes(AF.q.toLowerCase()));
+  if (AF.status!=='All') r = r.filter(a => a.status===AF.status);
+  if (AF.band!=='All') r = r.filter(a => band(a.score)===AF.band.toLowerCase());
+  r = r.slice();
+  if (AF.sort==='match') r.sort((a,b) => b.score-a.score);
+  else if (AF.sort==='new') r.sort((a,b) => a.applied-b.applied);
+  else r.sort((a,b) => a.name.localeCompare(b.name));
+  return r;
+}
+function applicantsTable(){
+  const all = filtered(), pages = Math.max(1, Math.ceil(all.length/PAGE));
+  if (AF.page>pages) AF.page = pages;
+  const rows = all.slice((AF.page-1)*PAGE, AF.page*PAGE);
+  if (!all.length) return '<div class="empty"><h3>No applicants found</h3><p>Try another filter, or clear the search.</p><button class="btn btn--secondary" data-clear>Clear filters</button></div>';
+  return `<div class="table-wrap"><table class="table"><thead><tr><th>Applicant</th><th>Match${AF.sort==='match'?' &darr;':''}</th><th class="hide-sm">Missing skills</th><th>Status</th><th class="hide-sm">Applied</th></tr></thead><tbody>
+    ${rows.map(a => `<tr class="is-link" data-go="#/applicants/${a.id}"><td><div class="who"><span class="avatar">${initials(a.name)}</span><div><b>${esc(a.name)}</b><small>${a.matched.length} of ${listingOf(a.listing).skills.length} skills</small></div></div></td>
+      <td style="white-space:nowrap">${scoreCell(a.score)}</td><td class="hide-sm">${skillChips(a,2)}</td><td>${pill(a.status)}</td><td class="hide-sm" style="white-space:nowrap">${fmtDate(a.applied)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="table-foot"><span>Showing ${(AF.page-1)*PAGE+1} to ${(AF.page-1)*PAGE+rows.length} of ${all.length}</span>
+      <div class="pager"><button class="btn btn--secondary btn--sm" data-page="-1" ${AF.page<=1?'disabled':''}>Previous</button><button class="btn btn--secondary btn--sm" data-page="1" ${AF.page>=pages?'disabled':''}>Next</button></div></div>`;
+}
+function pageApplicants(){
+  const all = appsOf(AF.listing), cnt = s => s==='All' ? all.length : all.filter(a => a.status===s).length;
+  return `
+  <div class="page-head"><div><h1>Applicants</h1><p>Ranked by how well each resume fits the listing.</p></div>
+    <button class="btn btn--secondary" id="export">${icon('down')}Export CSV</button></div>
+  <div class="filters">
+    <div class="field"><label for="fl">Listing</label><select class="select" id="fl">${LISTINGS.map(l => `<option value="${l.id}" ${l.id===AF.listing?'selected':''}>${esc(l.title)}${l.status==='Closed'?' (Closed)':''}</option>`).join('')}</select></div>
+    <div class="field"><label for="fq">Search</label><div class="search">${icon('search')}<input class="input" id="fq" placeholder="Search by applicant name" value="${esc(AF.q)}"></div></div>
+  </div>
+  <div class="chiprow" id="statuschips">${['All',...STATUSES].map(s => `<button class="filter-chip" aria-pressed="${AF.status===s}" data-status="${s}">${s} <small>${cnt(s)}</small></button>`).join('')}</div>
+  <div class="toolbar"><span class="muted" id="count"></span><div class="toolbar__right">
+    <select class="select" id="fb" aria-label="Filter by band"><option value="All">All bands</option>${['Strong','Fair','Weak'].map(b => `<option ${AF.band===b?'selected':''}>${b}</option>`).join('')}</select>
+    <select class="select" id="fs" aria-label="Sort"><option value="match" ${AF.sort==='match'?'selected':''}>Match, high to low</option><option value="new" ${AF.sort==='new'?'selected':''}>Newest first</option><option value="name" ${AF.sort==='name'?'selected':''}>Name, A to Z</option></select></div></div>
+  <div class="card" id="apptable">${applicantsTable()}</div>`;
+}
+function refreshApplicants(){
+  $('#apptable').innerHTML = applicantsTable();
+  $('#count').textContent = filtered().length + ' applicant' + (filtered().length===1?'':'s');
+  $$('#statuschips .filter-chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.status===AF.status));
+}
+function csvEscape(v){ let s = String(v); if (/^[=+\-@\t\r]/.test(s)) s = "'"+s; return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+function exportCsv(){
+  const rows = filtered(), head = ['Applicant name','Applicant email','Match score','Band','Skills matched','Skills missing','Status','Applied at'];
+  const lines = [head].concat(rows.map(a => [a.name,a.email,a.score,BAND[band(a.score)],a.matched.join('; '),a.missing.join('; '),a.status,dateOffset(a.applied).toISOString().slice(0,10)]));
+  const blob = new Blob([lines.map(r => r.map(csvEscape).join(',')).join('\n')], { type:'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'applicants-'+AF.listing+'.csv'; a.click(); URL.revokeObjectURL(a.href);
+  toast('Exported '+rows.length+' applicants');
+}
+
+/* =========================================================
+   PAGE: APPLICANT DETAIL
+   ========================================================= */
+function pageDetail(id){
+  const a = APPS.find(x => x.id===id); if (!a) return '<div class="empty"><h3>Applicant not found</h3></div>';
+  if (a.status==='Submitted'){ a.status='Viewed'; a.firstViewed = 0; a.updated = 0; }
+  const l = listingOf(a.listing), b = band(a.score), n = l.skills.length;
+  const ranked = appsOf(a.listing).sort((x,y) => y.score-x.score), i = ranked.findIndex(x => x.id===id);
+  const prev = ranked[i-1], next = ranked[i+1], locked = a.status==='Withdrawn';
+  const desc = a.score>=70 ? 'High' : a.score>=45 ? 'Medium' : 'Low';
+  return `
+  <a class="crumb" href="#/applicants?listing=${a.listing}">${icon('left')}Applicants</a>
+  <div class="detail"><div class="stack">
+    <div class="card card__pad"><div class="person"><span class="avatar">${initials(a.name)}</span><div style="flex:1"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><h1>${esc(a.name)}</h1>${pill(a.status)}</div>
+      <a class="mail" href="mailto:${esc(a.email)}">${icon('mail')}${esc(a.email)}</a><p class="muted">Applied ${fmtDate(a.applied)}</p></div></div></div>
+    <div class="card card__pad"><div class="score-hero"><div class="score-hero__num score--${b}" style="color:var(--color-${b})">${a.score}<small>/100</small></div>
+      <div class="score-hero__text"><span class="badge badge--${b}">${BAND[b]} match</span><p>${BAND[b]} match. ${a.name.split(' ')[0]} has ${a.matched.length} of ${n} skills this job asks for.</p></div></div>
+      <div class="bars"><div><div class="bar__head"><span>Skills match</span><b>${a.matched.length} of ${n}</b></div><div class="bar__track"><span style="width:${a.matched.length/n*100}%"></span></div></div>
+      <div><div class="bar__head"><span>Description match</span><b>${desc}</b></div><div class="bar__track"><span style="width:${Math.min(100,Math.round(a.score*0.9+8))}%"></span></div><p class="help" style="margin-top:6px">How closely the resume reads like the job description.</p></div></div></div>
+    <div class="card card__pad"><h2 style="margin-bottom:16px">Skills</h2>
+      <div class="skill-group"><h3>Matched (${a.matched.length})</h3><div class="chips">${a.matched.map(s => '<span class="chip">'+esc(sk(s))+'</span>').join('') || '<span class="muted">None</span>'}</div></div>
+      <div class="skill-group"><h3>Missing (${a.missing.length})</h3><div class="chips">${a.missing.map(s => '<span class="chip chip--miss">'+esc(sk(s))+'</span>').join('') || '<span class="muted">None</span>'}</div></div></div>
+    <div class="card card__pad"><h2 style="margin-bottom:12px">Resume</h2><p class="help" style="margin-bottom:12px">Plain text, as submitted with the application.</p><div class="resume">${esc(a.resume)}</div></div>
+  </div><div class="stack" style="position:sticky;top:24px">
+    <div class="card card__pad"><h2 style="margin-bottom:16px">Status</h2><div class="stack" style="gap:8px" role="radiogroup" aria-label="Application status">
+      ${['Viewed','Shortlisted','Rejected'].map(s => `<button class="status-opt" role="radio" aria-checked="${a.status===s}" data-set="${s}" ${locked?'disabled':''}>${s}${a.status===s?icon('check'):''}</button>`).join('')}</div>
+      ${locked?'<p class="help" style="margin-top:12px">This applicant withdrew. The status cannot be changed.</p>':''}</div>
+    <div class="card card__pad"><h2 style="margin-bottom:16px">Application</h2><div class="kv"><div><span>Listing</span><b><a class="link" href="#/applicants?listing=${l.id}">${esc(l.title)}</a></b></div><div><span>Applied</span><b>${fmtDate(a.applied)}</b></div><div><span>First viewed</span><b>${a.firstViewed===null?'Not yet':fmtDate(a.firstViewed)}</b></div><div><span>Last updated</span><b>${fmtDate(a.updated)}</b></div></div></div>
+    <div class="pn"><a class="btn btn--secondary" ${prev?'href="#/applicants/'+prev.id+'"':'aria-disabled="true"'}>${icon('left')}Previous</a><a class="btn btn--secondary" ${next?'href="#/applicants/'+next.id+'"':'aria-disabled="true"'}>Next${icon('right')}</a></div>
+  </div></div>`;
+}
+
+/* =========================================================
+   PAGE: POST / EDIT LISTING
+   ========================================================= */
+let D, removed, editingId;
+function newDraft(l){ D = l ? { title:l.title, location:l.location, type:l.type, min:l.min||'', max:l.max||'', description:l.description, skills:l.skills.slice() } : { title:'', location:'', type:'Full-time', min:'', max:'', description:'', skills:[] }; removed = new Set(); }
+function findSkills(text){
+  const t = text.toLowerCase(), out = [];
+  const terms = SKILLS.map(s => [s,s]).concat(Object.entries(ALIASES));
+  for (const [term, skill] of terms){
+    const re = new RegExp('(^|[^a-z0-9+#.])'+term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|[^a-z0-9+#])');
+    if (re.test(t) && !out.includes(skill)) out.push(skill);
+  }
+  return out;
+}
+function salaryError(){
+  const a = D.min!=='' , b = D.max!=='';
+  if (!a && !b) return '';
+  if (!a || !b || Number(D.min) > Number(D.max)) return 'Enter both amounts, with the minimum at or below the maximum.';
+  return '';
+}
+function formValid(){ return D.title.trim().length>=3 && D.location.trim().length>=2 && D.description.trim().length>=50 && !salaryError(); }
+function pageForm(id){
+  editingId = id || null; newDraft(id ? listingOf(id) : null);
+  return `
+  <a class="crumb" href="#/listings">${icon('left')}Listings</a>
+  <div class="page-head"><div><h1>${id?'Edit listing':'Post a listing'}</h1><p>${id?'Changes do not affect existing applications or their scores.':'Applicants see this listing and their match score before they apply.'}</p></div></div>
+  <div class="form-grid"><div class="card form-card" id="formcard">
+    <div><div class="section-title">Basics</div><div class="stackf">
+      <div class="field"><label class="label" for="t">Title<span class="req">*</span></label><input class="input" id="t" data-f="title" placeholder="Enter the job title" value="${esc(D.title)}"></div>
+      <div class="row-2"><div class="field"><label class="label" for="loc">Location<span class="req">*</span></label><input class="input" id="loc" data-f="location" placeholder="Enter the job location" value="${esc(D.location)}"></div>
+      <div class="field"><label class="label" for="ty">Employment type<span class="req">*</span></label><select class="select" id="ty" data-f="type">${['Full-time','Part-time','Contract','Internship'].map(o => `<option ${D.type===o?'selected':''}>${o}</option>`).join('')}</select></div></div></div></div>
+    <div class="hr"></div>
+    <div><div class="section-title">Description</div><div class="field"><label class="label" for="d">Role, responsibilities and requirements<span class="req">*</span></label>
+      <textarea class="textarea" id="d" data-f="description" placeholder="Describe the role, responsibilities and requirements. Skills are found from this text.">${esc(D.description)}</textarea><span class="help" id="cnt"></span></div></div>
+    <div class="hr"></div>
+    <div><div class="section-title">Pay <span class="label"><span class="opt">Optional</span></span></div><div class="row-2">
+      <div class="field"><label class="label" for="mn">Minimum (per month)</label><div class="prefix"><span>PHP</span><input class="input" id="mn" data-f="min" inputmode="numeric" placeholder="25,000" value="${D.min}"></div></div>
+      <div class="field"><label class="label" for="mx">Maximum (per month)</label><div class="prefix"><span>PHP</span><input class="input" id="mx" data-f="max" inputmode="numeric" placeholder="35,000" value="${D.max}"></div></div></div>
+      <p class="error" id="saly" style="margin-top:8px"></p></div>
+    <div class="hr"></div>
+    <div><div class="section-title">Skills <span class="label"><span class="opt" id="skcount"></span></span></div>
+      <p class="help" style="margin-bottom:12px">Found from your title and description. Remove any that do not belong, or add more from the list.</p>
+      <div class="chips" id="skchips" style="margin-bottom:12px"></div>
+      <div class="combo" id="combo"><input class="input" id="skq" placeholder="Add a skill from the list" autocomplete="off" role="combobox" aria-expanded="false"><div class="combo__list" id="skl"></div></div></div>
+    <div class="actionbar"><span class="help" id="hint"></span><a class="btn btn--secondary" href="#/listings">Cancel</a><button class="btn btn--primary" id="publish">${id?'Save changes':'Publish'}</button></div>
+  </div>
+  <aside class="card preview" aria-label="Listing preview"><h3>How applicants see it</h3><div id="pv"></div></aside></div>`;
+}
+function updateForm(){
+  $('#cnt').textContent = D.description.length.toLocaleString()+' / 10,000 characters, at least 50';
+  const se = salaryError(); $('#saly').textContent = se; $('#mn').classList.toggle('is-error', !!se); $('#mx').classList.toggle('is-error', !!se);
+  $('#skcount').textContent = D.skills.length+' of 30';
+  $('#skchips').innerHTML = D.skills.length ? D.skills.map(s => `<span class="chip">${esc(sk(s))}<button data-rm="${esc(s)}" aria-label="Remove ${esc(s)}">${icon('x')}</button></span>`).join('') : '<span class="muted">No skills yet</span>';
+  const ok = formValid(); $('#publish').disabled = !ok;
+  $('#hint').textContent = ok ? '' : 'Complete the title, description and location to publish.';
+  $('#pv').innerHTML = `<div class="preview__title">${esc(D.title||'Job title')}</div><p class="muted">${esc(ME.company)}</p>
+    <dl><div><dt>Location</dt><dd>${esc(D.location||'Not set')}</dd></div><div><dt>Type</dt><dd>${esc(D.type)}</dd></div><div><dt>Pay</dt><dd>${D.min!==''&&D.max!==''&&!se ? money(D.min)+' to '+Number(D.max).toLocaleString('en-US')+' per month' : 'Not specified'}</dd></div></dl>
+    <div class="chips">${D.skills.slice(0,8).map(s => '<span class="chip">'+esc(sk(s))+'</span>').join('')}${D.skills.length>8?'<span class="chip chip--more">+'+(D.skills.length-8)+'</span>':''}</div>`;
+}
+function suggest(){
+  for (const s of findSkills(D.title+' '+D.description)) if (!removed.has(s) && !D.skills.includes(s) && D.skills.length<30) D.skills.push(s);
+}
+function renderCombo(){
+  const q = $('#skq').value.trim().toLowerCase();
+  const list = SKILLS.filter(s => !D.skills.includes(s) && (!q || s.includes(q))).slice(0,30);
+  $('#skl').innerHTML = list.length ? list.map(s => `<button type="button" data-add="${esc(s)}">${esc(sk(s))}</button>`).join('') : '<p>No match in the skills list.</p>';
+}
+function publish(){
+  const data = { title:D.title.trim(), location:D.location.trim(), type:D.type, min:D.min===''?null:Number(D.min), max:D.max===''?null:Number(D.max), description:D.description.trim(), skills:D.skills.slice() };
+  if (editingId) Object.assign(listingOf(editingId), data);
+  else LISTINGS.unshift(Object.assign({ id:'l'+(LISTINGS.length+1)+Date.now()%1000, status:'Open', posted:0 }, data));
+  toast(editingId ? 'Listing updated' : 'Listing published'); location.hash = '#/listings';
+}
+
+/* =========================================================
+   PAGE: PROFILE
+   ========================================================= */
+function pageProfile(){
+  return `<div class="page-head"><div><h1>Profile</h1><p>Update your name and the company shown on your listings.</p></div></div>
+  <div class="card profile-card"><div class="field"><label class="label" for="pn">Display name<span class="req">*</span></label><input class="input" id="pn" value="${esc(ME.name)}"><span class="error" id="pne"></span></div>
+    <div class="field"><label class="label" for="pe">Email</label><input class="input" id="pe" value="${esc(ME.email)}" readonly><span class="help">Your email is your login and cannot be changed here.</span></div>
+    <div class="field"><label class="label" for="pc">Company name<span class="req">*</span></label><input class="input" id="pc" value="${esc(ME.company)}"><span class="error" id="pce"></span></div>
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn--primary" id="psave" disabled>Save</button></div></div>`;
+}
+function profileCheck(){
+  const n = $('#pn').value.trim(), c = $('#pc').value.trim();
+  const ne = n.length<2||n.length>80 ? 'Enter a name of 2 to 80 characters.' : '', ce = c.length<2||c.length>120 ? 'Enter a company name of 2 to 120 characters.' : '';
+  $('#pne').textContent = ne; $('#pce').textContent = ce;
+  $('#psave').disabled = !!(ne||ce) || (n===ME.name && c===ME.company);
+}
+
+/* =========================================================
+   ROUTER
+   ========================================================= */
+function parse(){
+  const raw = location.hash.replace(/^#\/?/, '') || 'dashboard', [path, qs] = raw.split('?');
+  return { parts: path.split('/'), q: new URLSearchParams(qs||'') };
+}
+function render(){
+  const { parts, q } = parse(), view = $('#view'); let route = parts[0];
+  if (route==='dashboard') view.innerHTML = pageDashboard();
+  else if (route==='listings' && parts[1]==='new') { view.innerHTML = pageForm(); suggest(); updateForm(); }
+  else if (route==='listings' && parts[1]==='edit') { view.innerHTML = pageForm(parts[2]); updateForm(); }
+  else if (route==='listings' && parts[1]) view.innerHTML = pageListingView(parts[1]);
+  else if (route==='listings') view.innerHTML = pageListings();
+  else if (route==='applicants' && parts[1]) { view.innerHTML = pageDetail(parts[1]); route = 'applicants'; }
+  else if (route==='applicants') { if (q.get('listing')) { AF.listing = q.get('listing'); AF.status='All'; AF.band='All'; AF.q=''; AF.page=1; } if (q.get('status')) { AF.status = q.get('status'); AF.page=1; } view.innerHTML = pageApplicants(); refreshApplicants(); }
+  else if (route==='profile') { view.innerHTML = pageProfile(); }
+  else { location.hash = '#/dashboard'; return; }
+  $$('#nav a').forEach(a => a.classList.toggle('is-active', a.dataset.route===route));
+  $('#app').classList.remove('menu-open'); window.scrollTo(0,0);
+  $('#meName').textContent = ME.name; $('#meCo').textContent = ME.company; $('#meAvatar').textContent = initials(ME.name);
+}
+window.addEventListener('hashchange', render);
+
+/* =========================================================
+   EVENTS (delegated)
+   ========================================================= */
+document.addEventListener('click', e => {
+  const t = e.target;
+  const menuBtn = t.closest('[data-menu]');
+  $$('.menu.is-open').forEach(m => { if (!menuBtn || m !== menuBtn.parentElement) m.classList.remove('is-open'); });
+  if (menuBtn){ menuBtn.parentElement.classList.toggle('is-open'); return; }
+  if (!t.closest('#combo')) $('#combo')?.classList.remove('is-open');
+  const go = t.closest('[data-go]');
+  if (go && !t.closest('[data-stop]') && !t.closest('a,button')) { location.hash = go.dataset.go; return; }
+  const tab = t.closest('[data-tab]'); if (tab){ LF.tab = tab.dataset.tab; $('#view').innerHTML = pageListings(); return; }
+  const act = t.closest('[data-act]');
+  if (act){ const l = listingOf(act.dataset.id);
+    if (act.dataset.act==='close') confirmModal({ title:'Close this listing?', body:'It leaves the job list and applicants can no longer apply. Existing applications stay.', action:'Close listing', onYes:() => { l.status='Closed'; render(); toast('Listing closed'); } });
+    if (act.dataset.act==='reopen'){ l.status='Open'; render(); toast('Listing reopened'); }
+    if (act.dataset.act==='delete') confirmModal({ title:'Delete this listing?', body:'This cannot be undone.', action:'Delete', danger:true, onYes:() => { LISTINGS.splice(LISTINGS.indexOf(l),1); if (parse().parts[1]) location.hash = '#/listings'; else render(); toast('Listing deleted'); } });
+    return; }
+  const st = t.closest('[data-status]'); if (st){ AF.status = st.dataset.status; AF.page = 1; refreshApplicants(); return; }
+  const pg = t.closest('[data-page]'); if (pg){ AF.page += Number(pg.dataset.page); refreshApplicants(); return; }
+  if (t.closest('[data-clear]')){ AF.q=''; AF.status='All'; AF.band='All'; AF.page=1; $('#view').innerHTML = pageApplicants(); refreshApplicants(); return; }
+  if (t.closest('#export')) { exportCsv(); return; }
+  const set = t.closest('[data-set]');
+  if (set){ const a = APPS.find(x => x.id===parse().parts[1]); a.status = set.dataset.set; a.updated = 0; $('#view').innerHTML = pageDetail(a.id); toast('Status set to '+a.status); return; }
+  const rm = t.closest('[data-rm]'); if (rm){ D.skills = D.skills.filter(s => s!==rm.dataset.rm); removed.add(rm.dataset.rm); updateForm(); return; }
+  const add = t.closest('[data-add]'); if (add){ if (D.skills.length<30){ D.skills.push(add.dataset.add); removed.delete(add.dataset.add); } $('#skq').value=''; $('#combo').classList.remove('is-open'); updateForm(); return; }
+  if (t.closest('#publish')) { publish(); return; }
+  if (t.closest('#psave')) { ME.name = $('#pn').value.trim(); ME.company = $('#pc').value.trim(); render(); toast('Profile saved'); return; }
+  if (t.closest('#collapse')) { $('#app').classList.toggle('is-collapsed'); return; }
+  if (t.closest('#openMenu')) { $('#app').classList.add('menu-open'); return; }
+  if (t.closest('#scrim')) { $('#app').classList.remove('menu-open'); return; }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id==='fq'){ AF.q = t.value; AF.page = 1; refreshApplicants(); }
+  else if (t.dataset.f){ D[t.dataset.f] = (t.dataset.f==='min'||t.dataset.f==='max') ? t.value.replace(/[^\d]/g,'') : t.value; if (t.dataset.f==='min'||t.dataset.f==='max') t.value = D[t.dataset.f]; if (t.dataset.f==='title'||t.dataset.f==='description') suggest(); updateForm(); }
+  else if (t.id==='skq'){ $('#combo').classList.add('is-open'); renderCombo(); }
+  else if (t.id==='pn'||t.id==='pc') profileCheck();
+});
+document.addEventListener('focusin', e => { if (e.target.id==='skq'){ $('#combo').classList.add('is-open'); renderCombo(); } });
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id==='fl'){ AF.listing = t.value; AF.status='All'; AF.page=1; $('#view').innerHTML = pageApplicants(); refreshApplicants(); }
+  else if (t.id==='fb'){ AF.band = t.value; AF.page = 1; refreshApplicants(); }
+  else if (t.id==='fs'){ AF.sort = t.value; AF.page = 1; refreshApplicants(); }
+  else if (t.dataset.f==='type'){ D.type = t.value; updateForm(); }
+});
+document.addEventListener('keydown', e => { if (e.key==='Enter'){ const tr = e.target.closest?.('tr[data-go]'); if (tr) location.hash = tr.dataset.go; } });
+
+render();
+</script>
+</body>
+</html>

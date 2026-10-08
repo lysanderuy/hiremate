@@ -1,0 +1,224 @@
+# TalentFlow AI: design system
+# Matches talentflow-ai_tokens.css and talentflow-ai_brand-guidelines.md.
+# Personality (from talentflow-ai_brief.md): clear, calm, fair, quick.
+
+name: TalentFlow AI
+version: 1.1.0
+personality: [clear, calm, fair, quick]
+
+# Why this palette:
+# - Indigo (#4f39f6) is the brand color. It reads as calm and trustworthy, and it
+#   was already the color of the existing site, so nothing needs to be redone.
+# - Everything else is neutral gray. The only other colors are green, amber and
+#   gray, and they are reserved for score bands so that color always means a score.
+# - Near-black navy appears in two places only (recruiter card, footer) to give
+#   the page a heavy base without feeling loud.
+# - No gradients on UI, no neon. Calm means flat surfaces and plenty of space.
+
+colors:
+  brand:
+    primary: "#4f39f6"
+    primary-hover: "#3f2bd6"
+    primary-active: "#3322b8"
+    primary-soft: "#eeebff"
+    primary-soft-line: "#cfc8ff"
+    on-primary: "#ffffff"
+    on-primary-muted: "#e6e2ff"
+    night: "#0f172a"
+    on-night: "#d0d5e2"
+    on-night-muted: "#98a2b3"
+  neutral:
+    ink: "#101828"
+    text: "#475467"
+    muted: "#667085"
+    line: "#e4e7ec"
+    page: "#f7f8fa"
+    surface: "#ffffff"
+  score:                       # only for scores, bands and matched skills
+    strong: { text: "#0f6b4c", bg: "#e3f5ee", range: "70 to 100" }
+    fair:   { text: "#975004", bg: "#fdf1df", range: "40 to 69" }
+    weak:   { text: "#566074", bg: "#eef0f3", range: "0 to 39" }
+  feedback:
+    error: "#d92d20"
+    error-soft: "#fef3f2"
+    error-strong: "#b42318"
+    focus: "#4f39f6"
+
+contrast_checked:              # WCAG ratios, normal text needs 4.5 or more
+  white_on_primary: 6.46
+  primary_on_primary-soft: 5.53
+  strong_on_strong-soft: 5.75
+  fair_on_fair-soft: 5.43
+  weak_on_weak-soft: 5.54
+  text_on_white: 7.69
+  muted_on_white: 4.97
+  on-primary-muted_on_primary: 5.14
+  on-night_on_night: 12.15
+  on-night-muted_on_night: 6.93
+
+typography:
+  display:
+    family: "Space Grotesk"
+    fallback: "system-ui, sans-serif"
+    weights: [500, 600, 700]
+    use: headings, wordmark, score numerals, step numbers
+  body:
+    family: "Inter"
+    fallback: "system-ui, sans-serif"
+    weights: [400, 500, 600]
+    use: paragraphs, buttons, forms, tables, labels
+  mono:
+    family: "system monospace"
+    use: resume text preview only
+  scale:
+    xs:       { size: "12px", use: "badges, pills, helper and error text, table headers, eyebrow" }
+    chip:     { size: "13px", use: "skill chips" }
+    sm:       { size: "14px", use: "app body, inputs, buttons, table cells, menu items, nav links" }
+    md:       { size: "15px", use: "landing body, landing large buttons" }
+    base:     { size: "16px", weight: 600, use: "card titles, h2, brand text, FAQ questions, step titles" }
+    lead:     { size: "17px", use: "landing lead and hero sub" }
+    lg:       { size: "18px", use: "modal title, table score numeral, /100 on detail" }
+    h1_app:   { size: "24px (20px on phones)", weight: 600, use: "page h1, Welcome back" }
+    h1_auth:  { size: "26px", weight: 600 }
+    stat:     { size: "28px", weight: 600, use: "stat card numerals" }
+    numeral:  { size: "36px", weight: 700, use: "hero preview score numeral" }
+    h2:       { size: "clamp(24px, 2.8vw, 32px)", weight: 600, use: "landing section heading" }
+    h1:       { size: "clamp(34px, 4.4vw, 48px)", weight: 700, use: "landing hero headline" }
+    score:    { size: "56px (44px on phones)", weight: 700, features: "tabular numerals", use: "score hero numeral, /100 at 18px" }
+    landing_small: { size: "24px", use: "step numerals, proof numbers, CTA card h3" }
+    app_labels: { size: "14px", weight: 500, use: "field labels" }
+    app_subsection: { size: "14px", weight: 600 }
+    table_header: { size: "12px", transform: uppercase, tracking: "0.06em" }
+    toast: { size: "14px" }
+  line_height: { display: 1.1, ui: 1.5, body: 1.6 }
+  letter_spacing: { display: "-0.025em", eyebrow: "0.08em" }
+  rules:
+    - Numerals in scores use tabular figures so columns line up.
+    - Eyebrows are 12px, uppercase, semibold, display font.
+    - Body copy line length stays under 70 characters.
+
+spacing:
+  base: 4px
+  scale: [4, 8, 12, 16, 24, 32, 48, 56, 104]
+  section_padding: { desktop: 56px, mobile: 56px, short_screens: 24px }
+  card_padding: { default: 24px, large: 32px, cta: 40px }
+
+radius:
+  sm: 6px
+  md: 10px        # buttons, inputs, list rows
+  lg: 16px        # cards
+  xl: 24px        # feature panels, CTA cards
+  pill: 999px     # badges, chips
+
+shadows:
+  sm: "0 1px 2px rgba(16, 24, 40, 0.06)"
+  md: "0 8px 24px rgba(16, 24, 40, 0.08)"
+  focus: "0 0 0 3px rgba(79, 57, 246, 0.35)"
+  rule: Cards use sm. Only the main score card and floating panels use md. No colored shadows.
+
+breakpoints:
+  sm: 640px
+  md: 960px
+  lg: 1280px
+container: { max_width: 1120px, gutter: 24px, gutter_mobile: 16px }
+nav_height: 64px
+
+layout:
+  desktop_sections: "Each landing section is at least one screen tall (100svh minus nav), content centered."
+  stack_at: 960px
+  min_touch_target: 40px   # desktop; 44px under 640px for primary tap targets and inputs
+
+components:
+  button:
+    height: { default: 40px, large: 44px, small: 36px, xs: 32px, icon: 40px }
+    text: "14px semibold (15px on landing large)"
+    radius: md
+    weight: 600
+    variants:
+      primary:   { bg: primary, text: on-primary, hover: primary-hover }
+      secondary: { bg: surface, text: ink, border: line, hover-border: muted }
+      light:     { bg: white, text: primary, use: "on primary background only" }
+    rules: One primary button per section. Labels are verbs. No icons inside buttons unless it is an arrow.
+  badge:
+    height: 24px
+    radius: pill
+    text: 12px semibold
+    variants: [strong, fair, weak]
+    rule: Badge text is the band name (Strong, Fair, Weak), never a percentage.
+  chip:
+    height: 28px
+    radius: pill
+    text: 13px medium
+    variants:
+      matched: { bg: primary-soft, text: primary }
+      missing: { bg: surface, text: muted, border: "1px dashed #c0c5cf" }
+  card:
+    bg: surface
+    border: "1px solid line"
+    radius: lg
+    shadow: sm
+  score_card:
+    parts: [numeral, band badge, reason sentence, skills bar, description match bar, missing chips]
+    numeral: "display font 700, band color, with '/100' in muted"
+    reason_format: "You have {n} of {m} skills this job asks for."
+  bar:
+    height: 8px
+    radius: pill
+    track: weak-soft
+    fill: primary (neutral detail) or strong (hero preview)
+    value_label: "right-aligned, words or fractions, never %"
+  band_row:
+    columns: "range (96px) | badge (80px) | description (1fr)"
+    rule: Description wraps inside its own column, never under the badge.
+  input:
+    height: 40px          # 44px on auth and under 640px
+    text: 14px            # 16px under 640px to prevent iOS zoom
+    radius: md
+    border: "1px solid line"
+    focus: "border primary + focus shadow"
+    error: "border error, message below in error color, 12px"
+  nav:
+    height: 64px
+    bg: "white at 94%, blur"
+    border_bottom: line
+  footer:
+    bg: night
+    columns: [brand, product, applicants, recruiters]
+    bottom_bar: "copyright only"
+  cta_card:
+    radius: xl
+    padding: 40px
+    variants: { applicant: primary, recruiter: night }
+
+score:
+  scale: "0 to 100, integer"
+  bands:
+    strong: "70 to 100"
+    fair: "40 to 69"
+    weak: "0 to 39"
+  display_rules:
+    - Show the number with "/100" and the band name. Never show "%".
+    - Always show matched and missing skills next to the score.
+    - The word "match" follows the band in labels: Strong match.
+    - 'Description match is shown as Low, Medium or High. Cutoffs to be set after calibration.'
+
+iconography:
+  style: "outline, 1.8px stroke, rounded caps and joins, 24px grid"
+  logo_mark: "four-point sparkle pair, white on primary"
+  used: [sparkle, check-circle, info, document]
+  rule: Icons support text. They are never the only label.
+
+motion:
+  duration: { fast: 150ms, base: 200ms }
+  easing: "cubic-bezier(0.2, 0, 0, 1)"
+  rules:
+    - Motion is for state changes only (hover, open, focus).
+    - No looping or decorative animation.
+    - Respect prefers-reduced-motion.
+
+accessibility:
+  - Normal text meets 4.5:1. Large text meets 3:1.
+  - Visible focus ring on every interactive element (3px, primary).
+  - Touch targets 40px or larger on desktop, 44px or larger under 640px for primary tap targets.
+  - Score and band are never shown by color alone. The number and band name are always text.
+  - Missing skills use a dashed border as well as color.

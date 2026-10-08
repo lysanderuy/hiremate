@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalentFlow AI: Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TOKENS (same values as talentflow-ai_tokens.css)
+   ========================================================= */
+:root {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --color-primary: #4f39f6; --color-primary-hover: #3f2bd6; --color-primary-active: #3322b8;
+  --color-primary-soft: #eeebff;
+  --color-ink: #101828; --color-text: #475467; --color-muted: #667085;
+  --color-line: #e4e7ec; --color-page: #f7f8fa; --color-surface: #ffffff;
+  --color-strong: #0f6b4c; --color-strong-soft: #e3f5ee;
+  --color-fair: #975004; --color-fair-soft: #fdf1df;
+  --color-error: #d92d20; --color-error-soft: #fef3f2;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
+  --shadow-md: 0 8px 24px rgba(16,24,40,.08); --shadow-focus: 0 0 0 3px rgba(79,57,246,.35);
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); font-size: 16px; line-height: 1.5; color: var(--color-text); background: var(--color-surface); -webkit-font-smoothing: antialiased; }
+h1, h2 { font-family: var(--font-display); color: var(--color-ink); letter-spacing: -0.025em; line-height: 1.12; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+.link { color: var(--color-primary); font-weight: 500; }
+.link:hover { text-decoration: underline; }
+
+/* =========================================================
+   LAYOUT  (split: brand panel + form)
+   ========================================================= */
+.auth { display: grid; grid-template-columns: minmax(420px, 5fr) 7fr; min-height: 100svh; }
+
+/* Brand panel (component: AuthAside). One headline, one line, one example. */
+.aside { background: var(--color-primary); color: #e6e2ff; padding: var(--space-6) var(--space-7); display: flex; flex-direction: column; justify-content: space-between; position: sticky; top: 0; height: 100svh; }
+.logo { display: inline-flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-weight: 600; font-size: 1.375rem; letter-spacing: -0.02em; }
+.logo__mark { width: 40px; height: 40px; border-radius: 10px; background: #fff; color: var(--color-primary); display: grid; place-items: center; }
+.aside .logo { color: #fff; }
+.aside__body { max-width: 440px; }
+.aside h2 { color: #fff; font-size: clamp(2rem, 3.2vw, 2.75rem); font-weight: 700; }
+.aside p.sub { margin-top: var(--space-4); font-size: 1.125rem; }
+.example { margin-top: var(--space-7); background: #fff; color: var(--color-text); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: 0 16px 40px rgba(15,23,42,.25); max-width: 380px; }
+.example__top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+.example b.t { display: block; font-family: var(--font-display); color: var(--color-ink); font-weight: 600; }
+.example small { color: var(--color-muted); font-size: .8125rem; }
+.example__num { font-family: var(--font-display); font-weight: 700; font-size: 2.5rem; line-height: 1; color: var(--color-strong); letter-spacing: -0.03em; text-align: right; }
+.example__num span { font-size: 1rem; color: var(--color-muted); font-weight: 500; letter-spacing: 0; }
+.example p { margin-top: var(--space-3); color: var(--color-ink); font-weight: 500; font-size: .9375rem; }
+.rows { display: grid; gap: var(--space-2); margin-top: var(--space-4); }
+.rows div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-line); border-radius: 8px; font-size: .875rem; }
+.rows b { color: var(--color-ink); font-weight: 600; }
+.rows .sc { font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; font-variant-numeric: tabular-nums; }
+.sc--strong { color: var(--color-strong); } .sc--fair { color: var(--color-fair); }
+.badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); font-size: .8125rem; font-weight: 600; }
+.badge--strong { background: var(--color-strong-soft); color: var(--color-strong); }
+.aside__foot { font-size: .875rem; color: #cfc8ff; }
+
+/* Form side (component: AuthCard) */
+.main { display: flex; flex-direction: column; min-height: 100svh; }
+.topline { display: none; padding: var(--space-4); }
+.topline .logo { color: var(--color-ink); }
+.topline .logo__mark { background: var(--color-primary); color: #fff; }
+.center { flex: 1; display: grid; place-items: center; padding: var(--space-6) var(--space-5); }
+.card { width: 100%; max-width: 420px; }
+.card h1 { font-size: 2rem; font-weight: 600; }
+.card .lead { margin-top: var(--space-2); margin-bottom: var(--space-6); }
+.step { font-size: .8125rem; font-weight: 600; color: var(--color-primary); letter-spacing: .08em; text-transform: uppercase; margin-bottom: var(--space-3); font-family: var(--font-display); }
+
+/* =========================================================
+   FORM PRIMITIVES
+   ========================================================= */
+form { display: grid; gap: var(--space-5); }
+.field { display: grid; gap: 6px; }
+.field label, .label { font-weight: 500; color: var(--color-ink); font-size: .9375rem; display: flex; justify-content: space-between; align-items: baseline; }
+.req { color: var(--color-error); margin-left: 2px; }
+.wrap { position: relative; }
+.input { width: 100%; height: 48px; padding: 0 var(--space-4); border: 1px solid #d0d5dd; border-radius: var(--radius-md); background: #fff; color: var(--color-ink); font: inherit; font-size: 1rem; }
+.input::placeholder { color: #98a2b3; }
+.input:focus { outline: 0; border-color: var(--color-primary); box-shadow: var(--shadow-focus); }
+.input.is-error { border-color: var(--color-error); }
+.wrap .input { padding-right: 48px; }
+.eye { position: absolute; right: 4px; top: 4px; width: 40px; height: 40px; border-radius: 8px; display: grid; place-items: center; color: var(--color-muted); }
+.eye:hover { background: var(--color-page); color: var(--color-ink); }
+.err { font-size: .8125rem; color: var(--color-error); min-height: 0; }
+.err:empty { display: none; }
+.help { font-size: .8125rem; color: var(--color-muted); }
+.rule { display: inline-flex; align-items: center; gap: 6px; font-size: .8125rem; color: var(--color-muted); }
+.rule svg { width: 14px; height: 14px; }
+.rule.ok { color: var(--color-strong); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: 52px; padding: 0 var(--space-5); border-radius: var(--radius-md); font-weight: 600; font-size: 1rem; border: 1px solid transparent; width: 100%; transition: background .15s, border-color .15s; }
+.btn svg { width: 18px; height: 18px; }
+.btn--primary { background: var(--color-primary); color: #fff; }
+.btn--primary:hover { background: var(--color-primary-hover); }
+.btn--primary:active { background: var(--color-primary-active); }
+.btn--secondary { background: #fff; color: var(--color-ink); border-color: var(--color-line); }
+.btn--secondary:hover { border-color: var(--color-muted); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.alert { display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: .9375rem; margin-bottom: var(--space-5); }
+.alert svg { margin-top: 2px; }
+.alert--error { background: var(--color-error-soft); color: #b42318; }
+.alert--info { background: var(--color-primary-soft); color: var(--color-ink); }
+.foot { text-align: center; margin-top: var(--space-6); font-size: .9375rem; }
+.back { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-muted); font-weight: 500; margin-top: var(--space-4); justify-content: center; width: 100%; }
+.back:hover { color: var(--color-ink); }
+.back svg { width: 18px; height: 18px; }
+
+/* Role picker */
+.roles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-6); }
+.role { text-align: left; border: 1px solid var(--color-line); border-radius: var(--radius-lg); padding: var(--space-4); display: grid; gap: var(--space-3); background: #fff; position: relative; }
+.role:hover { border-color: var(--color-muted); }
+.role[aria-checked="true"] { border-color: var(--color-primary); background: var(--color-primary-soft); box-shadow: 0 0 0 1px var(--color-primary); }
+.role__icon { width: 40px; height: 40px; border-radius: 10px; background: var(--color-page); display: grid; place-items: center; color: var(--color-muted); }
+.role[aria-checked="true"] .role__icon { background: var(--color-primary); color: #fff; }
+.role b { display: block; font-family: var(--font-display); color: var(--color-ink); font-weight: 600; font-size: 1.0625rem; }
+.role small { color: var(--color-muted); font-size: .875rem; line-height: 1.4; display: block; }
+.role[aria-checked="true"] b { color: var(--color-primary); }
+.role .tick { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-radius: 50%; background: var(--color-primary); color: #fff; display: none; place-items: center; }
+.role[aria-checked="true"] .tick { display: grid; }
+.role .tick svg { width: 12px; height: 12px; stroke-width: 3; }
+
+/* Status screens */
+.status-icon { width: 56px; height: 56px; border-radius: 16px; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; margin-bottom: var(--space-5); }
+.status-icon svg { width: 28px; height: 28px; }
+.status-icon--warn { background: var(--color-error-soft); color: #b42318; }
+.reason { background: var(--color-page); border: 1px solid var(--color-line); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-5); }
+.reason small { display: block; color: var(--color-muted); margin-bottom: 4px; }
+.stack { display: grid; gap: var(--space-3); }
+
+.toast { position: fixed; left: 50%; bottom: var(--space-6); transform: translate(-50%, 20px); background: #0f172a; color: #fff; padding: 12px var(--space-5); border-radius: var(--radius-md); font-weight: 500; box-shadow: 0 16px 40px rgba(16,24,40,.25); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; max-width: calc(100vw - 32px); }
+.toast.is-show { opacity: 1; transform: translate(-50%, 0); }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 960px) {
+  .auth { grid-template-columns: 1fr; }
+  .aside { display: none; }
+  .topline { display: block; }
+  .center { place-items: start center; padding-top: var(--space-5); }
+}
+@media (max-width: 480px) {
+  .center { padding: var(--space-5) var(--space-4); }
+  .card h1 { font-size: 1.75rem; }
+  .roles { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="spark" viewBox="0 0 24 24"><path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8z"/><path d="M18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></symbol>
+  <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0112 6c6.5 0 10 6 10 6a17 17 0 01-3.2 3.9M6.6 7.6A17 17 0 002 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></symbol>
+  <symbol id="brief" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/></symbol>
+  <symbol id="mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="lockk" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+</svg>
+
+<div class="auth">
+  <!-- Brand panel -->
+  <aside class="aside" aria-hidden="false">
+    <a href="#/login" class="logo"><span class="logo__mark"><svg class="i"><use href="#spark"/></svg></span>TalentFlow AI</a>
+    <div class="aside__body" id="aside"></div>
+    <p class="aside__foot">&copy; 2026 TalentFlow AI</p>
+  </aside>
+
+  <!-- Form side -->
+  <div class="main">
+    <div class="topline"><a href="#/login" class="logo"><span class="logo__mark"><svg class="i"><use href="#spark"/></svg></span>TalentFlow AI</a></div>
+    <div class="center"><div class="card" id="card"></div></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic = (n) => '<svg class="i"><use href="#'+n+'"/></svg>';
+let toastT; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('is-show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('is-show'),2600); }
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const state = { email:'', role:'applicant' };
+
+/* Aside copy: one headline, one line, one example. */
+const ASIDE = {
+  applicant: { h:'Know your fit before you apply.', p:'See your match score, and the skills behind it, on every listing.',
+    ex:`<div class="example"><div class="example__top"><div><b class="t">Junior Data Analyst</b><small>Cebu City &middot; Full-time</small></div><div class="example__num">78<span>/100</span></div></div>
+        <p>Strong match. You have 6 of 8 skills this job asks for.</p></div>` },
+  recruiter: { h:'Start with the best matches.', p:'Post a listing and see applicants ranked by fit, with the skill gaps for each.',
+    ex:`<div class="example"><b class="t">Applicants for Junior Data Analyst</b><div class="rows">
+        <div><b>Applicant A</b><span><span class="sc sc--strong">84</span></span></div><div><b>Applicant B</b><span><span class="sc sc--strong">71</span></span></div><div><b>Applicant C</b><span><span class="sc sc--fair">52</span></span></div></div></div>` }
+};
+function setAside(kind){ const a = ASIDE[kind]; $('#aside').innerHTML = '<h2>'+a.h+'</h2><p class="sub">'+a.p+'</p>'+a.ex; }
+
+/* Field component */
+function field({ id, label, type='text', ph='', ac='', req=true, value='' }){
+  const pw = type==='password';
+  return `<div class="field"><label for="${id}"><span>${label}${req?'<span class="req" aria-hidden="true">*</span>':''}</span>${id==='pw' && ROUTE==='login' ? '<a class="link" href="#/forgot" style="font-size:.9375rem">Forgot password?</a>' : ''}</label>
+    <div class="wrap"><input class="input" id="${id}" name="${id}" type="${type}" placeholder="${esc(ph)}" autocomplete="${ac}" value="${esc(value)}" ${req?'required':''} aria-describedby="${id}-e">
+    ${pw?`<button type="button" class="eye" data-eye="${id}" aria-label="Show password">${ic('eye')}</button>`:''}</div><span class="err" id="${id}-e" role="alert"></span></div>`;
+}
+function setErr(id, msg){ const i = $('#'+id), e = $('#'+id+'-e'); if (!i) return !msg; e.textContent = msg||''; i.classList.toggle('is-error', !!msg); return !msg; }
+const rules = {
+  name: v => v.trim().length<2 || v.trim().length>80 ? 'Enter a name of 2 to 80 characters.' : '',
+  company: v => v.trim().length<2 || v.trim().length>120 ? 'Enter a company name of 2 to 120 characters.' : '',
+  email: v => !EMAIL_RE.test(v.trim()) ? 'Enter a valid email address.' : '',
+  pw: v => v.length<8 ? 'Use at least 8 characters.' : '',
+  pwLogin: v => !v ? 'Enter your password.' : '',
+  pw2: v => v !== ($('#pw')?.value||'') ? 'The passwords do not match.' : ''
+};
+function validate(map){ let first = null; for (const [id, fn] of Object.entries(map)){ const ok = setErr(id, fn($('#'+id).value)); if (!ok && !first) first = id; } if (first) $('#'+first).focus(); return !first; }
+function busy(btn, text, fn){ const old = btn.innerHTML; btn.disabled = true; btn.textContent = text; setTimeout(() => { btn.disabled = false; btn.innerHTML = old; fn(); }, 700); }
+
+/* =========================================================
+   SCREENS
+   ========================================================= */
+let ROUTE = 'login';
+const SCREENS = {
+  login(){
+    setAside('applicant');
+    return `<h1>Welcome back</h1><p class="lead">Sign in to continue to your account.</p>
+    <div id="alert"></div>
+    <form id="f" novalidate>${field({id:'email',label:'Email address',type:'email',ph:'you@example.com',ac:'email'})}${field({id:'pw',label:'Password',type:'password',ph:'Enter your password',ac:'current-password'})}
+      <button class="btn btn--primary" type="submit">Sign in</button></form>
+    <p class="foot">Do not have an account? <a class="link" href="#/signup">Create account</a></p>`;
+  },
+  signup(q){
+    setAside('applicant');
+    const pre = q.get('role') || state.role;
+    return `<p class="step">Step 1 of 2</p><h1>Create your account</h1><p class="lead">First, tell us who you are.</p>
+    <div class="roles" role="radiogroup" aria-label="I am a">
+      <button type="button" class="role" role="radio" aria-checked="${pre==='applicant'}" data-role="applicant"><span class="tick">${ic('check')}</span><span class="role__icon">${ic('user')}</span><span><b>Applicant</b><small>Looking for jobs</small></span></button>
+      <button type="button" class="role" role="radio" aria-checked="${pre==='recruiter'}" data-role="recruiter"><span class="tick">${ic('check')}</span><span class="role__icon">${ic('brief')}</span><span><b>Recruiter</b><small>Hiring talent</small></span></button></div>
+    <button class="btn btn--primary" id="cont">Continue ${ic('right')}</button>
+    <p class="foot">Already have an account? <a class="link" href="#/login">Sign in</a></p>`;
+  },
+  signupDetails(role){
+    state.role = role; setAside(role);
+    const rec = role==='recruiter';
+    return `<p class="step">Step 2 of 2</p><h1>Your details</h1><p class="lead">Signing up as ${rec?'a recruiter':'an applicant'}. <a class="link" href="#/signup?role=${rec?'recruiter':'applicant'}">Change</a></p>
+    <div id="alert"></div>
+    <form id="f" novalidate data-role="${role}">${field({id:'name',label:'Full name',ph:'Enter your full name',ac:'name'})}
+      ${rec?field({id:'company',label:'Company',ph:'Enter your company name',ac:'organization'}):''}
+      ${field({id:'email',label:'Email address',type:'email',ph:'you@example.com',ac:'email'})}
+      ${field({id:'pw',label:'Password',type:'password',ph:'Create a password',ac:'new-password'})}
+      <span class="rule" id="rule">${ic('check')}At least 8 characters</span>
+      <button class="btn btn--primary" type="submit">Create account</button></form>
+    ${rec?'<p class="help" style="margin-top:16px;text-align:center">New recruiter accounts are reviewed before you can post listings.</p>':''}
+    <a class="back" href="#/signup?role=${role}">${ic('left')}Back</a>`;
+  },
+  forgot(){
+    setAside('applicant');
+    return `<h1>Reset your password</h1><p class="lead">Enter your email and we will send a reset link.</p>
+    <form id="f" novalidate>${field({id:'email',label:'Email address',type:'email',ph:'you@example.com',ac:'email'})}<button class="btn btn--primary" type="submit">Send reset link</button></form>
+    <a class="back" href="#/login">${ic('left')}Back to sign in</a>`;
+  },
+  sent(){
+    setAside('applicant');
+    return `<div class="status-icon">${ic('mail')}</div><h1>Check your email</h1><p class="lead">If this email has an account, a reset link is on the way.</p>
+    <div class="stack"><a class="btn btn--primary" href="#/login">Back to sign in</a><button class="btn btn--secondary" id="resend">Send again</button></div>`;
+  },
+  confirm(){
+    setAside('applicant');
+    return `<div class="status-icon">${ic('mail')}</div><h1>Check your email to confirm</h1><p class="lead">We sent a confirmation link to <b style="color:var(--color-ink)">${esc(state.email||'your email')}</b>. Open it to finish creating your account.</p>
+    <div class="stack"><a class="btn btn--primary" href="#/login">Back to sign in</a><button class="btn btn--secondary" id="resend">Send again</button></div>`;
+  },
+  reset(){
+    setAside('applicant');
+    return `<h1>Set a new password</h1><p class="lead">Choose a password you have not used here before.</p>
+    <form id="f" novalidate>${field({id:'pw',label:'New password',type:'password',ph:'At least 8 characters',ac:'new-password'})}${field({id:'pw2',label:'Confirm password',type:'password',ph:'Enter it again',ac:'new-password'})}
+      <button class="btn btn--primary" type="submit">Update password</button></form>`;
+  },
+  done(){
+    setAside('applicant');
+    return `<div class="status-icon">${ic('check')}</div><h1>Password updated</h1><p class="lead">You can now sign in with your new password.</p><a class="btn btn--primary" href="#/login">Sign in</a>`;
+  },
+  awaiting(){
+    setAside('recruiter');
+    return `<div class="status-icon">${ic('clock')}</div><h1>Awaiting approval</h1><p class="lead">An administrator reviews every new recruiter account. You can browse jobs while you wait, and post listings once you are approved.</p>
+    <div class="stack"><a class="btn btn--primary" href="#/login" data-toast="Browsing jobs opens the public job list.">Browse jobs</a><a class="btn btn--secondary" href="#/login">Log out</a></div>`;
+  },
+  rejected(){
+    setAside('recruiter');
+    return `<div class="status-icon status-icon--warn">${ic('alert')}</div><h1>Your account was not approved</h1><p class="lead">You can still browse jobs. If something changed, ask for another review.</p>
+    <div class="reason"><small>Reason from the administrator</small>We could not match the company name to a registered business. Please check the spelling and try again.</div>
+    <div class="stack"><button class="btn btn--primary" id="again">Ask for another review</button><a class="btn btn--secondary" href="#/login">Log out</a></div>`;
+  },
+  suspended(){
+    setAside('applicant');
+    return `<div class="status-icon status-icon--warn">${ic('lockk')}</div><h1>This account is suspended</h1><p class="lead">You cannot sign in right now.</p><a class="btn btn--secondary" href="#/login">Back to sign in</a>`;
+  }
+};
+
+/* =========================================================
+   ROUTER
+   ========================================================= */
+function render(){
+  const raw = location.hash.replace(/^#\/?/, '') || 'login', [path, qs] = raw.split('?'), parts = path.split('/'), q = new URLSearchParams(qs||'');
+  let html, titles = { login:'Sign in', signup:'Create account', forgot:'Reset password', reset:'New password' };
+  if (parts[0]==='signup' && (parts[1]==='applicant'||parts[1]==='recruiter')){ ROUTE = 'signupDetails'; html = SCREENS.signupDetails(parts[1]); }
+  else if (SCREENS[parts[0]]){ ROUTE = parts[0]; html = SCREENS[parts[0]](q); }
+  else { location.hash = '#/login'; return; }
+  $('#card').innerHTML = html;
+  document.title = 'TalentFlow AI: ' + (titles[ROUTE] || 'Account');
+  const f = $('#f, #cont, .btn'); const first = $('#card input'); if (first) first.focus();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', render);
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+document.addEventListener('click', e => {
+  const t = e.target;
+  const eye = t.closest('[data-eye]');
+  if (eye){ const i = $('#'+eye.dataset.eye), show = i.type==='password'; i.type = show?'text':'password'; eye.innerHTML = ic(show?'eyeoff':'eye'); eye.setAttribute('aria-label', show?'Hide password':'Show password'); return; }
+  const role = t.closest('[data-role]');
+  if (role){ state.role = role.dataset.role; $$('.role').forEach(r => r.setAttribute('aria-checked', r===role)); setAside(state.role); return; }
+  if (t.closest('#cont')){ location.hash = '#/signup/'+state.role; return; }
+  if (t.closest('#resend')){ toast('Sent again'); return; }
+  if (t.closest('#again')){ toast('Review requested'); location.hash = '#/awaiting'; return; }
+  const ts = t.closest('[data-toast]'); if (ts){ toast(ts.dataset.toast); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id==='pw' && ROUTE==='signupDetails'){ const ok = e.target.value.length>=8; $('#rule').classList.toggle('ok', ok); }
+  if (e.target.classList.contains('input') && e.target.classList.contains('is-error')) setErr(e.target.id, '');
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]'), v = id => $('#'+id)?.value.trim() || '';
+  if (ROUTE==='login'){
+    if (!validate({ email:rules.email, pw:rules.pwLogin })) return;
+    const em = v('email').toLowerCase(), pw = $('#pw').value;
+    busy(btn, 'Signing in', () => {
+      if (em.includes('suspended')) { location.hash = '#/suspended'; return; }
+      if (em.includes('unconfirmed')) { state.email = em; $('#alert').innerHTML = '<div class="alert alert--info">'+ic('alert')+'<span>Check your email to confirm your account.</span></div>'; return; }
+      if (pw==='wrong') { $('#alert').innerHTML = '<div class="alert alert--error">'+ic('alert')+'<span>Email or password is incorrect.</span></div>'; return; }
+      if (em.includes('pending')) { location.hash = '#/awaiting'; return; }
+      if (em.includes('rejected')) { location.hash = '#/rejected'; return; }
+      toast('Signed in. Opening your dashboard.');
+    });
+  } else if (ROUTE==='signupDetails'){
+    const rec = e.target.dataset.role==='recruiter', map = { name:rules.name, email:rules.email, pw:rules.pw }; if (rec) map.company = rules.company;
+    if (!validate(Object.fromEntries(['name', ...(rec?['company']:[]), 'email','pw'].map(k => [k, map[k]])))) return;
+    state.email = v('email');
+    busy(btn, 'Creating account', () => {
+      if (v('email').toLowerCase()==='taken@example.com'){ setErr('email','An account with this email already exists.'); $('#email').focus(); return; }
+      location.hash = rec ? '#/awaiting' : (v('email').toLowerCase().includes('confirm') ? '#/confirm' : '#/login');
+      if (!rec && !v('email').toLowerCase().includes('confirm')) toast('Account created. Opening your dashboard.');
+    });
+  } else if (ROUTE==='forgot'){
+    if (!validate({ email:rules.email })) return;
+    busy(btn, 'Sending', () => { location.hash = '#/sent'; });
+  } else if (ROUTE==='reset'){
+    if (!validate({ pw:rules.pw, pw2:rules.pw2 })) return;
+    busy(btn, 'Updating', () => { location.hash = '#/done'; });
+  }
+});
+render();
+</script>
+</body>
+</html>
