@@ -25,7 +25,6 @@ import type { ApplicationSummaryResponse } from "@/validators/application.valida
 
 const NEW_LISTING_PATH = "/dashboard/recruiter/listings/new";
 const CANDIDATES_PATH = "/dashboard/recruiter/candidates";
-const MAX_SKILL_CHIPS = 3;
 
 const rowGrid =
   "xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_5rem_8rem_8rem] xl:items-center xl:gap-6";
@@ -54,33 +53,9 @@ function EmptyState({ message, showPostLink }: { message: string; showPostLink?:
       <p className="mt-4 text-sm text-muted-foreground">{message}</p>
       {showPostLink ? (
         <Link href={NEW_LISTING_PATH} className={cn(buttonVariants(), "mt-4 h-9 px-4")}>
-          Post listing
+          + Create Job Listing
         </Link>
       ) : null}
-    </div>
-  );
-}
-
-function SkillsSummary({ application }: { application: ApplicationSummaryResponse }) {
-  const matched = application.skillsMatched;
-  const shown = matched.slice(0, MAX_SKILL_CHIPS);
-  return (
-    <div className="space-y-2">
-      {shown.length > 0 ? (
-        <ul className="flex flex-wrap gap-2" aria-label="Matched skills">
-          {shown.map((skill) => (
-            <li
-              key={skill}
-              className="inline-flex max-w-full items-center rounded-full bg-tint px-2.5 py-1 text-sm break-all text-primary"
-            >
-              {skill}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      <p className="pl-0.5 text-xs text-muted-foreground">
-        {matched.length} matched, {application.skillsMissing.length} missing
-      </p>
     </div>
   );
 }
@@ -91,12 +66,14 @@ function ApplicationsList({
   errorMessage,
   filtersActive,
   queryString,
+  jobTitle,
 }: {
   data: ApplicationSummaryResponse[] | undefined;
   isPending: boolean;
   errorMessage: string | undefined;
   filtersActive: boolean;
   queryString: string;
+  jobTitle: string;
 }) {
   if (isPending) {
     return (
@@ -134,7 +111,7 @@ function ApplicationsList({
         )}
       >
         <span role="columnheader">Name</span>
-        <span role="columnheader">Skills</span>
+        <span role="columnheader">Job</span>
         <span role="columnheader">Match</span>
         <span role="columnheader">Status</span>
         <span role="columnheader">Applied</span>
@@ -157,8 +134,8 @@ function ApplicationsList({
                 {application.applicantName ?? "Unnamed applicant"}
               </Link>
             </div>
-            <div role="cell" className="min-w-0 text-sm text-navy">
-              <SkillsSummary application={application} />
+            <div role="cell" className="min-w-0 text-sm break-words text-navy">
+              {jobTitle}
             </div>
             <div role="cell" className="text-sm text-navy">
               <span className="text-muted-foreground xl:hidden">Match: </span>
@@ -496,6 +473,7 @@ function CandidatesContent({
           errorMessage={error?.message}
           filtersActive={filtersActive}
           queryString={queryString}
+          jobTitle={listing.title}
         />
       </div>
     </div>
