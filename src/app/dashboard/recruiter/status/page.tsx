@@ -1,7 +1,12 @@
+import { CircleAlert, Clock, Lock } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AuthHeader, AuthSplit, AuthStatusIcon } from "@/components/auth/auth-split";
 import { LogoutButton } from "@/components/shared/logout-button";
+import { buttonVariants } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth/require-role";
+import { cn } from "@/lib/utils";
 
 export default async function RecruiterStatusPage() {
   const { profile } = await requireRole("recruiter");
@@ -10,26 +15,50 @@ export default async function RecruiterStatusPage() {
 
   const copy = {
     pending: {
-      title: "Awaiting approval.",
-      body: "An administrator is reviewing your account. You can post listings once it is approved.",
+      icon: Clock,
+      tone: "default",
+      title: "Awaiting approval",
+      body: "An administrator reviews every new recruiter account. You can browse jobs while you wait, and post listings once you are approved.",
     },
     rejected: {
-      title: "Your account was not approved.",
-      body: profile.rejectionReason ?? "No reason was given.",
+      icon: CircleAlert,
+      tone: "warn",
+      title: "Your account was not approved",
+      body: "You can still browse jobs.",
     },
     suspended: {
-      title: "This account is suspended.",
+      icon: Lock,
+      tone: "warn",
+      title: "This account is suspended",
       body: "You cannot post listings or review applicants while it is suspended.",
     },
-  }[profile.accountStatus];
+  } as const;
+  const { icon, tone, title, body } = copy[profile.accountStatus];
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-section p-6 text-center">
-      <div className="max-w-md">
-        <h1 className="text-2xl font-semibold text-navy">{copy.title}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">{copy.body}</p>
+    <AuthSplit role="recruiter">
+      <AuthStatusIcon icon={icon} tone={tone} />
+      <AuthHeader title={title}>{body}</AuthHeader>
+
+      {profile.accountStatus === "rejected" && (
+        <div className="mb-5 rounded-md border border-line bg-page p-4">
+          <p className="mb-1 text-chip text-muted-foreground">Reason from the administrator</p>
+          <p className="text-sm text-ink">{profile.rejectionReason ?? "No reason was given."}</p>
+        </div>
+      )}
+
+      <div className="grid gap-3">
+        {profile.accountStatus === "pending" && (
+          <Link href="/jobs" className={cn(buttonVariants({ size: "lg" }), "w-full text-sm")}>
+            Browse jobs
+          </Link>
+        )}
+        <LogoutButton
+          className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full text-sm")}
+        >
+          Log out
+        </LogoutButton>
       </div>
-      <LogoutButton />
-    </main>
+    </AuthSplit>
   );
 }

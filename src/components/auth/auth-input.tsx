@@ -1,63 +1,98 @@
 "use client";
 
-import { Eye, EyeOff, type LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { useId, useState } from "react";
+import type { ZodError } from "zod";
 
+import { FIELD_CLASS, FieldLabel } from "@/components/shared/field-label";
 import { cn } from "@/lib/utils";
 
-type AuthInputProps = React.ComponentProps<"input"> & {
-  label: string;
-  icon: LucideIcon;
-  labelAction?: React.ReactNode;
-  requiredMark?: boolean;
-};
+export type FieldErrors = Partial<Record<string, string>>;
 
-const inputClassName =
-  "h-11 w-full rounded-lg border border-border bg-white pr-3 pl-10 text-sm text-navy outline-none transition-colors placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring";
+export function toFieldErrors(error: ZodError): FieldErrors {
+  const errors: FieldErrors = {};
+  for (const issue of error.issues) {
+    const key = String(issue.path[0]);
+    errors[key] ??= issue.message;
+  }
+  return errors;
+}
+
+export function clearFieldError(errors: FieldErrors, name: string): FieldErrors {
+  if (!errors[name]) return errors;
+  const next = { ...errors };
+  delete next[name];
+  return next;
+}
+
+export function focusFirstError(form: HTMLFormElement, errors: FieldErrors) {
+  const first = Array.from(form.elements).find(
+    (element): element is HTMLInputElement =>
+      element instanceof HTMLInputElement && Boolean(errors[element.name]),
+  );
+  first?.focus();
+}
+
+type AuthInputProps = Omit<React.ComponentProps<"input">, "id"> & {
+  label: string;
+  error?: string;
+  hint?: React.ReactNode;
+  labelAction?: React.ReactNode;
+};
 
 export function AuthInput({
   label,
-  icon: Icon,
+  error,
+  hint,
   labelAction,
-  requiredMark,
+  required,
   type,
   className,
   ...props
 }: AuthInputProps) {
+  const id = useId();
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
 
   return (
-    <label className="block space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-navy">
+    <div className="grid gap-1.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <FieldLabel htmlFor={id} required={required}>
           {label}
-          {requiredMark && (
-            <span aria-hidden="true" className="ml-1 text-red-600">
-              *
-            </span>
-          )}
-        </span>
+        </FieldLabel>
         {labelAction}
       </div>
       <div className="relative">
-        <Icon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
         <input
           {...props}
+          id={id}
           type={isPassword && showPassword ? "text" : type}
-          className={cn(inputClassName, isPassword && "pr-11", className)}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={hint ? `${hintId} ${errorId}` : errorId}
+          className={cn(FIELD_CLASS, "h-11", isPassword && "pr-12", className)}
         />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShowPassword((shown) => !shown)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute top-1/2 right-3 -translate-y-1/2 rounded text-slate-400 transition-colors outline-none hover:text-navy focus-visible:ring-3 focus-visible:ring-ring"
+            className="absolute top-1 right-1 flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-page hover:text-ink"
           >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {showPassword ? (
+              <EyeOff className="size-4" aria-hidden="true" />
+            ) : (
+              <Eye className="size-4" aria-hidden="true" />
+            )}
           </button>
         )}
       </div>
-    </label>
+      {hint && <div id={hintId}>{hint}</div>}
+      <p id={errorId} role="alert" className="text-chip text-error empty:hidden">
+        {error}
+      </p>
+    </div>
   );
 }

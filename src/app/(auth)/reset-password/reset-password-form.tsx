@@ -1,10 +1,16 @@
 "use client";
 
-import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { AuthInput } from "@/components/auth/auth-input";
+import {
+  AuthInput,
+  clearFieldError,
+  focusFirstError,
+  toFieldErrors,
+  type FieldErrors,
+} from "@/components/auth/auth-input";
+import { AuthAlert, AuthHeader } from "@/components/auth/auth-split";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { resetPasswordSchema } from "@/validators/auth.validator";
@@ -13,17 +19,24 @@ import { completeRecovery } from "./actions";
 export function ResetPasswordForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setError(null);
+    setFieldErrors({});
 
-    const parsed = resetPasswordSchema.safeParse(
-      Object.fromEntries(new FormData(event.currentTarget)),
-    );
-    if (!parsed.success) {
-      setError(parsed.error.issues[0].message);
+    const values = Object.fromEntries(new FormData(form));
+    const parsed = resetPasswordSchema.safeParse(values);
+    const errors: FieldErrors = parsed.success ? {} : toFieldErrors(parsed.error);
+    if (parsed.success && values.confirmPassword !== values.password) {
+      errors.confirmPassword = "The passwords do not match.";
+    }
+    if (!parsed.success || errors.confirmPassword) {
+      setFieldErrors(errors);
+      focusFirstError(form, errors);
       return;
     }
 
@@ -45,31 +58,44 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-navy">Set a new password</h1>
-        <p className="text-sm text-muted-foreground">Use at least 8 characters.</p>
-      </div>
+    <div>
+      <AuthHeader title="Set a new password">
+        Choose a password you have not used here before.
+      </AuthHeader>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form
+        onSubmit={handleSubmit}
+        onInput={(event) =>
+          setFieldErrors((errors) =>
+            clearFieldError(errors, (event.target as HTMLInputElement).name),
+          )
+        }
+        noValidate
+        className="grid gap-5"
+      >
+        {error && <AuthAlert tone="error">{error}</AuthAlert>}
+
         <AuthInput
           label="New password"
-          icon={Lock}
           name="password"
           type="password"
           autoComplete="new-password"
-          placeholder="Enter your new password"
-          minLength={8}
+          placeholder="At least 8 characters"
           required
+          error={fieldErrors.password}
         />
 
-        {error && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-            {error}
-          </p>
-        )}
+        <AuthInput
+          label="Confirm password"
+          name="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Enter it again"
+          required
+          error={fieldErrors.confirmPassword}
+        />
 
-        <Button type="submit" size="lg" disabled={loading} className="h-11 w-full text-base">
+        <Button type="submit" size="lg" disabled={loading} className="w-full text-sm">
           {loading ? "Updating..." : "Update password"}
         </Button>
       </form>

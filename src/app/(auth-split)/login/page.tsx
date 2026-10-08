@@ -1,12 +1,17 @@
 "use client";
 
-import { Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
-import { AuthInput } from "@/components/auth/auth-input";
-import { AuthSplit } from "@/components/auth/auth-split";
+import {
+  AuthInput,
+  clearFieldError,
+  focusFirstError,
+  toFieldErrors,
+  type FieldErrors,
+} from "@/components/auth/auth-input";
+import { AuthAlert, AuthHeader, AuthSplit } from "@/components/auth/auth-split";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { signInSchema } from "@/validators/auth.validator";
@@ -27,6 +32,7 @@ function LoginForm() {
   // Errors passed by /api/auth/callback (e.g. expired confirmation link).
   const callbackError = useSearchParams().get("error");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
@@ -35,13 +41,17 @@ function LoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setError(null);
+    setFieldErrors({});
     setUnconfirmedEmail(null);
     setResent(false);
 
-    const parsed = signInSchema.safeParse(Object.fromEntries(new FormData(event.currentTarget)));
+    const parsed = signInSchema.safeParse(Object.fromEntries(new FormData(form)));
     if (!parsed.success) {
-      setError(parsed.error.issues[0].message);
+      const errors = toFieldErrors(parsed.error);
+      setFieldErrors(errors);
+      focusFirstError(form, errors);
       return;
     }
 
@@ -53,8 +63,13 @@ function LoginForm() {
       setLoading(false);
       if (authError.code === "email_not_confirmed") {
         setUnconfirmedEmail(parsed.data.email);
+        return;
       }
-      setError(authError.message);
+      setError(
+        authError.code === "invalid_credentials"
+          ? "Email or password is incorrect."
+          : authError.message,
+      );
       return;
     }
 
@@ -82,69 +97,75 @@ function LoginForm() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold tracking-tight text-navy sm:text-3xl">Welcome back</h2>
-        <p className="text-sm text-muted-foreground">Sign in to continue to your account.</p>
-      </div>
+    <div>
+      <AuthHeader title="Welcome back">Sign in to continue to your account.</AuthHeader>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form
+        onSubmit={handleSubmit}
+        onInput={(event) =>
+          setFieldErrors((errors) =>
+            clearFieldError(errors, (event.target as HTMLInputElement).name),
+          )
+        }
+        noValidate
+        className="grid gap-5"
+      >
+        {displayError && <AuthAlert tone="error">{displayError}</AuthAlert>}
+        {unconfirmedEmail && (
+          <AuthAlert tone="info">
+            {resent ? (
+              <p>Confirmation email sent. Check your inbox.</p>
+            ) : (
+              <>
+                <p>Check your email to confirm your account.</p>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  className="font-medium text-primary hover:text-primary-hover hover:underline"
+                >
+                  Resend confirmation email
+                </button>
+              </>
+            )}
+          </AuthAlert>
+        )}
+
         <AuthInput
           label="Email address"
-          icon={Mail}
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="Enter your email address"
+          placeholder="you@example.com"
           required
+          error={fieldErrors.email}
         />
 
         <AuthInput
           label="Password"
-          icon={Lock}
           name="password"
           type="password"
           autoComplete="current-password"
           placeholder="Enter your password"
           required
+          error={fieldErrors.password}
           labelAction={
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-primary hover:text-primary-hover"
+              className="rounded-sm text-sm font-medium text-primary hover:underline"
             >
               Forgot password?
             </Link>
           }
         />
 
-        {displayError && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-            {displayError}
-          </p>
-        )}
-        {unconfirmedEmail && !resent && (
-          <button
-            type="button"
-            onClick={handleResend}
-            className="text-sm font-medium text-primary hover:text-primary-hover"
-          >
-            Resend confirmation email
-          </button>
-        )}
-        {resent && (
-          <p className="text-sm text-muted-foreground">
-            Confirmation email sent. Check your inbox.
-          </p>
-        )}
-
-        <Button type="submit" size="lg" disabled={loading} className="h-11 w-full text-base">
+        <Button type="submit" size="lg" disabled={loading} className="w-full text-sm">
           {loading ? "Signing in..." : "Sign in"}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
+      <p className="mt-6 text-center text-sm">
+        Do not have an account?{" "}
+        <Link href="/signup" className="font-medium text-primary hover:underline">
           Create account
         </Link>
       </p>

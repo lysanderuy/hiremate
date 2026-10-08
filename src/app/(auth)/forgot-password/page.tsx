@@ -4,39 +4,36 @@ import { ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { AuthInput } from "@/components/auth/auth-input";
-import { Button } from "@/components/ui/button";
+import {
+  AuthInput,
+  clearFieldError,
+  focusFirstError,
+  toFieldErrors,
+  type FieldErrors,
+} from "@/components/auth/auth-input";
+import { AuthAlert, AuthHeader, AuthStatusIcon } from "@/components/auth/auth-split";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { forgotPasswordSchema } from "@/validators/auth.validator";
-
-function BackToSignIn() {
-  return (
-    <div className="text-center">
-      <Link
-        href="/login"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-navy"
-      >
-        <ArrowLeft className="size-4" />
-        Back to sign in
-      </Link>
-    </div>
-  );
-}
 
 export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
-  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setError(null);
+    setFieldErrors({});
 
-    const parsed = forgotPasswordSchema.safeParse(
-      Object.fromEntries(new FormData(event.currentTarget)),
-    );
+    const parsed = forgotPasswordSchema.safeParse(Object.fromEntries(new FormData(form)));
     if (!parsed.success) {
-      setError(parsed.error.issues[0].message);
+      const errors = toFieldErrors(parsed.error);
+      setFieldErrors(errors);
+      focusFirstError(form, errors);
       return;
     }
 
@@ -52,58 +49,63 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    setSentTo(parsed.data.email);
+    setSent(true);
   }
 
-  if (sentTo) {
+  if (sent) {
     return (
-      <div className="space-y-6 text-center">
-        <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-tint text-primary">
-          <Mail className="size-6" />
-        </span>
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">Check your email</h1>
-          <p className="text-sm text-muted-foreground">
-            If an account exists for {sentTo}, we sent a link to reset your password.
-          </p>
-        </div>
-        <BackToSignIn />
+      <div>
+        <AuthStatusIcon icon={Mail} />
+        <AuthHeader title="Check your email">
+          If this email has an account, a reset link is on the way.
+        </AuthHeader>
+        <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "w-full text-sm")}>
+          Back to sign in
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-navy">Forgot your password?</h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a reset link.
-        </p>
-      </div>
+    <div>
+      <AuthHeader title="Reset your password">
+        Enter your email and we will send a reset link.
+      </AuthHeader>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form
+        onSubmit={handleSubmit}
+        onInput={(event) =>
+          setFieldErrors((errors) =>
+            clearFieldError(errors, (event.target as HTMLInputElement).name),
+          )
+        }
+        noValidate
+        className="grid gap-5"
+      >
+        {error && <AuthAlert tone="error">{error}</AuthAlert>}
+
         <AuthInput
           label="Email address"
-          icon={Mail}
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="Enter your email address"
+          placeholder="you@example.com"
           required
+          error={fieldErrors.email}
         />
 
-        {error && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-            {error}
-          </p>
-        )}
-
-        <Button type="submit" size="lg" disabled={loading} className="h-11 w-full text-base">
+        <Button type="submit" size="lg" disabled={loading} className="w-full text-sm">
           {loading ? "Sending..." : "Send reset link"}
         </Button>
       </form>
 
-      <BackToSignIn />
+      <Link
+        href="/login"
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-ink"
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        Back to sign in
+      </Link>
     </div>
   );
 }
