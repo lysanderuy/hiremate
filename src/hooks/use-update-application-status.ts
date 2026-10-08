@@ -9,6 +9,7 @@ import type {
 } from "@/validators/application.validator";
 
 import { applicationKeys } from "./use-applications";
+import { dashboardKeys } from "./use-dashboard";
 import { listingKeys } from "./use-listings";
 
 export function useUpdateApplicationStatus() {
@@ -22,6 +23,7 @@ export function useUpdateApplicationStatus() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: applicationKeys.lists }),
         queryClient.invalidateQueries({ queryKey: listingKeys.all }),
+        queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
       ]);
     },
     onError: async (_error, { id }) => {

@@ -8,6 +8,7 @@ import {
   updateApplicationStatusSchema,
 } from "@/validators/application.validator";
 import { companyResponseSchema, updateCompanySchema } from "@/validators/company.validator";
+import { dashboardResponseSchema } from "@/validators/dashboard.validator";
 import {
   createListingSchema,
   listingIdResponseSchema,
@@ -209,6 +210,16 @@ export const openApiDocument = createDocument({
           "403": errorResponse("Account is not an approved recruiter."),
           "404": errorResponse("Listing not found."),
           "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/dashboard": {
+      get: {
+        summary: "Get the authenticated recruiter's dashboard summary",
+        responses: {
+          "200": successResponse("Dashboard retrieved successfully.", dashboardResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an approved recruiter."),
         },
       },
     },
