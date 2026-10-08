@@ -1,6 +1,17 @@
 # Hiremate
 
-Reusable full-stack boilerplate: Next.js 16 + Supabase + Drizzle + Zod.
+Job board with AI resume matching (branded TalentFlow AI). Recruiters post
+listings and review applicants ranked by match score; applicants apply with a
+text resume. Built on Next.js 16 + Supabase + Drizzle + Zod.
+
+- **Recruiters**: approval-gated console (dashboard, listings, applicants with
+  band filter and match sort, company profile).
+- **Applicants**: signup/login and role-based dashboard.
+- **Matcher**: scoring/band derivation lives in the app; the ML matcher is a
+  later phase (see `docs/`).
+
+Product, brand and design references (PRD, brief, tokens, HTML mockups) are in
+[`docs/`](docs/).
 
 | Layer        | Tech                                                              |
 | ------------ | ----------------------------------------------------------------- |
@@ -123,15 +134,22 @@ Tests are excluded on purpose — kept fast locally; they run in CI instead.
 src/
 ├── app/                  # Routes, layouts — frontend only
 │   ├── (auth)/           # Login, signup, forgot/reset password (route group)
-│   ├── dashboard/        # Role-based redirect + applicant/ and recruiter/ dashboards
+│   ├── (auth-split)/     # Login, signup (split-layout route group)
+│   ├── dashboard/        # Role-based redirect + applicant/ and recruiter/
+│   │   └── recruiter/    # status/ (approval screens) + (console)/ applicants, listings, profile
 │   ├── error.tsx         # Error boundary (wire Sentry etc. here)
 │   ├── global-error.tsx  # Root-layout error fallback (self-contained)
 │   ├── not-found.tsx     # 404
 │   └── api/              # Route handlers only — no UI under api/
+│       ├── applications/ # review + status updates
 │       ├── auth/         # callback (code exchange) + logout
+│       ├── company/      # recruiter company profile
+│       ├── dashboard/    # recruiter dashboard stats
 │       ├── docs/         # Scalar interactive API reference UI
+│       ├── listings/     # CRUD + [id]/applications
 │       ├── openapi.json/ # generated OpenAPI 3.1 spec (raw JSON, no envelope)
-│       └── profile/      # example: GET/PATCH /api/profile
+│       ├── profile/      # GET/PATCH /api/profile
+│       └── skills/       # list + suggest
 ├── components/
 │   ├── ui/               # Generic primitives (buttons, inputs, ...)
 │   └── shared/           # Composed, app-specific components
@@ -153,11 +171,26 @@ src/
 └── proxy.ts              # Next.js 16 proxy, ex-middleware (auth session refresh)
 ```
 
-Outside `src/`: `scripts/` (RLS guardrail + auth debug), `drizzle.config.ts`
-(schema path, migration dir, `DIRECT_URL`).
+Outside `src/`: `docs/` (product and design references), `scripts/` (RLS
+guardrail, auth debug, seeding), `drizzle.config.ts` (schema path, migration
+dir, `DIRECT_URL`).
 
-The `profiles` table + validator + service + route + hook are a working
-reference implementation of the layering — replace per project.
+Tables: `profiles`, `companies`, `jobs`, `applications`, `resumes`, `skills`.
+The `profiles` slice (validator + service + route + hook) is the smallest
+reference implementation of the layering.
+
+## Docs
+
+`docs/` holds the TalentFlow AI design inputs, not generated output:
+
+| File                                       | Purpose                                          |
+| ------------------------------------------ | ------------------------------------------------ |
+| `talentflow-ai_prd.md`                     | Product requirements                             |
+| `talentflow-ai_brief.md`                   | Short project brief                              |
+| `talentflow-ai_brand-guidelines.md`        | Brand voice, color, type                         |
+| `talentflow-ai_design.yaml`                | Design system spec                               |
+| `talentflow-ai_tokens.css`                 | Design tokens (mirrored in app styles)           |
+| `talentflow-ai_*_final.html`, `_auth.html` | Static mockups: landing, recruiter console, auth |
 
 ## Auth
 
@@ -256,5 +289,8 @@ Then:
 | `db:migrate`              | Run pending migrations, then RLS guardrail                 |
 | `db:verify`               | RLS guardrail — fails if any public table has RLS disabled |
 | `db:auth-users`           | Debug: list recent signups + email confirmation status     |
+| `db:seed-skills`          | Seed the skills table                                      |
+| `db:seed-applicants`      | Seed placeholder applicants (dev data)                     |
+| `db:cleanup-applicants`   | Remove seeded applicants                                   |
 | `db:push`                 | Push schema directly (prototyping only)                    |
 | `db:studio`               | Drizzle Studio data browser                                |
