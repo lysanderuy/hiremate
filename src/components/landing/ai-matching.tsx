@@ -1,74 +1,88 @@
-import { CircleCheck, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
-import { MatchBar } from "./match-bar";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
-const dimensions = [
-  { title: "Skills Match", description: "How many required skills appear in your profile" },
+import { MatchBar, MissingSkills } from "./match-bar";
+
+const bands = [
   {
-    title: "Semantic Similarity",
-    description: "How closely your experience aligns with the role description",
+    range: "70 to 100",
+    name: "Strong",
+    variant: "strong",
+    text: "Most of what the job asks for is in your resume.",
   },
   {
-    title: "Experience Level",
-    description: "Whether your years of experience meet the requirement",
+    range: "40 to 69",
+    name: "Fair",
+    variant: "fair",
+    text: "Some overlap. Check the missing skills.",
   },
-  { title: "Education", description: "Whether your educational background fits the position" },
-];
-
-const scores = [
-  { label: "Skills Match", value: 95, indicatorClassName: "bg-primary" },
-  { label: "Semantic Similarity", value: 89, indicatorClassName: "bg-violet-500" },
-  { label: "Experience", value: 90, indicatorClassName: "bg-match-bar" },
-  { label: "Education", value: 100, indicatorClassName: "bg-blue-500" },
-];
+  {
+    range: "0 to 39",
+    name: "Weak",
+    variant: "weak",
+    text: "Little overlap with this listing.",
+  },
+] as const;
 
 export function AiMatching() {
   return (
-    <section id="ai-matching" className="scroll-mt-16 bg-section py-16 md:py-24">
-      <div className="mx-auto grid max-w-7xl px-4 sm:px-6 lg:px-8 grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-        <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-none">
-          <p className="text-xs font-semibold tracking-wider text-primary sm:text-sm uppercase">
-            AI Matching
+    <section id="matching" className="section-screen">
+      <div className="site-container grid grid-cols-1 items-center gap-12 min-[961px]:grid-cols-2 min-[961px]:gap-18 *:min-w-0">
+        <div>
+          <p className="eyebrow">AI Matching</p>
+          <h2 className="text-section font-semibold">Understanding your match in plain language</h2>
+          <p className="mt-3 text-lead">
+            Every score is out of 100 and comes with its reasons. You see the skills you match, the
+            ones you lack, and what the number means.
           </p>
-          <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight sm:text-4xl text-navy">
-            Understanding your match in plain language
-          </h2>
-          <p className="mt-5 text-base leading-relaxed sm:text-lg text-slate-600">
-            Our AI compares your resume against each job description across multiple dimensions. You
-            always see a clear explanation, not just a number.
-          </p>
-          <ul className="mt-8 space-y-5">
-            {dimensions.map((item) => (
-              <li key={item.title} className="flex gap-3">
-                <CircleCheck className="mt-0.5 size-5 shrink-0 text-primary" />
-                <div>
-                  <p className="text-base font-semibold text-navy">{item.title}</p>
-                  <p className="text-sm text-slate-500">{item.description}</p>
-                </div>
+          <ul aria-label="Score bands" className="mt-8 grid gap-3">
+            {bands.map((band) => (
+              <li
+                key={band.name}
+                className="grid grid-cols-[84px_72px_1fr] items-center gap-3 rounded-md border border-line bg-surface px-4 py-3 min-[641px]:grid-cols-[96px_80px_1fr] min-[641px]:gap-4"
+              >
+                <span className="font-display font-semibold whitespace-nowrap text-ink tabular-nums">
+                  {band.range}
+                </span>
+                <Badge variant={band.variant} className="justify-self-start">
+                  {band.name}
+                </Badge>
+                <span className="text-sm">{band.text}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="mx-auto w-full max-w-xl rounded-2xl border bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-          <div className="text-center">
-            <p className="text-5xl font-bold text-match sm:text-6xl">91%</p>
-            <p className="mt-1 text-sm font-medium text-match">Strong Match</p>
-            <p className="mx-auto mt-4 max-w-sm text-sm text-slate-600">
-              You meet most requirements and your experience closely aligns with this role.
+        <Card className="gap-0 px-5 pt-8 pb-5 shadow-md min-[641px]:px-8 min-[641px]:pt-12 min-[641px]:pb-8">
+          <div className="mb-5 border-b border-line pb-5 text-center">
+            <p className="font-display text-score-sm leading-none font-bold tracking-[-0.04em] text-strong tabular-nums min-[641px]:text-score">
+              78
+              <small className="text-lg font-medium tracking-normal text-muted-foreground">
+                /100
+              </small>
             </p>
+            <p className="mt-2 font-semibold text-strong">Strong match</p>
+            <p className="mt-3">You have 6 of 8 skills this job asks for.</p>
           </div>
-          <div className="my-7 h-px bg-border" />
-          <div className="space-y-5">
-            {scores.map((score) => (
-              <MatchBar key={score.label} {...score} />
-            ))}
+          <div className="grid gap-4">
+            <MatchBar label="Skills match" valueLabel="6 of 8" percent={75} />
+            <MatchBar
+              label="Description match"
+              valueLabel="High"
+              percent={82}
+              help="How closely your resume reads like the job description."
+            />
           </div>
-          <p className="mt-7 flex items-start gap-2 text-xs text-slate-500">
-            <Info className="mt-0.5 size-4 shrink-0" />
+          <div className="mt-5">
+            <MissingSkills skills={["Docker", "AWS"]} />
+          </div>
+          <p className="mt-5 flex gap-3 text-xs text-muted-foreground">
+            <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             AI-generated results are intended to assist users and may require human verification.
           </p>
-        </div>
+        </Card>
       </div>
     </section>
   );

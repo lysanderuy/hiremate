@@ -1,61 +1,56 @@
-import { Card } from "@/components/ui/card";
-
 const steps = [
   {
     number: "01",
-    title: "Upload Resume",
-    description: "Upload your resume as PDF, DOCX, or TXT in seconds.",
+    title: "Save your resume",
+    description:
+      "Paste text or upload a .txt or text-based PDF. You keep one resume on your account.",
   },
   {
     number: "02",
-    title: "AI Extracts Information",
-    description:
-      "Our NLP engine reads your resume and pulls out key skills, experience, and education.",
+    title: "We read your skills",
+    description: "Skills are picked out of your resume and out of each job listing.",
   },
   {
     number: "03",
-    title: "AI Analyzes Skills",
+    title: "Compare by meaning",
     description:
-      "Your profile is compared against thousands of job descriptions using semantic matching.",
+      "Your resume and each listing are compared by skills and by meaning, not only exact words.",
   },
   {
     number: "04",
-    title: "Find Your Best Match",
-    description:
-      "Browse personalized job recommendations ranked by how well they match your profile.",
+    title: "See your score, then apply",
+    description: "Every listing shows your score and the skills you lack. Apply where you fit.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="scroll-mt-16 bg-primary py-16 md:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <p className="text-xs font-semibold tracking-wider text-indigo-200 sm:text-sm uppercase">
-            How it works
-          </p>
-          <h2 className="mx-auto mt-3 max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl text-white">
+    <section id="how" className="section-screen bg-primary text-on-primary-muted">
+      <div className="site-container">
+        <div className="mx-auto mb-10 max-w-[640px] text-center">
+          <p className="eyebrow text-on-primary-eyebrow">How it works</p>
+          <h2 className="text-section font-semibold text-white">
             From resume to the right job in four steps
           </h2>
         </div>
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, index) => (
-            <Card
+        <ol className="grid grid-cols-1 gap-4 min-[641px]:grid-cols-2 min-[961px]:grid-cols-4">
+          {steps.map((step) => (
+            <li
               key={step.number}
-              className="relative gap-3 border border-white/15 bg-white/10 p-6 text-white shadow-none ring-0 transition-all hover:-translate-y-0.5 hover:bg-white/15"
+              className="rounded-xl border border-white/20 bg-white/12 p-6 min-[641px]:p-8"
             >
-              <span className="text-2xl font-bold text-indigo-200">{step.number}</span>
-              {index < steps.length - 1 && (
-                <span
-                  aria-hidden
-                  className="absolute top-9 right-6 hidden h-px w-8 bg-white/30 lg:block"
-                />
-              )}
-              <h3 className="text-base font-semibold text-white">{step.title}</h3>
-              <p className="text-sm leading-relaxed text-indigo-100">{step.description}</p>
-            </Card>
+              <div className="mb-4 flex items-center justify-between font-display text-2xl font-semibold text-white">
+                {step.number}
+                <span aria-hidden="true" className="h-px w-10 bg-white/40" />
+              </div>
+              <h3 className="mb-3 text-base font-semibold text-white">{step.title}</h3>
+              <p className="text-md">{step.description}</p>
+            </li>
           ))}
-        </div>
+        </ol>
+        <p className="mt-8 text-center">
+          Recruiters post a listing and get applicants ranked the same way.
+        </p>
       </div>
     </section>
   );

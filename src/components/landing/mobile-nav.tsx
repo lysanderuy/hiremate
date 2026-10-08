@@ -32,7 +32,7 @@ export function MobileNav({ links }: MobileNavProps) {
             variant="ghost"
             size="icon"
             aria-label="Open menu"
-            className="size-10 text-navy lg:hidden"
+            className="text-ink min-[961px]:hidden"
           />
         }
       >
@@ -41,7 +41,7 @@ export function MobileNav({ links }: MobileNavProps) {
       <SheetContent side="right" className="w-4/5 max-w-xs gap-0">
         <SheetHeader className="border-b p-4 pr-14">
           <SheetTitle>
-            <Logo />
+            <Logo href="/" />
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col p-2">
@@ -52,7 +52,7 @@ export function MobileNav({ links }: MobileNavProps) {
               render={
                 <a
                   href={link.href}
-                  className="flex h-12 items-center rounded-lg px-3 text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-navy"
+                  className="flex h-11 items-center rounded-md px-3 text-sm font-medium text-text hover:bg-page hover:text-ink"
                 />
               }
             >
@@ -63,14 +63,14 @@ export function MobileNav({ links }: MobileNavProps) {
         <div className="mt-auto flex flex-col gap-3 border-t p-4">
           <Link
             href="/login"
-            className={cn(buttonVariants({ variant: "outline" }), "h-11 w-full text-sm")}
+            className={cn(buttonVariants({ variant: "outline" }), "w-full")}
             onClick={() => setOpen(false)}
           >
             Sign In
           </Link>
           <Link
             href="/signup"
-            className={cn(buttonVariants(), "h-11 w-full text-sm")}
+            className={cn(buttonVariants(), "w-full")}
             onClick={() => setOpen(false)}
           >
             Get Started

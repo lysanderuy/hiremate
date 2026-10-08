@@ -7,43 +7,35 @@ import { Logo } from "./logo";
 import { MobileNav } from "./mobile-nav";
 
 const links = [
-  { label: "How it works", href: "#how-it-works" },
-  { label: "AI Matching", href: "#ai-matching" },
+  { label: "How it works", href: "#how" },
+  { label: "AI Matching", href: "#matching" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl px-4 sm:px-6 lg:px-8 items-center justify-between">
-        <Logo />
-        <nav className="hidden items-center gap-8 lg:flex">
+    <header className="sticky top-0 z-10 border-b border-line bg-white/95 backdrop-blur-sm">
+      <div className="site-container flex h-(--nav-height) items-center justify-between gap-6">
+        <Logo href="/" />
+        <nav aria-label="Main" className="hidden items-center gap-12 font-medium min-[961px]:flex">
           {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="py-2 text-sm font-medium text-slate-600 transition-colors hover:text-navy"
+              className="flex min-h-10 items-center rounded-sm transition-colors hover:text-ink"
             >
               {link.label}
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-2 min-[641px]:gap-6">
           <Link
             href="/login"
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "hidden h-10 px-3 lg:h-9 text-sm text-slate-700 sm:inline-flex",
-            )}
+            className="hidden min-h-10 items-center rounded-sm font-medium transition-colors hover:text-ink min-[641px]:flex"
           >
             Sign In
           </Link>
-          <Link
-            href="/signup"
-            className={cn(
-              buttonVariants(),
-              "hidden h-10 px-4 text-sm min-[360px]:inline-flex lg:h-9",
-            )}
-          >
+          <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "max-[420px]:hidden")}>
             Get Started
           </Link>
           <MobileNav links={links} />

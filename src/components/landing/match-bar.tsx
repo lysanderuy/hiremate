@@ -2,45 +2,57 @@ import { cn } from "@/lib/utils";
 
 type MatchBarProps = {
   label: string;
-  value: number;
-  indicatorClassName: string;
-  inline?: boolean;
+  valueLabel: string;
+  percent: number;
+  tone?: "primary" | "strong";
+  help?: string;
 };
 
-export function MatchBar({ label, value, indicatorClassName, inline = false }: MatchBarProps) {
-  const track = (
-    <div
-      role="progressbar"
-      aria-label={label}
-      aria-valuenow={value}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100"
-    >
-      <div
-        className={cn("h-full rounded-full", indicatorClassName)}
-        style={{ width: `${value}%` }}
-      />
+export function MatchBar({ label, valueLabel, percent, tone = "primary", help }: MatchBarProps) {
+  return (
+    <div className="grid gap-1.5">
+      <div className="flex justify-between text-sm">
+        <span>{label}</span>
+        <b className="font-semibold text-ink">{valueLabel}</b>
+      </div>
+      <div aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-weak-soft">
+        <span
+          className={cn(
+            "block h-full rounded-full",
+            tone === "strong" ? "bg-strong" : "bg-primary",
+          )}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      {help && <small className="text-xs text-muted-foreground">{help}</small>}
     </div>
   );
+}
 
-  if (inline) {
-    return (
-      <div className="flex items-center gap-3 text-xs">
-        <span className="w-16 shrink-0 sm:w-20 text-slate-500">{label}</span>
-        {track}
-        <span className="w-8 shrink-0 text-right font-medium text-navy">{value}%</span>
-      </div>
-    );
-  }
-
+export function SkillChip({ children, missing = false }: { children: string; missing?: boolean }) {
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-navy">{label}</span>
-        <span className="font-medium text-navy">{value}%</span>
-      </div>
-      <div className="flex">{track}</div>
+    <span
+      className={cn(
+        "inline-flex h-7 items-center rounded-full px-3 text-chip font-medium",
+        missing
+          ? "border border-dashed border-line-dashed bg-surface text-muted-foreground"
+          : "bg-primary-soft text-primary",
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function MissingSkills({ skills }: { skills: string[] }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-muted-foreground">
+      Missing
+      {skills.map((skill) => (
+        <SkillChip key={skill} missing>
+          {skill}
+        </SkillChip>
+      ))}
     </div>
   );
 }
