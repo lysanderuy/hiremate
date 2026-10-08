@@ -19,7 +19,7 @@ import {
 import type { SkillResponse } from "@/validators/skill.validator";
 
 const LISTINGS_PATH = "/dashboard/recruiter/listings";
-const SETTINGS_PATH = "/dashboard/recruiter/settings";
+const PROFILE_PATH = "/dashboard/recruiter/profile";
 const MAX_DESCRIPTION = 10000;
 const MIN_DESCRIPTION = 50;
 
@@ -83,7 +83,7 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
 
   const isRemoved = mode === "edit" && listing?.status === "removed";
   const pending = createListing.isPending || updateListing.isPending;
-  const needsCompany = apiMessage?.includes("company name in Settings") ?? false;
+  const needsCompany = apiMessage?.includes("company name in Profile") ?? false;
   const descriptionLength = description.trim().length;
 
   function handleSuccess() {
@@ -289,8 +289,8 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
           {needsCompany && (
             <>
               {" "}
-              <Link href={SETTINGS_PATH} className="font-medium underline">
-                Go to Settings
+              <Link href={PROFILE_PATH} className="font-medium underline">
+                Go to Profile
               </Link>
             </>
           )}

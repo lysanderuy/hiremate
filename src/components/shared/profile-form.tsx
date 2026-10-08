@@ -4,7 +4,10 @@ import { useState } from "react";
 
 import { FieldLabel } from "@/components/shared/field-label";
 import { Button } from "@/components/ui/button";
+import { useCompany } from "@/hooks/use-company";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
+import { useUpdateCompany } from "@/hooks/use-update-company";
+import { updateCompanySchema } from "@/validators/company.validator";
 import { updateProfileSchema } from "@/validators/profile.validator";
 
 const fieldClassName =
@@ -12,41 +15,83 @@ const fieldClassName =
 
 export function ProfileForm() {
   const profile = useProfile();
+  const company = useCompany();
 
-  if (profile.isPending) return <p className="text-sm text-muted-foreground">Loading...</p>;
+  if (profile.isPending || company.isPending) {
+    return <p className="text-sm text-muted-foreground">Loading...</p>;
+  }
 
-  if (profile.error || !profile.data) {
+  const error = profile.error ?? company.error;
+  if (error || !profile.data) {
     return (
       <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-        {profile.error?.message ?? "Profile not found."}
+        {error?.message ?? "Profile not found."}
       </p>
     );
   }
 
   const { displayName, email, jobTitle } = profile.data;
-  return <ProfileFields initialName={displayName ?? ""} email={email} jobTitle={jobTitle ?? ""} />;
+  return (
+    <ProfileFields
+      initialName={displayName ?? ""}
+      email={email}
+      jobTitle={jobTitle ?? ""}
+      initialCompany={company.data?.name ?? ""}
+    />
+  );
 }
 
-type ProfileFieldsProps = { initialName: string; email: string; jobTitle: string };
+type ProfileFieldsProps = {
+  initialName: string;
+  email: string;
+  jobTitle: string;
+  initialCompany: string;
+};
 
-function ProfileFields({ initialName, email, jobTitle }: ProfileFieldsProps) {
+function ProfileFields({ initialName, email, jobTitle, initialCompany }: ProfileFieldsProps) {
   const updateProfile = useUpdateProfile();
+  const updateCompany = useUpdateCompany();
   const [displayName, setDisplayName] = useState(initialName);
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState(initialCompany);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [companyError, setCompanyError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const nameChanged = displayName !== initialName;
+  const companyChanged = companyName !== initialCompany;
+  const pending = updateProfile.isPending || updateCompany.isPending;
+  const saveError = updateProfile.error ?? updateCompany.error;
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaved(false);
 
-    const parsed = updateProfileSchema.safeParse({ displayName });
-    if (!parsed.success) {
-      setFieldError("Enter a display name of 2 to 80 characters.");
-      return;
-    }
+    const parsedProfile = nameChanged ? updateProfileSchema.safeParse({ displayName }) : null;
+    const parsedCompany = companyChanged
+      ? updateCompanySchema.safeParse({ name: companyName })
+      : null;
 
-    setFieldError(null);
-    updateProfile.mutate(parsed.data, { onSuccess: () => setSaved(true) });
+    setNameError(
+      parsedProfile && !parsedProfile.success
+        ? "Enter a display name of 2 to 80 characters."
+        : null,
+    );
+    setCompanyError(
+      parsedCompany && !parsedCompany.success
+        ? "Enter a company name of 2 to 120 characters."
+        : null,
+    );
+    if (parsedProfile?.success === false || parsedCompany?.success === false) return;
+
+    try {
+      await Promise.all([
+        parsedProfile?.success ? updateProfile.mutateAsync(parsedProfile.data) : null,
+        parsedCompany?.success ? updateCompany.mutateAsync(parsedCompany.data) : null,
+      ]);
+      setSaved(true);
+    } catch {
+      // surfaced via the mutation error state
+    }
   }
 
   return (
@@ -66,13 +111,13 @@ function ProfileFields({ initialName, email, jobTitle }: ProfileFieldsProps) {
           maxLength={80}
           placeholder="Enter your display name"
           autoComplete="name"
-          aria-invalid={Boolean(fieldError)}
-          aria-describedby={fieldError ? "display-name-error" : undefined}
+          aria-invalid={Boolean(nameError)}
+          aria-describedby={nameError ? "display-name-error" : undefined}
           className={fieldClassName}
         />
-        {fieldError && (
+        {nameError && (
           <p id="display-name-error" role="alert" className="text-sm text-red-600">
-            {fieldError}
+            {nameError}
           </p>
         )}
       </div>
@@ -91,9 +136,35 @@ function ProfileFields({ initialName, email, jobTitle }: ProfileFieldsProps) {
         <input id="profile-job-title" value={jobTitle} readOnly className={fieldClassName} />
       </div>
 
-      {updateProfile.error && (
+      <div className="space-y-2">
+        <FieldLabel htmlFor="company-name" required>
+          Company name
+        </FieldLabel>
+        <input
+          id="company-name"
+          name="companyName"
+          value={companyName}
+          onChange={(event) => {
+            setCompanyName(event.target.value);
+            setSaved(false);
+          }}
+          maxLength={120}
+          placeholder="Enter your company name"
+          autoComplete="organization"
+          aria-invalid={Boolean(companyError)}
+          aria-describedby={companyError ? "company-name-error" : undefined}
+          className={fieldClassName}
+        />
+        {companyError && (
+          <p id="company-name-error" role="alert" className="text-sm text-red-600">
+            {companyError}
+          </p>
+        )}
+      </div>
+
+      {saveError && (
         <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-          {updateProfile.error.message}
+          {saveError.message}
         </p>
       )}
 
@@ -106,10 +177,10 @@ function ProfileFields({ initialName, email, jobTitle }: ProfileFieldsProps) {
         <Button
           type="submit"
           size="lg"
-          disabled={updateProfile.isPending}
+          disabled={pending || (!nameChanged && !companyChanged)}
           className="h-11 px-5 text-base"
         >
-          {updateProfile.isPending ? "Saving..." : "Save"}
+          {pending ? "Saving..." : "Save"}
         </Button>
       </div>
     </form>

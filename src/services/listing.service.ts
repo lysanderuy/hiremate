@@ -74,7 +74,7 @@ export const listingService = {
       where: eq(companies.ownerId, userId),
     });
     if (!company) {
-      throw new HttpError("Add your company name in Settings before posting a listing.", 409);
+      throw new HttpError("Add your company name in Profile before posting a listing.", 409);
     }
 
     const { skillIds, ...fields } = input;

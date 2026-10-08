@@ -10,7 +10,6 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
-  Settings,
   Sparkles,
   User,
   Users,
@@ -37,7 +36,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: `${BASE}/listings`, label: "Listings", icon: Briefcase },
   { href: `${BASE}/candidates`, label: "Candidates", icon: Users },
   { href: `${BASE}/profile`, label: "Profile", icon: User },
-  { href: `${BASE}/settings`, label: "Settings", icon: Settings },
 ];
 
 const ITEM_CLASS =
