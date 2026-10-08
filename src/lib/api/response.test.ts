@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ZodError, z } from "zod";
 
+import { HttpError } from "./errors";
 import { apiError, apiSuccess, handleApiError } from "./response";
 
 describe("apiSuccess", () => {
@@ -35,6 +36,24 @@ describe("handleApiError", () => {
     const body = await response.json();
     expect(body.success).toBe(false);
     expect(body.error).toContain("displayName");
+  });
+
+  it("returns the HttpError message and status", async () => {
+    const response = handleApiError(new HttpError("Listing not found", 404));
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({
+      success: false,
+      error: "Listing not found",
+    });
+  });
+
+  it("returns a 400 for a malformed JSON body", async () => {
+    const response = handleApiError(new SyntaxError("Unexpected end of JSON input"));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      success: false,
+      error: "Invalid JSON body",
+    });
   });
 
   it("falls back to a 500 for unknown errors", async () => {
