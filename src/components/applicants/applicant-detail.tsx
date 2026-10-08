@@ -82,7 +82,7 @@ function SkillGroup({
 
 function ScoreCard({ application }: { application: ApplicationDetailResponse }) {
   const { matchScore } = application;
-  const band = matchScore === null ? null : getMatchBand(matchScore, application.band);
+  const band = matchScore === null ? null : getMatchBand(matchScore);
   const matched = application.skillsMatched.length;
   const total = matched + application.skillsMissing.length;
   const firstName = application.applicantName?.trim().split(/\s+/)[0] ?? "This applicant";

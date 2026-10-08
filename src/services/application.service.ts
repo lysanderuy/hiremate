@@ -91,6 +91,12 @@ function orderBy(sort: ListApplicationsQuery["sort"]) {
   return [sql`${applications.matchScore} desc nulls last`, desc(applications.createdAt)];
 }
 
+const bandScoreRange = {
+  strong: sql`${applications.matchScore} >= 70`,
+  fair: sql`${applications.matchScore} between 40 and 69`,
+  weak: sql`${applications.matchScore} <= 39`,
+};
+
 function notFound(): HttpError {
   return new HttpError("Application not found", 404);
 }
@@ -112,7 +118,7 @@ export const applicationService = {
     const baseConditions = [
       eq(applications.jobId, listingId),
       pattern ? ilike(profiles.displayName, pattern) : undefined,
-      band ? eq(applications.band, band) : undefined,
+      band ? bandScoreRange[band] : undefined,
     ];
 
     const [rows, countRows] = await Promise.all([

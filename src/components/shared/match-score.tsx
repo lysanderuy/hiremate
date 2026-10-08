@@ -14,25 +14,16 @@ export const BAND_TEXT: Record<MatchBand, string> = {
   weak: "text-weak",
 };
 
-export function getMatchBand(score: number, storedBand?: MatchBand | null): MatchBand {
-  if (storedBand) return storedBand;
+export function getMatchBand(score: number): MatchBand {
   if (score >= 70) return "strong";
   if (score >= 40) return "fair";
   return "weak";
 }
 
-export function ScoreCell({
-  score,
-  band: storedBand,
-  className,
-}: {
-  score: number | null;
-  band?: MatchBand | null;
-  className?: string;
-}) {
+export function ScoreCell({ score, className }: { score: number | null; className?: string }) {
   if (score === null) return <span className="text-muted-foreground">Not scored</span>;
 
-  const band = getMatchBand(score, storedBand);
+  const band = getMatchBand(score);
   return (
     <span className={cn("inline-flex items-center gap-2 whitespace-nowrap", className)}>
       <span className="flex items-baseline">

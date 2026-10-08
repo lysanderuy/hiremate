@@ -168,7 +168,7 @@ function ApplicantRow({
         </div>
       </Td>
       <Td className="whitespace-nowrap">
-        <ScoreCell score={application.matchScore} band={application.band} />
+        <ScoreCell score={application.matchScore} />
       </Td>
       <Td className="max-sm:hidden">
         <MissingSkills skills={application.skillsMissing} />
