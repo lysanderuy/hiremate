@@ -6,8 +6,9 @@ import { ACCOUNT_STATUSES, APP_ROLES } from "@/types/roles";
 export const updateProfileSchema = z.object({
   displayName: z
     .string()
-    .min(1)
-    .max(100)
+    .trim()
+    .min(2)
+    .max(80)
     .optional()
     .meta({ description: "Display name shown throughout the app.", example: "Jane Doe" }),
 });
