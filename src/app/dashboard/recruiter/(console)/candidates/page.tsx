@@ -1,16 +1,31 @@
-import { Users } from "lucide-react";
+import { Suspense } from "react";
 
-import { PagePlaceholder } from "@/components/shared/page-placeholder";
+import { CandidatesView } from "@/components/candidates/candidates-view";
 import { requireActiveRecruiter } from "@/lib/auth/require-role";
+import { listingIdSchema } from "@/validators/listing.validator";
 
-export default async function RecruiterCandidatesPage() {
+type RecruiterCandidatesPageProps = {
+  searchParams: Promise<{ listing?: string }>;
+};
+
+export default async function RecruiterCandidatesPage({
+  searchParams,
+}: RecruiterCandidatesPageProps) {
   await requireActiveRecruiter();
+  const { listing } = await searchParams;
+  const parsed = listingIdSchema.safeParse(listing);
 
   return (
-    <PagePlaceholder
-      icon={Users}
-      title="Candidates"
-      description="Ranked applicants for your listings will appear here."
-    />
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight text-navy">Candidates</h1>
+        <p className="text-sm text-muted-foreground">
+          Review and rank applicants for each listing.
+        </p>
+      </div>
+      <Suspense fallback={null}>
+        <CandidatesView initialListingId={parsed.success ? parsed.data : undefined} />
+      </Suspense>
+    </div>
   );
 }
