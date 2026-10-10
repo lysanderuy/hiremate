@@ -122,13 +122,13 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 
 **Sounds like / does not**
 
-| Sounds like                                                               | Does not sound like                     |
-| ------------------------------------------------------------------------- | --------------------------------------- |
-| Strong match. You have 6 of 8 skills this job asks for.                   | Unlock your dream career with AI magic! |
-| Missing: Docker, AWS.                                                     | You are not qualified.                  |
-| 12 applicants. Top match: 84.                                             | Revolutionary candidate intelligence.   |
-| Your resume could not be read. Upload a text-based PDF or paste the text. | Oops! Something went wrong.             |
-| Save your resume                                                          | Supercharge your profile                |
+| Sounds like                                             | Does not sound like                     |
+| ------------------------------------------------------- | --------------------------------------- |
+| Strong match. You have 6 of 8 skills this job asks for. | Unlock your dream career with AI magic! |
+| Missing: Docker, AWS.                                   | You are not qualified.                  |
+| 12 applicants. Top match: 84.                           | Revolutionary candidate intelligence.   |
+| Your resume could not be read. Upload a text-based PDF. | Oops! Something went wrong.             |
+| Save your resume                                        | Supercharge your profile                |
 
 **Word choices**
 

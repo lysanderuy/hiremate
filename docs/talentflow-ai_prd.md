@@ -13,7 +13,7 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 | Administrator     | A platform owner. Approves recruiters, manages users, moderates listings, manages the skills list, reads platform reports.                                                        |
 | Company           | The employer a recruiter posts for. One company per recruiter in the MVP. Name only.                                                                                              |
 | Listing           | A job posting made by a recruiter.                                                                                                                                                |
-| Resume            | The applicant's text resume. One per applicant. Plain text is the source of truth.                                                                                                |
+| Resume            | The applicant's PDF resume, kept as extracted text. One per applicant. The extracted text is the source of truth.                                                                 |
 | Application       | An applicant's submission to one listing. Carries a snapshot of the resume.                                                                                                       |
 | Snapshot          | The copy of the resume text kept with an application at the moment it was submitted.                                                                                              |
 | Match score       | A whole number from 0 to 100 showing how well one resume fits one listing. A ranking aid, not a verdict.                                                                          |
@@ -62,7 +62,7 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 
 **Primary**
 
-- **Applicant.** Applies to several roles. Wants to know their fit before applying and what is missing. Brings a text resume or a text-based PDF. Success: sends fewer, better applications.
+- **Applicant.** Applies to several roles. Wants to know their fit before applying and what is missing. Brings a text-based PDF resume. Success: sends fewer, better applications.
 - **Recruiter.** Hires for open roles and gets many applications per listing. Wants the best fits first, with a reason for each. Success: shortlists faster from ranked applicants.
 
 **Secondary**
@@ -110,15 +110,15 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 
 **Resume** (one per applicant)
 
-| Field            | Rules                                           |
-| ---------------- | ----------------------------------------------- |
-| id               | unique                                          |
-| applicant        | the Applicant user, one resume per applicant    |
-| text             | required, 200 to 200,000 characters, plain text |
-| source           | Pasted, Text file, PDF. Information only.       |
-| processing_state | Processing, Ready, Failed                       |
-| skills           | derived from the text. Not editable in the MVP. |
-| updated_at       | timestamp                                       |
+| Field            | Rules                                                  |
+| ---------------- | ------------------------------------------------------ |
+| id               | unique                                                 |
+| applicant        | the Applicant user, one resume per applicant           |
+| text             | required, 200 to 200,000 characters, read from the PDF |
+| source           | PDF. Information only.                                 |
+| processing_state | Processing, Ready, Failed                              |
+| skills           | derived from the text. Not editable in the MVP.        |
+| updated_at       | timestamp                                              |
 
 **Application**
 
@@ -209,22 +209,21 @@ Acceptance criteria:
 ### FL-04 Add or replace a resume
 
 1. Applicant opens My resume.
-2. Chooses one input: paste text, upload a .txt file, or upload a PDF.
-3. The system shows the text for review in an editable box. For a PDF, this is the text read from the file.
-4. Applicant edits if needed and presses Save resume.
-5. The resume is Processing, then Ready.
+2. Chooses a PDF file to upload.
+3. The system reads the text from the PDF on the server.
+4. The resume is Processing, then Ready.
 
 Acceptance criteria:
 
-- [ ] Pasted or edited text must be 200 to 200,000 characters. Otherwise Save is blocked with "A resume needs at least 200 characters." or "This resume is too long."
-- [ ] A .txt file must be UTF-8 and at most 200 KB. A larger file shows "Text files can be up to 200 KB."
-- [ ] A PDF must be at most 4 MB and contain selectable text. A scanned PDF shows "We could not read text from this file. Paste your text or upload a text-based PDF."
-- [ ] Other file types are rejected with "Upload a .txt or .pdf file."
+- [ ] The file must be a PDF of at most 4 MB with selectable text. Other file types are rejected with "Upload a PDF file."
+- [ ] A larger PDF shows "PDF files can be up to 4 MB."
+- [ ] A scanned PDF, or one with fewer than 200 readable characters, shows "We could not read text from this file. Upload a text-based PDF."
+- [ ] The text read from the PDF must be 200 to 200,000 characters. Otherwise the upload is rejected with "A resume needs at least 200 characters." or "This resume is too long."
 - [ ] The uploaded PDF file itself is not stored. Only the text is.
-- [ ] Nothing is saved until the applicant presses Save resume.
-- [ ] Saving a new resume replaces the old one. The Applicant never has more than one.
+- [ ] The resume is saved as soon as the PDF is read. There is no text box to edit.
+- [ ] Uploading a new PDF replaces the old resume. The Applicant never has more than one.
 - [ ] After saving, processing_state is Processing and then Ready, within 10 seconds for a typical resume.
-- [ ] If processing fails, the state is Failed and the page shows "We could not process your resume. Try saving again." with a Retry button.
+- [ ] If processing fails, the state is Failed and the page shows "We could not process your resume. Try again." with a Retry button.
 - [ ] Existing applications keep their snapshot and are not changed.
 
 ### FL-05 Browse and search listings
@@ -433,8 +432,8 @@ Acceptance criteria:
 
 ### 6.2 Resume handling
 
-- Inputs: pasted text, .txt (UTF-8, up to 200 KB), PDF (up to 4 MB, text-based).
-- PDF reading takes the text only and keeps reading order as best it can. Columns and tables can come out jumbled, which is why the text is shown for review and editing before saving.
+- Inputs: PDF (up to 4 MB, text-based).
+- PDF reading takes the text only and keeps reading order as best it can. Columns and tables can come out jumbled, and that text is what gets scored and shown to recruiters.
 - A PDF with fewer than 200 readable characters is treated as scanned and rejected.
 - Only the final text is stored. Original files are not stored.
 - One resume per applicant. A new save replaces the old one.
