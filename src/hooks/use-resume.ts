@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
-import type { ResumeResponse, SaveResumeInput } from "@/validators/resume.validator";
+import type { ResumeResponse } from "@/validators/resume.validator";
 
 import { applicantDashboardKeys } from "./use-applicant-dashboard";
 import { myApplicationKeys } from "./use-my-applications";
@@ -27,15 +27,6 @@ export function useResume() {
   return useQuery({
     queryKey: resumeKeys.me,
     queryFn: () => api.get<ResumeResponse | null>("/api/resumes/me"),
-  });
-}
-
-export function useSaveResume() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (input: SaveResumeInput) => api.put<ResumeResponse>("/api/resumes/me", input),
-    onSuccess: (data) => syncAfterResumeChange(queryClient, data),
   });
 }
 

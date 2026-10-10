@@ -84,7 +84,6 @@ export function JobDetail({ id }: { id: string }) {
     );
   }
 
-  const resumeHref = `${RESUME_PATH}?return=jobs/${listing.id}`;
   const resumeFailed = resume?.state === "failed";
 
   function openConfirm() {
@@ -117,7 +116,7 @@ export function JobDetail({ id }: { id: string }) {
     matchFallback = (
       <>
         <p className="font-medium text-ink">Add a resume to see your match score.</p>
-        <Link href={resumeHref} className={`${buttonVariants({ size: "sm" })} mt-4`}>
+        <Link href={RESUME_PATH} className={`${buttonVariants({ size: "sm" })} mt-4`}>
           Add resume
         </Link>
       </>
@@ -125,7 +124,7 @@ export function JobDetail({ id }: { id: string }) {
   } else if (listing.matchStatus === "resume_not_ready") {
     matchFallback = resumeFailed ? (
       <>
-        <p className="font-medium text-ink">We could not process your resume. Try saving again.</p>
+        <p className="font-medium text-ink">We could not process your resume. Try again.</p>
         <Link
           href={RESUME_PATH}
           className={`${buttonVariants({ variant: "outline", size: "sm" })} mt-4`}
@@ -185,7 +184,7 @@ export function JobDetail({ id }: { id: string }) {
   } else if (listing.matchStatus === "no_resume") {
     applyBlock = (
       <>
-        <Link href={resumeHref} className={`${buttonVariants()} w-full`}>
+        <Link href={RESUME_PATH} className={`${buttonVariants()} w-full`}>
           Apply
         </Link>
         <span className="text-xs text-muted-foreground">
@@ -201,7 +200,7 @@ export function JobDetail({ id }: { id: string }) {
         </Button>
         <span className="text-xs text-muted-foreground">
           {resumeFailed
-            ? "Save your resume again to apply."
+            ? "Retry processing your resume to apply."
             : "Apply opens when your resume is ready."}
         </span>
       </>

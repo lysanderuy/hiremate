@@ -202,7 +202,7 @@ function ResumeBanner({ resume, onRefresh }: { resume: ResumeSummary; onRefresh:
           </Link>
         }
       >
-        We could not process your resume. Try saving again.
+        We could not process your resume. Try again.
       </ResumeCallout>
     );
   }
@@ -218,11 +218,11 @@ function YourResume({ data }: { data: ApplicantDashboardResponse | undefined }) 
   if (!data) {
     body = <SectionMessage message="Loading resume..." bordered={false} />;
   } else if (state === null) {
-    body = <p>No resume yet. Paste your text or upload a .txt or text-based PDF file.</p>;
+    body = <p>No resume yet. PDF upload is coming soon.</p>;
   } else if (state === "processing") {
     body = <p>Finding skills in your resume.</p>;
   } else if (state === "failed") {
-    body = <p>We could not read this resume. Save it again to find your skills.</p>;
+    body = <p>We could not read this resume. Try again to find your skills.</p>;
   } else {
     body = (
       <>
