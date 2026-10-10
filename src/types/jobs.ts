@@ -8,3 +8,7 @@ export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
   contract: "Contract",
   internship: "Internship",
 };
+
+export const JOB_STATUSES = ["open", "closed", "removed"] as const;
+
+export type JobStatus = (typeof JOB_STATUSES)[number];

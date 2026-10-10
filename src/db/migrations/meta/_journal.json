@@ -43,6 +43,13 @@
       "when": 1791433422149,
       "tag": "0005_recruiter-prereqs-rls-trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791604716377,
+      "tag": "0006_crazy_marvel_boy",
+      "breakpoints": true
     }
   ]
 }

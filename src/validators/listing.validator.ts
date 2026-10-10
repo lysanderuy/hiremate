@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { EMPLOYMENT_TYPES } from "@/types/jobs";
+import { EMPLOYMENT_TYPES, JOB_STATUSES } from "@/types/jobs";
 
 import { skillResponseSchema } from "./skill.validator";
 
@@ -134,7 +134,7 @@ export const listingResponseSchema = z
       .int()
       .nullable()
       .meta({ description: "Maximum salary, if disclosed.", example: 60000 }),
-    status: z.enum(["open", "closed", "removed"]).meta({
+    status: z.enum(JOB_STATUSES).meta({
       description: "Listing status. Removed listings were taken down by an administrator.",
       example: "open",
     }),

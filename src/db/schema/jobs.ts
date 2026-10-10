@@ -10,10 +10,12 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { JOB_STATUSES } from "@/types/jobs";
+
 import { companies } from "./companies";
 import { profiles } from "./profiles";
 
-export const jobStatus = pgEnum("job_status", ["open", "closed", "removed"]);
+export const jobStatus = pgEnum("job_status", JOB_STATUSES);
 
 export const jobs = pgTable(
   "jobs",
