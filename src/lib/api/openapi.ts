@@ -301,6 +301,29 @@ export const openApiDocument = createDocument({
         },
       },
     },
+    "/api/resumes/me/pdf": {
+      post: {
+        summary:
+          "Upload a text-based PDF resume, replacing any existing one. The PDF is not stored.",
+        requestBody: {
+          content: {
+            "multipart/form-data": {
+              schema: z.object({
+                file: z
+                  .string()
+                  .meta({ description: "PDF file, up to 4 MB and 30 pages.", format: "binary" }),
+              }),
+            },
+          },
+        },
+        responses: {
+          "200": successResponse("Resume saved successfully.", resumeResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "422": errorResponse("Not a PDF, too large, or no readable text."),
+        },
+      },
+    },
     "/api/listings/open": {
       get: {
         summary: "Browse open listings, with the applicant's match and application for each",

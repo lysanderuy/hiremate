@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { HttpError } from "@/lib/api/errors";
@@ -65,9 +65,13 @@ export const resumeService = {
     const [row] = await db
       .update(resumes)
       .set({ state, skills, updatedAt: new Date() })
-      .where(eq(resumes.applicantId, userId))
+      .where(and(eq(resumes.applicantId, userId), eq(resumes.text, existing.text)))
       .returning();
 
-    return toResponse(row);
+    if (row) return toResponse(row);
+
+    // The resume was replaced while skills were being extracted; keep the newer one.
+    const [current] = await db.select().from(resumes).where(eq(resumes.applicantId, userId));
+    return toResponse(current ?? existing);
   },
 };
