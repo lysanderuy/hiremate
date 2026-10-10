@@ -1,7 +1,9 @@
 import { z } from "zod";
 
-import { APPLICATION_STATUSES } from "@/types/applications";
-import { applicationIdSchema } from "@/validators/application.validator";
+import { APPLICANT_APPLICATION_STATUSES, APPLICATION_STATUSES } from "@/types/applications";
+import { APPLICATION_BANDS, applicationIdSchema } from "@/validators/application.validator";
+import { matchSummarySchema, openListingIdSchema } from "@/validators/open-listing.validator";
+import { resumeSourceSchema, resumeStateSchema } from "@/validators/resume.validator";
 
 const statField = (description: string, example: number) =>
   z.number().int().min(0).meta({ description, example });
@@ -52,3 +54,75 @@ export const dashboardResponseSchema = z
 
 export type RecentApplicationResponse = z.infer<typeof recentApplicationSchema>;
 export type DashboardResponse = z.infer<typeof dashboardResponseSchema>;
+
+export const applicantDashboardResponseSchema = z
+  .object({
+    resume: z.object({
+      state: resumeStateSchema.nullable().meta({
+        description: "Resume state, or null when the applicant has no resume.",
+        example: "ready",
+      }),
+      source: resumeSourceSchema.nullable().meta({
+        description: "How the resume was provided, or null when there is none.",
+        example: "pasted",
+      }),
+      skillCount: statField("Skills found in the resume.", 12),
+      updatedAt: z.string().datetime().nullable().meta({
+        description: "Timestamp the resume was last saved, or null when there is none.",
+        example: "2026-10-06T09:30:00.000Z",
+      }),
+    }),
+    applications: z.object({
+      total: statField("All of the applicant's applications.", 9),
+      shortlisted: statField("Applications shortlisted, including interviews.", 2),
+      waiting: statField("Applications submitted and not yet viewed.", 3),
+    }),
+    recent: z
+      .array(
+        z.object({
+          id: applicationIdSchema,
+          jobTitle: z.string().meta({
+            description: "Title of the listing applied to.",
+            example: "Senior Frontend Engineer",
+          }),
+          companyName: z.string().meta({ description: "Company name.", example: "Acme Corp" }),
+          status: z.enum(APPLICANT_APPLICATION_STATUSES).meta({
+            description: "Application status. Interviews are reported as shortlisted.",
+            example: "submitted",
+          }),
+          matchScore: z.number().int().nullable().meta({
+            description: "Match score from 0 to 100, or null if not scored.",
+            example: 82,
+          }),
+          band: z.enum(APPLICATION_BANDS).nullable().meta({
+            description: "Match band, or null if not scored.",
+            example: "strong",
+          }),
+          createdAt: z.string().datetime().meta({
+            description: "Timestamp the application was submitted.",
+            example: "2026-10-06T09:30:00.000Z",
+          }),
+        }),
+      )
+      .meta({ description: "The applicant's four most recent applications." }),
+    bestMatches: z
+      .array(
+        z.object({
+          id: openListingIdSchema,
+          title: z.string().meta({
+            description: "Listing title.",
+            example: "Senior Frontend Engineer",
+          }),
+          companyName: z.string().meta({ description: "Company name.", example: "Acme Corp" }),
+          location: z.string().meta({ description: "Where the role is based.", example: "Manila" }),
+          match: matchSummarySchema,
+        }),
+      )
+      .meta({
+        description:
+          "Up to three open listings the applicant has not applied to, best match first. Empty unless the resume is ready.",
+      }),
+  })
+  .meta({ id: "ApplicantDashboard", description: "Summary figures for the applicant dashboard." });
+
+export type ApplicantDashboardResponse = z.infer<typeof applicantDashboardResponseSchema>;
