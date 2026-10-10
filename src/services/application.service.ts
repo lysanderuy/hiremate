@@ -1,16 +1,33 @@
 import "server-only";
 
-import { and, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/db";
-import { applications, jobs, profiles, type Application } from "@/db/schema";
+import {
+  applications,
+  companies,
+  jobSkills,
+  jobs,
+  profiles,
+  resumes,
+  skills,
+  type Application,
+} from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
+import { scoreMatch } from "@/lib/matching/score";
+import { toApplicantStatus, type ApplicantApplicationStatus } from "@/types/applications";
+import type { EmploymentType } from "@/types/jobs";
 import type {
   ApplicationDetailResponse,
   ApplicationListResponse,
   ApplicationSummaryResponse,
+  ApplyToListingInput,
   ListApplicationsQuery,
+  ListMyApplicationsQuery,
+  MyApplicationDetailResponse,
+  MyApplicationListResponse,
+  MyApplicationSummaryResponse,
   UpdateApplicationStatusInput,
 } from "@/validators/application.validator";
 
@@ -96,6 +113,85 @@ const bandScoreRange = {
   fair: sql`${applications.matchScore} between 40 and 69`,
   weak: sql`${applications.matchScore} <= 39`,
 };
+
+const mineSummaryColumns = {
+  id: applications.id,
+  jobId: applications.jobId,
+  jobTitle: jobs.title,
+  companyName: companies.name,
+  location: jobs.location,
+  employmentType: jobs.employmentType,
+  jobStatus: jobs.status,
+  status: applications.status,
+  matchScore: applications.matchScore,
+  band: applications.band,
+  createdAt: applications.createdAt,
+  statusChangedAt: applications.statusChangedAt,
+};
+
+const mineDetailColumns = {
+  ...mineSummaryColumns,
+  resumeSnapshot: applications.resumeSnapshot,
+  skillsMatched: applications.skillsMatched,
+  skillsMissing: applications.skillsMissing,
+  viewedAt: applications.viewedAt,
+};
+
+type MineSummaryRow = Pick<
+  Application,
+  "id" | "jobId" | "status" | "matchScore" | "band" | "createdAt" | "statusChangedAt"
+> & {
+  jobTitle: string;
+  companyName: string;
+  location: string;
+  employmentType: string;
+  jobStatus: MyApplicationSummaryResponse["jobStatus"];
+};
+type MineDetailRow = MineSummaryRow &
+  Pick<Application, "resumeSnapshot" | "skillsMatched" | "skillsMissing" | "viewedAt">;
+
+const WITHDRAWABLE_STATUSES: Application["status"][] = [
+  "submitted",
+  "viewed",
+  "shortlisted",
+  "interview",
+];
+
+function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
+  return {
+    id: row.id,
+    jobId: row.jobId,
+    jobTitle: row.jobTitle,
+    companyName: row.companyName,
+    location: row.location,
+    employmentType: row.employmentType as EmploymentType,
+    jobStatus: row.jobStatus,
+    status: toApplicantStatus(row.status),
+    matchScore: row.matchScore,
+    band: row.band,
+    createdAt: row.createdAt.toISOString(),
+    statusChangedAt: row.statusChangedAt.toISOString(),
+  };
+}
+
+function toMineDetail(row: MineDetailRow): MyApplicationDetailResponse {
+  return {
+    ...toMineSummary(row),
+    resumeSnapshot: row.resumeSnapshot,
+    skillsMatched: row.skillsMatched,
+    skillsMissing: row.skillsMissing,
+    viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
+  };
+}
+
+function selectMine(executor: Pick<typeof db, "select">, userId: string, id: string) {
+  return executor
+    .select(mineDetailColumns)
+    .from(applications)
+    .innerJoin(jobs, eq(jobs.id, applications.jobId))
+    .innerJoin(companies, eq(companies.id, jobs.companyId))
+    .where(and(eq(applications.id, id), eq(applications.applicantId, userId)));
+}
 
 function notFound(): HttpError {
   return new HttpError("Application not found", 404);
@@ -205,6 +301,126 @@ export const applicationService = {
         .where(eq(applications.id, id));
 
       return toDetail({ ...row, status, statusChangedAt: now, viewedAt });
+    });
+  },
+
+  async listMine(
+    userId: string,
+    { status }: ListMyApplicationsQuery,
+  ): Promise<MyApplicationListResponse> {
+    const statusCondition: SQL | undefined =
+      status === "shortlisted"
+        ? inArray(applications.status, ["shortlisted", "interview"])
+        : status
+          ? eq(applications.status, status)
+          : undefined;
+
+    const [rows, countRows] = await Promise.all([
+      db
+        .select(mineSummaryColumns)
+        .from(applications)
+        .innerJoin(jobs, eq(jobs.id, applications.jobId))
+        .innerJoin(companies, eq(companies.id, jobs.companyId))
+        .where(and(eq(applications.applicantId, userId), statusCondition))
+        .orderBy(desc(applications.createdAt), desc(applications.id)),
+      db
+        .select({ status: applications.status, total: count() })
+        .from(applications)
+        .where(eq(applications.applicantId, userId))
+        .groupBy(applications.status),
+    ]);
+
+    const counts: MyApplicationListResponse["counts"] = {
+      all: 0,
+      submitted: 0,
+      viewed: 0,
+      shortlisted: 0,
+      rejected: 0,
+      withdrawn: 0,
+    };
+    for (const row of countRows) {
+      const mapped: ApplicantApplicationStatus = toApplicantStatus(row.status);
+      counts[mapped] += row.total;
+      counts.all += row.total;
+    }
+
+    return { items: rows.map(toMineSummary), counts };
+  },
+
+  async getMine(userId: string, id: string): Promise<MyApplicationDetailResponse> {
+    const [row] = await selectMine(db, userId, id);
+    if (!row) throw notFound();
+    return toMineDetail(row);
+  },
+
+  async apply(
+    userId: string,
+    { listingId }: ApplyToListingInput,
+  ): Promise<MyApplicationDetailResponse> {
+    return db.transaction(async (tx) => {
+      const [job] = await tx
+        .select({ status: jobs.status })
+        .from(jobs)
+        .where(eq(jobs.id, listingId))
+        .for("share");
+      if (!job) throw new HttpError("Listing not found", 404);
+      if (job.status !== "open") throw new HttpError("This listing is no longer open.", 409);
+
+      const [resume] = await tx
+        .select({ text: resumes.text, state: resumes.state, skills: resumes.skills })
+        .from(resumes)
+        .where(eq(resumes.applicantId, userId));
+      if (!resume) throw new HttpError("Add your resume before applying.", 409);
+      if (resume.state !== "ready") {
+        throw new HttpError("Your resume is not ready. Save it again before applying.", 409);
+      }
+
+      const jobSkillRows = await tx
+        .select({ name: skills.name })
+        .from(jobSkills)
+        .innerJoin(skills, eq(skills.id, jobSkills.skillId))
+        .where(eq(jobSkills.jobId, listingId))
+        .orderBy(skills.name);
+      const result = scoreMatch(
+        resume.skills,
+        jobSkillRows.map((row) => row.name),
+      );
+
+      const [created] = await tx
+        .insert(applications)
+        .values({
+          jobId: listingId,
+          applicantId: userId,
+          resumeSnapshot: resume.text,
+          skillsMatched: result?.matched ?? [],
+          skillsMissing: result?.missing ?? [],
+          matchScore: result?.score ?? null,
+          band: result?.band ?? null,
+        })
+        .onConflictDoNothing({ target: [applications.jobId, applications.applicantId] })
+        .returning({ id: applications.id });
+      if (!created) throw new HttpError("You already applied to this listing.", 409);
+
+      const [row] = await selectMine(tx, userId, created.id);
+      return toMineDetail(row);
+    });
+  },
+
+  async withdraw(userId: string, id: string): Promise<MyApplicationDetailResponse> {
+    return db.transaction(async (tx) => {
+      const [row] = await selectMine(tx, userId, id).for("update", { of: applications });
+      if (!row) throw notFound();
+      if (!WITHDRAWABLE_STATUSES.includes(row.status)) {
+        throw new HttpError("This application can no longer be withdrawn.", 409);
+      }
+
+      const now = new Date();
+      await tx
+        .update(applications)
+        .set({ status: "withdrawn", statusChangedAt: now })
+        .where(eq(applications.id, id));
+
+      return toMineDetail({ ...row, status: "withdrawn", statusChangedAt: now });
     });
   },
 };

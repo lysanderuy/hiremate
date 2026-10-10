@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   applicationIdSchema,
+  applyToListingSchema,
   listApplicationsQuerySchema,
+  listMyApplicationsQuerySchema,
   updateApplicationStatusSchema,
 } from "./application.validator";
 
@@ -69,5 +71,31 @@ describe("updateApplicationStatusSchema", () => {
 
   it("requires a status", () => {
     expect(updateApplicationStatusSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+describe("listMyApplicationsQuerySchema", () => {
+  it("accepts applicant-facing statuses", () => {
+    for (const status of ["submitted", "viewed", "shortlisted", "rejected", "withdrawn"]) {
+      expect(listMyApplicationsQuerySchema.safeParse({ status }).success).toBe(true);
+    }
+  });
+
+  it("rejects interview, which is internal", () => {
+    expect(listMyApplicationsQuerySchema.safeParse({ status: "interview" }).success).toBe(false);
+  });
+
+  it("allows no status", () => {
+    expect(listMyApplicationsQuerySchema.safeParse({}).success).toBe(true);
+  });
+});
+
+describe("applyToListingSchema", () => {
+  it("requires a uuid listingId", () => {
+    expect(
+      applyToListingSchema.safeParse({ listingId: "7c1f2b0a-5d4e-4a63-9b8c-1e2d3f4a5b6c" }).success,
+    ).toBe(true);
+    expect(applyToListingSchema.safeParse({ listingId: "nope" }).success).toBe(false);
+    expect(applyToListingSchema.safeParse({}).success).toBe(false);
   });
 });

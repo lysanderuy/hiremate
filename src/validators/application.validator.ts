@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { APPLICATION_STATUSES } from "@/types/applications";
+import { APPLICANT_APPLICATION_STATUSES, APPLICATION_STATUSES } from "@/types/applications";
+import { EMPLOYMENT_TYPES, JOB_STATUSES } from "@/types/jobs";
 
 export const RECRUITER_SETTABLE_STATUSES = [
   "viewed",
@@ -144,3 +145,96 @@ export const applicationDetailResponseSchema = z
   .meta({ id: "ApplicationDetail", description: "A full application for recruiter review." });
 
 export type ApplicationDetailResponse = z.infer<typeof applicationDetailResponseSchema>;
+
+export const listMyApplicationsQuerySchema = z.object({
+  status: z.enum(APPLICANT_APPLICATION_STATUSES).optional().meta({
+    description: "Only return applications with this status. Shortlisted includes interviews.",
+    example: "shortlisted",
+  }),
+});
+
+export type ListMyApplicationsQuery = z.infer<typeof listMyApplicationsQuerySchema>;
+
+export const applyToListingSchema = z.object({
+  listingId: z.string().uuid().meta({
+    description: "ID of the open listing to apply to.",
+    example: "7c1f2b0a-5d4e-4a63-9b8c-1e2d3f4a5b6c",
+  }),
+});
+
+export type ApplyToListingInput = z.infer<typeof applyToListingSchema>;
+
+const myApplicationSummaryShape = {
+  id: applicationIdSchema,
+  jobId: summaryShape.jobId,
+  jobTitle: z.string().meta({
+    description: "Title of the listing applied to.",
+    example: "Senior Frontend Engineer",
+  }),
+  companyName: z.string().meta({ description: "Company name.", example: "Acme Corp" }),
+  location: z.string().meta({ description: "Where the role is based.", example: "Manila" }),
+  employmentType: z.enum(EMPLOYMENT_TYPES).meta({
+    description: "Employment type.",
+    example: "full_time",
+  }),
+  jobStatus: z.enum(JOB_STATUSES).meta({
+    description: "Whether the listing is still open.",
+    example: "open",
+  }),
+  status: z.enum(APPLICANT_APPLICATION_STATUSES).meta({
+    description: "Application status. Interviews are reported as shortlisted.",
+    example: "submitted",
+  }),
+  matchScore: summaryShape.matchScore,
+  band: summaryShape.band,
+  createdAt: summaryShape.createdAt,
+  statusChangedAt: summaryShape.statusChangedAt,
+};
+
+export const myApplicationSummaryResponseSchema = z.object(myApplicationSummaryShape).meta({
+  id: "MyApplicationSummary",
+  description: "One of the applicant's applications, as shown in their list.",
+});
+
+export type MyApplicationSummaryResponse = z.infer<typeof myApplicationSummaryResponseSchema>;
+
+export const myApplicationListResponseSchema = z
+  .object({
+    items: z.array(myApplicationSummaryResponseSchema).meta({
+      description: "The applicant's applications, newest first.",
+    }),
+    counts: z
+      .object({
+        all: countField("Total across all statuses.", 12),
+        submitted: countField("Applications with status submitted.", 5),
+        viewed: countField("Applications with status viewed.", 3),
+        shortlisted: countField("Applications shortlisted, including interviews.", 2),
+        rejected: countField("Applications with status rejected.", 1),
+        withdrawn: countField("Applications with status withdrawn.", 1),
+      })
+      .meta({ description: "Applications per status. Ignores the status filter." }),
+  })
+  .meta({ id: "MyApplicationList", description: "The applicant's applications with counts." });
+
+export type MyApplicationListResponse = z.infer<typeof myApplicationListResponseSchema>;
+
+export const myApplicationDetailResponseSchema = z
+  .object({
+    ...myApplicationSummaryShape,
+    resumeSnapshot: z.string().meta({
+      description: "Resume text as it was when the application was submitted.",
+      example: "Frontend engineer with five years of React experience...",
+    }),
+    skillsMatched: summaryShape.skillsMatched,
+    skillsMissing: summaryShape.skillsMissing,
+    viewedAt: z.string().datetime().nullable().meta({
+      description: "Timestamp a recruiter first opened the application, or null.",
+      example: "2026-01-02T08:00:00.000Z",
+    }),
+  })
+  .meta({
+    id: "MyApplicationDetail",
+    description: "A full application, as the applicant sees it.",
+  });
+
+export type MyApplicationDetailResponse = z.infer<typeof myApplicationDetailResponseSchema>;
