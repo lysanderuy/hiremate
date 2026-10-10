@@ -22,7 +22,7 @@ const panels: Panel[] = [
     title: "Get noticed by the right employers",
     description: "Save your resume once and see your fit on every listing.",
     items: [
-      "Save your resume as text or a text-based PDF",
+      "Save your resume as a text-based PDF",
       "See your score and missing skills on each listing",
       "Apply where you fit",
       "Track all your applications in one place",

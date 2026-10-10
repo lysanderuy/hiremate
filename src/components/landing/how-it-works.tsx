@@ -2,8 +2,7 @@ const steps = [
   {
     number: "01",
     title: "Save your resume",
-    description:
-      "Paste text or upload a .txt or text-based PDF. You keep one resume on your account.",
+    description: "Upload a text-based PDF. You keep one resume on your account.",
   },
   {
     number: "02",
