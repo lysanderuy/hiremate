@@ -2,7 +2,7 @@
 
 Job board with AI resume matching (branded TalentFlow AI). Recruiters post
 listings and review applicants ranked by match score; applicants apply with a
-text resume. Built on Next.js 16 + Supabase + Drizzle + Zod.
+PDF resume. Built on Next.js 16 + Supabase + Drizzle + Zod.
 
 - **Recruiters**: approval-gated console (dashboard, listings, applicants with
   band filter and match sort, company profile).

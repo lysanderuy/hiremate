@@ -30,7 +30,7 @@ import {
   openListingListResponseSchema,
 } from "@/validators/open-listing.validator";
 import { profileResponseSchema, updateProfileSchema } from "@/validators/profile.validator";
-import { resumeResponseSchema, saveResumeSchema } from "@/validators/resume.validator";
+import { resumeResponseSchema } from "@/validators/resume.validator";
 import {
   listSkillsQuerySchema,
   skillResponseSchema,
@@ -287,20 +287,6 @@ export const openApiDocument = createDocument({
           ),
           "401": errorResponse("Unauthorized."),
           "403": errorResponse(NOT_APPLICANT),
-        },
-      },
-      put: {
-        summary: "Save the applicant's resume and extract its skills, replacing any existing one",
-        requestBody: {
-          content: {
-            "application/json": { schema: saveResumeSchema },
-          },
-        },
-        responses: {
-          "200": successResponse("Resume saved successfully.", resumeResponseSchema),
-          "401": errorResponse("Unauthorized."),
-          "403": errorResponse(NOT_APPLICANT),
-          "422": errorResponse("Validation error."),
         },
       },
     },

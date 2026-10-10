@@ -15,16 +15,6 @@ export const resumeStateSchema = z.enum(RESUME_STATES).meta({
   example: "ready",
 });
 
-export const saveResumeSchema = z.object({
-  text: z.string().trim().min(MIN_RESUME_LENGTH).max(MAX_RESUME_LENGTH).meta({
-    description: "Plain-text resume. Between 200 and 200,000 characters.",
-    example: "Frontend engineer with five years of React and TypeScript experience...",
-  }),
-  source: resumeSourceSchema.default("pasted"),
-});
-
-export type SaveResumeInput = z.infer<typeof saveResumeSchema>;
-
 export const resumeResponseSchema = z
   .object({
     id: z.string().uuid().meta({

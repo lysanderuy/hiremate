@@ -6,7 +6,8 @@ import { db } from "@/db";
 import { HttpError } from "@/lib/api/errors";
 import { resumes, type Resume } from "@/db/schema";
 import { skillService } from "@/services/skill.service";
-import type { ResumeResponse, SaveResumeInput } from "@/validators/resume.validator";
+import type { ResumeSource } from "@/types/resumes";
+import type { ResumeResponse } from "@/validators/resume.validator";
 
 function toResponse(row: Resume): ResumeResponse {
   return {
@@ -25,7 +26,10 @@ export const resumeService = {
     return row ? toResponse(row) : null;
   },
 
-  async saveMine(userId: string, { text, source }: SaveResumeInput): Promise<ResumeResponse> {
+  async saveMine(
+    userId: string,
+    { text, source }: { text: string; source: ResumeSource },
+  ): Promise<ResumeResponse> {
     let skills: string[] = [];
     let state: Resume["state"] = "ready";
     try {
