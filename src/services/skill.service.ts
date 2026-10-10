@@ -14,7 +14,18 @@ import type {
 
 export type DbExecutor = Pick<typeof db, "select">;
 
+function loadActiveLexicon() {
+  return db
+    .select({ id: skills.id, name: skills.name, aliases: skills.aliases })
+    .from(skills)
+    .where(eq(skills.isActive, true));
+}
+
 export const skillService = {
+  async extractFromText(text: string): Promise<string[]> {
+    return createSkillMatcher(await loadActiveLexicon())(text);
+  },
+
   async listActive({ q, limit }: ListSkillsQuery): Promise<SkillResponse[]> {
     const search = q?.trim();
     const pattern = search ? `%${escapeLike(search)}%` : undefined;
@@ -28,10 +39,7 @@ export const skillService = {
   },
 
   async suggest({ title, description }: SuggestSkillsInput): Promise<SkillResponse[]> {
-    const lexicon = await db
-      .select({ id: skills.id, name: skills.name, aliases: skills.aliases })
-      .from(skills)
-      .where(eq(skills.isActive, true));
+    const lexicon = await loadActiveLexicon();
 
     const matched = new Set(createSkillMatcher(lexicon)(`${title}\n${description}`));
 

@@ -29,3 +29,25 @@ export async function authenticateActiveRecruiter(): Promise<ActiveRecruiterAuth
 
   return { ok: true, user, profile };
 }
+
+type ActiveApplicantAuth =
+  { ok: true; user: User; profile: Profile } | { ok: false; response: NextResponse };
+
+export async function authenticateApplicant(): Promise<ActiveApplicantAuth> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { ok: false, response: apiError("Unauthorized", 401) };
+
+  const profile = await profileService.getById(user.id);
+  if (!profile || profile.role !== "applicant" || profile.accountStatus !== "active") {
+    return {
+      ok: false,
+      response: apiError("Your account is not approved for this action.", 403),
+    };
+  }
+
+  return { ok: true, user, profile };
+}
