@@ -4,11 +4,18 @@ import {
   applicationDetailResponseSchema,
   applicationIdSchema,
   applicationListResponseSchema,
+  applyToListingSchema,
   listApplicationsQuerySchema,
+  listMyApplicationsQuerySchema,
+  myApplicationDetailResponseSchema,
+  myApplicationListResponseSchema,
   updateApplicationStatusSchema,
 } from "@/validators/application.validator";
 import { companyResponseSchema, updateCompanySchema } from "@/validators/company.validator";
-import { dashboardResponseSchema } from "@/validators/dashboard.validator";
+import {
+  applicantDashboardResponseSchema,
+  dashboardResponseSchema,
+} from "@/validators/dashboard.validator";
 import {
   createListingSchema,
   listingIdResponseSchema,
@@ -16,7 +23,14 @@ import {
   listingResponseSchema,
   updateListingSchema,
 } from "@/validators/listing.validator";
+import {
+  listOpenListingsQuerySchema,
+  openListingDetailResponseSchema,
+  openListingIdSchema,
+  openListingListResponseSchema,
+} from "@/validators/open-listing.validator";
 import { profileResponseSchema, updateProfileSchema } from "@/validators/profile.validator";
+import { resumeResponseSchema, saveResumeSchema } from "@/validators/resume.validator";
 import {
   listSkillsQuerySchema,
   skillResponseSchema,
@@ -61,6 +75,10 @@ const listingIdParams = z.object({
 });
 
 const applicationIdParams = z.object({ id: applicationIdSchema });
+
+const openListingIdParams = z.object({ id: openListingIdSchema });
+
+const NOT_APPLICANT = "Account is not an approved applicant.";
 
 export const openApiDocument = createDocument({
   openapi: "3.1.0",
@@ -256,6 +274,156 @@ export const openApiDocument = createDocument({
           "404": errorResponse("Application not found."),
           "409": errorResponse("The applicant withdrew this application."),
           "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/resumes/me": {
+      get: {
+        summary: "Get the applicant's resume",
+        responses: {
+          "200": successResponse(
+            "Resume retrieved successfully. Data is null when none exists.",
+            resumeResponseSchema.nullable(),
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+        },
+      },
+      put: {
+        summary: "Save the applicant's resume and extract its skills, replacing any existing one",
+        requestBody: {
+          content: {
+            "application/json": { schema: saveResumeSchema },
+          },
+        },
+        responses: {
+          "200": successResponse("Resume saved successfully.", resumeResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/resumes/me/reprocess": {
+      post: {
+        summary: "Re-run skill extraction on the stored resume text",
+        responses: {
+          "200": successResponse("Resume reprocessed successfully.", resumeResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "404": errorResponse("Resume not found."),
+        },
+      },
+    },
+    "/api/listings/open": {
+      get: {
+        summary: "Browse open listings, with the applicant's match and application for each",
+        requestParams: { query: listOpenListingsQuerySchema },
+        responses: {
+          "200": successResponse("Listings retrieved successfully.", openListingListResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/listings/open/{id}": {
+      get: {
+        summary: "Get one open listing, with the applicant's match and application",
+        requestParams: { path: openListingIdParams },
+        responses: {
+          "200": successResponse(
+            "Listing retrieved successfully.",
+            openListingDetailResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "404": errorResponse("Listing not found, or not open."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/applications": {
+      post: {
+        summary: "Apply to an open listing using the saved resume",
+        requestBody: {
+          content: {
+            "application/json": { schema: applyToListingSchema },
+          },
+        },
+        responses: {
+          "201": successResponse(
+            "Application submitted successfully.",
+            myApplicationDetailResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "404": errorResponse("Listing not found."),
+          "409": errorResponse(
+            "The listing is closed, the resume is missing or not ready, or the applicant already applied.",
+          ),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/applications/me": {
+      get: {
+        summary: "List the applicant's applications, newest first",
+        requestParams: { query: listMyApplicationsQuerySchema },
+        responses: {
+          "200": successResponse(
+            "Applications retrieved successfully.",
+            myApplicationListResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/applications/me/{id}": {
+      get: {
+        summary: "Get one of the applicant's applications",
+        requestParams: { path: applicationIdParams },
+        responses: {
+          "200": successResponse(
+            "Application retrieved successfully.",
+            myApplicationDetailResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "404": errorResponse("Application not found."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/applications/me/{id}/withdraw": {
+      post: {
+        summary: "Withdraw one of the applicant's applications",
+        requestParams: { path: applicationIdParams },
+        responses: {
+          "200": successResponse(
+            "Application withdrawn successfully.",
+            myApplicationDetailResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "404": errorResponse("Application not found."),
+          "409": errorResponse("The application was rejected or is already withdrawn."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/dashboard/applicant": {
+      get: {
+        summary: "Get the authenticated applicant's dashboard summary",
+        responses: {
+          "200": successResponse(
+            "Dashboard retrieved successfully.",
+            applicantDashboardResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
         },
       },
     },
