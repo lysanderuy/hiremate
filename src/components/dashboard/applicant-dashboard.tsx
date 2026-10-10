@@ -218,7 +218,7 @@ function YourResume({ data }: { data: ApplicantDashboardResponse | undefined }) 
   if (!data) {
     body = <SectionMessage message="Loading resume..." bordered={false} />;
   } else if (state === null) {
-    body = <p>No resume yet. PDF upload is coming soon.</p>;
+    body = <p>No resume yet. Upload a PDF to see your matches.</p>;
   } else if (state === "processing") {
     body = <p>Finding skills in your resume.</p>;
   } else if (state === "failed") {

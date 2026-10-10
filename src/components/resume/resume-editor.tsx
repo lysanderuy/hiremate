@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useReprocessResume, useResume } from "@/hooks/use-resume";
+import { useUploadResumePdf } from "@/hooks/use-upload-resume-pdf";
+import { checkPdfFile } from "@/lib/resume/client-file";
 
 import { ResumeCallout } from "./resume-callout";
 import { ResumeDropzone } from "./resume-dropzone";
@@ -11,6 +15,9 @@ import { SkillsFoundCard, WhatWeDoCard } from "./resume-side-cards";
 export function ResumeEditor() {
   const { data, isPending, error } = useResume();
   const reprocess = useReprocessResume();
+  const upload = useUploadResumePdf();
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   if (isPending) return <p className="text-muted-foreground">Loading...</p>;
   if (error) {
@@ -19,6 +26,14 @@ export function ResumeEditor() {
         {error.message}
       </p>
     );
+  }
+
+  function handleFile(file: File) {
+    setSaved(false);
+    const problem = checkPdfFile(file);
+    setFileError(problem);
+    if (problem) return;
+    upload.mutate(file, { onSuccess: () => setSaved(true) });
   }
 
   return (
@@ -46,9 +61,16 @@ export function ResumeEditor() {
 
       <div className="grid items-start gap-6 min-[1101px]:grid-cols-[1.6fr_1fr]">
         <Card className="gap-4 p-5 sm:p-6">
-          <ResumeDropzone />
+          <ResumeDropzone
+            uploading={upload.isPending}
+            error={fileError ?? upload.error?.message ?? null}
+            saved={saved}
+            onFile={handleFile}
+          />
           <p className="text-xs text-muted-foreground">
-            Your existing applications keep the resume you sent with them.
+            {data
+              ? "Uploading a new PDF replaces your current resume. Your existing applications keep the resume you sent with them."
+              : "Your PDF is read for text and skills. We do not keep the file itself."}
           </p>
         </Card>
 

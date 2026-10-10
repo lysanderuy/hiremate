@@ -14,7 +14,7 @@ export const resumeKeys = {
   me: ["resume", "me"] as const,
 };
 
-async function syncAfterResumeChange(queryClient: QueryClient, data: ResumeResponse) {
+export async function syncAfterResumeChange(queryClient: QueryClient, data: ResumeResponse) {
   queryClient.setQueryData(resumeKeys.me, data);
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: openListingKeys.all }),

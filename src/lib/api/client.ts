@@ -16,7 +16,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   const res = await fetch(path, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      ...(init?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
       ...init?.headers,
     },
   });
@@ -39,5 +39,6 @@ export const api = {
     apiFetch<T>(path, { method: "POST", body: JSON.stringify(body) }),
   patch: <T>(path: string, body: unknown) =>
     apiFetch<T>(path, { method: "PATCH", body: JSON.stringify(body) }),
+  upload: <T>(path: string, body: FormData) => apiFetch<T>(path, { method: "POST", body }),
   delete: <T>(path: string) => apiFetch<T>(path, { method: "DELETE" }),
 };
