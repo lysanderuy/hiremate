@@ -1,17 +1,15 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, max, notInArray } from "drizzle-orm";
+import { and, countDistinct, desc, eq, inArray, max, notInArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import { applications, companies, jobSkills, jobs, skills, type Job } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
 import { skillService, type DbExecutor } from "@/services/skill.service";
-import type { EmploymentType } from "@/types/jobs";
 import type { CreateListingInput, UpdateListingInput } from "@/validators/listing.validator";
 import type { SkillResponse } from "@/validators/skill.validator";
 
-export type ListingView = Omit<Job, "employmentType"> & {
-  employmentType: EmploymentType;
+export type ListingView = Job & {
   skills: SkillResponse[];
   applicantCount: number;
   topMatchScore: number | null;
@@ -26,7 +24,6 @@ const SKILLS_INVALID_MESSAGE = "One or more skills are not in the skills list.";
 function toView(job: Job, jobSkillList: SkillResponse[], stats: ApplicantStats): ListingView {
   return {
     ...job,
-    employmentType: job.employmentType as EmploymentType,
     skills: jobSkillList,
     applicantCount: stats.total,
     topMatchScore: stats.topMatchScore,
@@ -61,7 +58,7 @@ async function loadApplicantStats(jobIds: string[]): Promise<Map<string, Applica
   const rows = await db
     .select({
       jobId: applications.jobId,
-      total: count(),
+      total: countDistinct(applications.applicantId),
       topMatchScore: max(applications.matchScore),
     })
     .from(applications)

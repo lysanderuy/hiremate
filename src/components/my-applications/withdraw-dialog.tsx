@@ -2,13 +2,6 @@
 
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useWithdrawApplication } from "@/hooks/use-withdraw-application";
-import type { ApplicantApplicationStatus } from "@/types/applications";
-
-const WITHDRAWABLE: readonly ApplicantApplicationStatus[] = ["submitted", "viewed", "shortlisted"];
-
-export function canWithdraw(status: ApplicantApplicationStatus): boolean {
-  return WITHDRAWABLE.includes(status);
-}
 
 type WithdrawDialogProps = {
   applicationId: string;
@@ -40,7 +33,7 @@ export function WithdrawDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Withdraw this application?"
-      description={`This cannot be undone, and you cannot apply to ${jobTitle} again.`}
+      description={`This cannot be undone. You can apply to ${jobTitle} again while the listing is open.`}
       confirmLabel={withdraw.isPending ? "Withdrawing..." : "Withdraw"}
       danger
       pending={withdraw.isPending}

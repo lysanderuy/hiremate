@@ -6,7 +6,7 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -51,7 +51,9 @@ export const applications = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    unique().on(table.jobId, table.applicantId),
+    uniqueIndex("applications_job_applicant_active_idx")
+      .on(table.jobId, table.applicantId)
+      .where(sql`${table.status} <> 'withdrawn'`),
     check("applications_match_score_check", sql`${table.matchScore} between 0 and 100`),
   ],
 );

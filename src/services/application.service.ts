@@ -3,6 +3,7 @@ import "server-only";
 import { and, count, desc, eq, ilike, inArray, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/db";
+import { latestApplicationOnly } from "@/db/predicates";
 import {
   applications,
   companies,
@@ -16,7 +17,11 @@ import {
 import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
 import { scoreMatch } from "@/lib/matching/score";
-import { toApplicantStatus, type ApplicantApplicationStatus } from "@/types/applications";
+import {
+  canWithdraw,
+  toApplicantStatus,
+  type ApplicantApplicationStatus,
+} from "@/types/applications";
 import type { EmploymentType } from "@/types/jobs";
 import type {
   ApplicationDetailResponse,
@@ -144,18 +149,11 @@ type MineSummaryRow = Pick<
   jobTitle: string;
   companyName: string;
   location: string;
-  employmentType: string;
+  employmentType: EmploymentType;
   jobStatus: MyApplicationSummaryResponse["jobStatus"];
 };
 type MineDetailRow = MineSummaryRow &
   Pick<Application, "resumeSnapshot" | "skillsMatched" | "skillsMissing" | "viewedAt">;
-
-const WITHDRAWABLE_STATUSES: Application["status"][] = [
-  "submitted",
-  "viewed",
-  "shortlisted",
-  "interview",
-];
 
 function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
   return {
@@ -164,7 +162,7 @@ function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
     jobTitle: row.jobTitle,
     companyName: row.companyName,
     location: row.location,
-    employmentType: row.employmentType as EmploymentType,
+    employmentType: row.employmentType,
     jobStatus: row.jobStatus,
     status: toApplicantStatus(row.status),
     matchScore: row.matchScore,
@@ -215,6 +213,7 @@ export const applicationService = {
       eq(applications.jobId, listingId),
       pattern ? ilike(profiles.displayName, pattern) : undefined,
       band ? bandScoreRange[band] : undefined,
+      latestApplicationOnly,
     ];
 
     const [rows, countRows] = await Promise.all([
@@ -397,7 +396,10 @@ export const applicationService = {
           matchScore: result?.score ?? null,
           band: result?.band ?? null,
         })
-        .onConflictDoNothing({ target: [applications.jobId, applications.applicantId] })
+        .onConflictDoNothing({
+          target: [applications.jobId, applications.applicantId],
+          where: sql`${applications.status} <> 'withdrawn'`,
+        })
         .returning({ id: applications.id });
       if (!created) throw new HttpError("You already applied to this listing.", 409);
 
@@ -410,7 +412,7 @@ export const applicationService = {
     return db.transaction(async (tx) => {
       const [row] = await selectMine(tx, userId, id).for("update", { of: applications });
       if (!row) throw notFound();
-      if (!WITHDRAWABLE_STATUSES.includes(row.status)) {
+      if (!canWithdraw(row.status)) {
         throw new HttpError("This application can no longer be withdrawn.", 409);
       }
 

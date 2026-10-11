@@ -240,12 +240,15 @@ async function seed() {
           insert into applications (
             job_id, applicant_id, resume_snapshot, skills_matched, skills_missing,
             status, viewed_at, status_changed_at, created_at
-          ) values (
-            ${job.id}, ${userId}, ${resumeText},
+          )
+          select
+            ${job.id}::uuid, ${userId}::uuid, ${resumeText},
             ${sql.array(matched, 1009)}::text[], ${sql.array(missing, 1009)}::text[],
             ${status}::application_status, ${viewedAt}, ${changedAt}, ${createdAt}
+          where not exists (
+            select 1 from applications
+            where job_id = ${job.id}::uuid and applicant_id = ${userId}::uuid
           )
-          on conflict (job_id, applicant_id) do nothing
           returning id
         `;
         if (inserted.length > 0) appsCreated++;

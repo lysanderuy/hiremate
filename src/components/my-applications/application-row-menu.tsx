@@ -3,7 +3,7 @@
 import { Briefcase, Eye, MoreHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
-import { canWithdraw, WithdrawDialog } from "@/components/my-applications/withdraw-dialog";
+import { WithdrawDialog } from "@/components/my-applications/withdraw-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { APPLICATION_STATUS_LABELS } from "@/types/applications";
+import { APPLICATION_STATUS_LABELS, canWithdraw } from "@/types/applications";
 import type { MyApplicationSummaryResponse } from "@/validators/application.validator";
 
 const APPLICATIONS_PATH = "/dashboard/applicant/applications";

@@ -1,0 +1,2 @@
+ALTER TABLE "applications" DROP CONSTRAINT "applications_job_id_applicant_id_unique";--> statement-breakpoint
+CREATE UNIQUE INDEX "applications_job_applicant_active_idx" ON "applications" USING btree ("job_id","applicant_id") WHERE "applications"."status" <> 'withdrawn';

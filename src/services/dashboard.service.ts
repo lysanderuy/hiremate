@@ -3,6 +3,7 @@ import "server-only";
 import { and, count, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
+import { latestApplicationOnly } from "@/db/predicates";
 import { applications, companies, jobs, profiles, resumes } from "@/db/schema";
 import { openListingService } from "@/services/open-listing.service";
 import { toApplicantStatus } from "@/types/applications";
@@ -31,7 +32,7 @@ export const dashboardService = {
         })
         .from(applications)
         .innerJoin(jobs, eq(jobs.id, applications.jobId))
-        .where(eq(jobs.recruiterId, userId)),
+        .where(and(eq(jobs.recruiterId, userId), latestApplicationOnly)),
       db
         .select({ open: count() })
         .from(jobs)
@@ -49,7 +50,7 @@ export const dashboardService = {
         .from(applications)
         .innerJoin(jobs, eq(jobs.id, applications.jobId))
         .innerJoin(profiles, eq(profiles.id, applications.applicantId))
-        .where(eq(jobs.recruiterId, userId))
+        .where(and(eq(jobs.recruiterId, userId), latestApplicationOnly))
         .orderBy(desc(applications.createdAt), desc(applications.id))
         .limit(RECENT_LIMIT),
     ]);

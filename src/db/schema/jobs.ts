@@ -10,7 +10,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { JOB_STATUSES } from "@/types/jobs";
+import { JOB_STATUSES, type EmploymentType } from "@/types/jobs";
 
 import { companies } from "./companies";
 import { profiles } from "./profiles";
@@ -30,7 +30,7 @@ export const jobs = pgTable(
     title: text("title").notNull(),
     description: text("description").notNull(),
     location: text("location").notNull(),
-    employmentType: text("employment_type").notNull(),
+    employmentType: text("employment_type").$type<EmploymentType>().notNull(),
     status: jobStatus("status").notNull().default("open"),
     removalReason: text("removal_reason"),
     salaryMin: integer("salary_min"),

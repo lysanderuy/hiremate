@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { MatchCard } from "@/components/jobs/match-card";
-import { canWithdraw, WithdrawDialog } from "@/components/my-applications/withdraw-dialog";
+import { WithdrawDialog } from "@/components/my-applications/withdraw-dialog";
 import { CRUMB_CLASS } from "@/components/shared/page-header";
 import { ApplicationStatusPill } from "@/components/shared/status-pill";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -14,7 +14,11 @@ import { useMyApplication } from "@/hooks/use-my-application";
 import { ApiError } from "@/lib/api/client";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { APPLICATION_STATUS_LABELS, type ApplicantApplicationStatus } from "@/types/applications";
+import {
+  APPLICATION_STATUS_LABELS,
+  canWithdraw,
+  type ApplicantApplicationStatus,
+} from "@/types/applications";
 import { EMPLOYMENT_TYPE_LABELS } from "@/types/jobs";
 import type { MyApplicationDetailResponse } from "@/validators/application.validator";
 
@@ -28,7 +32,7 @@ const STATUS_MEANING: Record<ApplicantApplicationStatus, string> = {
   viewed: "The recruiter opened your application.",
   shortlisted: "The recruiter shortlisted you. They decide the next step.",
   rejected: "The recruiter did not move forward with this application.",
-  withdrawn: "You withdrew this application. You cannot apply to this job again.",
+  withdrawn: "You withdrew this application. You can apply again while the listing is open.",
 };
 
 type TimelineStep = {

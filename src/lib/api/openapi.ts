@@ -369,7 +369,7 @@ export const openApiDocument = createDocument({
           "403": errorResponse(NOT_APPLICANT),
           "404": errorResponse("Listing not found."),
           "409": errorResponse(
-            "The listing is closed, the resume is missing or not ready, or the applicant already applied.",
+            "Conflict. Returned when the listing is no longer open, the applicant has no saved resume, the saved resume is not ready, or the applicant already has an active (submitted, viewed, shortlisted or interview) or rejected application for this listing. An applicant who withdrew can apply again while the listing is open.",
           ),
           "422": errorResponse("Validation error."),
         },
@@ -409,6 +409,8 @@ export const openApiDocument = createDocument({
     "/api/applications/me/{id}/withdraw": {
       post: {
         summary: "Withdraw one of the applicant's applications",
+        description:
+          "The withdrawn application is kept as history. The applicant can apply to the same listing again while it is open.",
         requestParams: { path: applicationIdParams },
         responses: {
           "200": successResponse(
@@ -418,7 +420,9 @@ export const openApiDocument = createDocument({
           "401": errorResponse("Unauthorized."),
           "403": errorResponse(NOT_APPLICANT),
           "404": errorResponse("Application not found."),
-          "409": errorResponse("The application was rejected or is already withdrawn."),
+          "409": errorResponse(
+            "Conflict. The application can no longer be withdrawn because it was rejected or is already withdrawn.",
+          ),
           "422": errorResponse("Validation error."),
         },
       },

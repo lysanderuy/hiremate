@@ -38,7 +38,7 @@ type ListingRow = {
   title: string;
   companyName: string;
   location: string;
-  employmentType: string;
+  employmentType: EmploymentType;
   salaryMin: number | null;
   salaryMax: number | null;
   createdAt: Date;
@@ -84,6 +84,7 @@ async function loadApplications(
     .where(and(eq(applications.applicantId, userId), inArray(applications.jobId, jobIds)));
 
   for (const row of rows) {
+    if (row.status === "withdrawn") continue;
     byJob.set(row.jobId, { id: row.id, status: toApplicantStatus(row.status) });
   }
   return byJob;
@@ -119,7 +120,7 @@ async function decorate(
       title: row.title,
       companyName: row.companyName,
       location: row.location,
-      employmentType: row.employmentType as EmploymentType,
+      employmentType: row.employmentType,
       salaryMin: row.salaryMin,
       salaryMax: row.salaryMax,
       createdAt: row.createdAt.toISOString(),
@@ -130,19 +131,34 @@ async function decorate(
   });
 }
 
-// Overlap ratio of a listing's skills with the caller's ready resume; null when the listing has none.
-function matchRatio(userId: string) {
-  const total = sql`(select count(*) from ${jobSkills} where ${jobSkills.jobId} = ${jobs.id})`;
-  const matched = sql`(
-    select count(*) from ${jobSkills}
-    inner join ${skills} on ${skills.id} = ${jobSkills.skillId}
-    where ${jobSkills.jobId} = ${jobs.id}
-      and ${skills.name} in (
-        select unnest(${resumes.skills}) from ${resumes}
-        where ${resumes.applicantId} = ${userId} and ${resumes.state} = 'ready'
-      )
-  )`;
-  return sql<number | null>`case when ${total} = 0 then null else ${matched}::float / ${total} end`;
+function textArray(values: string[]): SQL {
+  if (values.length === 0) return sql`'{}'::text[]`;
+  return sql`array[${sql.join(
+    values.map((value) => sql`${value}`),
+    sql`, `,
+  )}]::text[]`;
+}
+
+// Per-job skill totals and overlap with the caller's resume skills, computed once for all jobs.
+function matchRanking(resumeSkills: string[]) {
+  const stats = db.$with("match_stats").as(
+    db
+      .select({
+        jobId: jobSkills.jobId,
+        total: count().as("total"),
+        matched:
+          sql<number>`count(*) filter (where ${skills.name} = any(${textArray(resumeSkills)}))`.as(
+            "matched",
+          ),
+      })
+      .from(jobSkills)
+      .innerJoin(skills, eq(skills.id, jobSkills.skillId))
+      .groupBy(jobSkills.jobId),
+  );
+  const ratio = sql<
+    number | null
+  >`case when coalesce(${stats.total}, 0) = 0 then null else ${stats.matched}::float / ${stats.total} end`;
+  return { stats, ratio };
 }
 
 function filterConditions({ q, location, type, minPay }: ListOpenListingsQuery): SQL[] {
@@ -169,20 +185,32 @@ export const openListingService = {
     const resume = await loadResume(userId);
     const where = and(...filterConditions(query));
 
-    const orderBy =
-      query.sort === "best_match" && resume?.state === "ready"
-        ? [sql`${matchRatio(userId)} desc nulls last`, desc(jobs.createdAt), desc(jobs.id)]
-        : [desc(jobs.createdAt), desc(jobs.id)];
+    const offset = (query.page - 1) * OPEN_LISTING_PAGE_SIZE;
+    const ranking =
+      query.sort === "best_match" && resume?.state === "ready" ? matchRanking(resume.skills) : null;
+
+    const rowsQuery = ranking
+      ? db
+          .with(ranking.stats)
+          .select(listingColumns)
+          .from(jobs)
+          .innerJoin(companies, eq(companies.id, jobs.companyId))
+          .leftJoin(ranking.stats, eq(ranking.stats.jobId, jobs.id))
+          .where(where)
+          .orderBy(sql`${ranking.ratio} desc nulls last`, desc(jobs.createdAt), desc(jobs.id))
+          .limit(OPEN_LISTING_PAGE_SIZE)
+          .offset(offset)
+      : db
+          .select(listingColumns)
+          .from(jobs)
+          .innerJoin(companies, eq(companies.id, jobs.companyId))
+          .where(where)
+          .orderBy(desc(jobs.createdAt), desc(jobs.id))
+          .limit(OPEN_LISTING_PAGE_SIZE)
+          .offset(offset);
 
     const [rows, [totalRow]] = await Promise.all([
-      db
-        .select(listingColumns)
-        .from(jobs)
-        .innerJoin(companies, eq(companies.id, jobs.companyId))
-        .where(where)
-        .orderBy(...orderBy)
-        .limit(OPEN_LISTING_PAGE_SIZE)
-        .offset((query.page - 1) * OPEN_LISTING_PAGE_SIZE),
+      rowsQuery,
       db
         .select({ total: count() })
         .from(jobs)
@@ -217,11 +245,13 @@ export const openListingService = {
   ): Promise<OpenListingSummaryResponse[]> {
     if (resume?.state !== "ready") return [];
 
-    const ratio = matchRatio(userId);
+    const { stats, ratio } = matchRanking(resume.skills);
     const rows = await db
+      .with(stats)
       .select(listingColumns)
       .from(jobs)
       .innerJoin(companies, eq(companies.id, jobs.companyId))
+      .innerJoin(stats, eq(stats.jobId, jobs.id))
       .where(
         and(
           eq(jobs.status, "open"),
@@ -229,6 +259,7 @@ export const openListingService = {
           sql`not exists (
             select 1 from ${applications}
             where ${applications.jobId} = ${jobs.id} and ${applications.applicantId} = ${userId}
+              and ${applications.status} <> 'withdrawn'
           )`,
         ),
       )
