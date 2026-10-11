@@ -64,7 +64,7 @@ export const applicantDashboardResponseSchema = z
       }),
       source: resumeSourceSchema.nullable().meta({
         description: "How the resume was provided, or null when there is none.",
-        example: "pasted",
+        example: "pdf",
       }),
       skillCount: statField("Skills found in the resume.", 12),
       updatedAt: z.string().datetime().nullable().meta({

@@ -1,9 +1,8 @@
 "use client";
 
 import { Upload } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type ResumeDropzoneProps = {
@@ -14,10 +13,9 @@ type ResumeDropzoneProps = {
 };
 
 export function ResumeDropzone({ uploading, error, saved, onFile }: ResumeDropzoneProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
-  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+  function handleDrop(event: React.DragEvent<HTMLLabelElement>) {
     event.preventDefault();
     setDragging(false);
     const file = event.dataTransfer.files[0];
@@ -32,7 +30,7 @@ export function ResumeDropzone({ uploading, error, saved, onFile }: ResumeDropzo
 
   return (
     <div className="grid gap-3">
-      <div
+      <label
         onDragOver={(event) => {
           event.preventDefault();
           if (!uploading) setDragging(true);
@@ -40,34 +38,25 @@ export function ResumeDropzone({ uploading, error, saved, onFile }: ResumeDropzo
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          "grid justify-items-center gap-2 rounded-xl border-2 border-dashed border-line-dashed bg-page px-5 py-8 text-center transition-colors",
+          "grid cursor-pointer justify-items-center gap-2 rounded-xl border-2 border-dashed border-line-dashed bg-page px-5 py-8 text-center transition-colors hover:border-primary hover:bg-primary-soft focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-primary",
           dragging && "border-primary bg-primary-soft",
+          uploading && "cursor-not-allowed opacity-60 hover:border-line-dashed hover:bg-page",
         )}
       >
         <span className="grid size-10 place-items-center rounded-full bg-primary-soft text-primary">
           <Upload className="size-5" aria-hidden="true" />
         </span>
         <b className="text-ink">Upload a PDF</b>
-        <p>Drag a text-based PDF here, or choose one. PDFs up to 4 MB.</p>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={uploading}
-          onClick={() => inputRef.current?.click()}
-        >
-          Choose file
-        </Button>
+        <span>Drag a text-based PDF here, or click to choose one. PDFs up to 4 MB.</span>
         <input
-          ref={inputRef}
           type="file"
           accept="application/pdf,.pdf"
-          tabIndex={-1}
           aria-label="Resume PDF"
           disabled={uploading}
           onChange={handleChange}
           className="sr-only"
         />
-      </div>
+      </label>
       <div aria-live="polite">
         {uploading && <p className="text-sm text-muted-foreground">Reading your PDF...</p>}
         {error && (

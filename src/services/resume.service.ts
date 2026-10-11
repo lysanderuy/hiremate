@@ -30,16 +30,15 @@ export const resumeService = {
     userId: string,
     { text, source }: { text: string; source: ResumeSource },
   ): Promise<ResumeResponse> {
-    let skills: string[] = [];
-    let state: Resume["state"] = "ready";
+    let skills: string[];
     try {
       skills = await skillService.extractFromText(text);
     } catch (error) {
       console.error("[resume] skill extraction failed", error);
-      state = "failed";
+      throw new HttpError("We could not process your resume. Please try again.", 503);
     }
 
-    const values = { text, source, state, skills, updatedAt: new Date() };
+    const values = { text, source, state: "ready" as const, skills, updatedAt: new Date() };
     const [row] = await db
       .insert(resumes)
       .values({ applicantId: userId, ...values })

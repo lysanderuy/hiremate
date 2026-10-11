@@ -6,8 +6,8 @@ export const MIN_RESUME_LENGTH = 200;
 export const MAX_RESUME_LENGTH = 200_000;
 
 export const resumeSourceSchema = z.enum(RESUME_SOURCES).meta({
-  description: "How the resume text was provided.",
-  example: "pasted",
+  description: "How the resume was provided.",
+  example: "pdf",
 });
 
 export const resumeStateSchema = z.enum(RESUME_STATES).meta({

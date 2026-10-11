@@ -10,7 +10,7 @@ import { MATCH_BAND_LABELS, ScoreCell } from "@/components/shared/match-score";
 import { PageHeader } from "@/components/shared/page-header";
 import { ApplicationStatusPill } from "@/components/shared/status-pill";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useApplicantDashboard } from "@/hooks/use-applicant-dashboard";
 import { useProfile } from "@/hooks/use-profile";
@@ -30,7 +30,6 @@ type ResumeSummary = ApplicantDashboardResponse["resume"];
 
 const RESUME_STATE_LABELS = {
   ready: "Ready",
-  processing: "Processing",
   failed: "Failed",
   none: "Not added",
 } as const;
@@ -87,7 +86,6 @@ function resumeSubtext(resume: ResumeSummary): string {
     const saved = resume.updatedAt ? `Saved ${formatDate(resume.updatedAt)}` : "Saved";
     return resume.source ? `${saved} · ${RESUME_SOURCE_LABELS[resume.source]}` : saved;
   }
-  if (resume.state === "processing") return "This takes a few seconds";
   if (resume.state === "failed") return "Open My resume to try again";
   return "Add one to see your scores";
 }
@@ -165,7 +163,7 @@ function StatCards({ data }: { data: ApplicantDashboardResponse | undefined }) {
   );
 }
 
-function ResumeBanner({ resume, onRefresh }: { resume: ResumeSummary; onRefresh: () => void }) {
+function ResumeBanner({ resume }: { resume: ResumeSummary }) {
   if (resume.state === null) {
     return (
       <ResumeCallout
@@ -176,19 +174,6 @@ function ResumeBanner({ resume, onRefresh }: { resume: ResumeSummary; onRefresh:
         }
       >
         Add your resume to see how well you fit each job.
-      </ResumeCallout>
-    );
-  }
-  if (resume.state === "processing") {
-    return (
-      <ResumeCallout
-        action={
-          <Button size="xs" variant="outline" onClick={onRefresh}>
-            Refresh
-          </Button>
-        }
-      >
-        Your resume is being prepared. Try again in a moment.
       </ResumeCallout>
     );
   }
@@ -219,8 +204,6 @@ function YourResume({ data }: { data: ApplicantDashboardResponse | undefined }) 
     body = <SectionMessage message="Loading resume..." bordered={false} />;
   } else if (state === null) {
     body = <p>No resume yet. Upload a PDF to see your matches.</p>;
-  } else if (state === "processing") {
-    body = <p>Finding skills in your resume.</p>;
   } else if (state === "failed") {
     body = <p>We could not read this resume. Try again to find your skills.</p>;
   } else {
@@ -358,7 +341,7 @@ function RecentApplications({
 }
 
 export function ApplicantDashboard() {
-  const { data, isPending, error, refetch } = useApplicantDashboard();
+  const { data, isPending, error } = useApplicantDashboard();
   const profile = useProfile();
   const firstName = profile.data?.displayName?.trim().split(/\s+/)[0];
   const resumeReady = data?.resume.state === "ready";
@@ -389,7 +372,7 @@ export function ApplicantDashboard() {
           {error.message}
         </p>
       )}
-      {data && <ResumeBanner resume={data.resume} onRefresh={() => void refetch()} />}
+      {data && <ResumeBanner resume={data.resume} />}
       <StatCards data={data} />
       <div className="mb-6 grid items-start gap-6 min-[1101px]:grid-cols-2">
         <YourResume data={data} />

@@ -9,8 +9,6 @@ export function SkillsFoundCard({ resume }: { resume: ResumeResponse | null | un
   let body: React.ReactNode;
   if (!resume) {
     body = <p>No skills yet. They show up once you add a resume.</p>;
-  } else if (resume.state === "processing") {
-    body = <p>Finding skills in your resume.</p>;
   } else if (resume.state === "failed") {
     body = <p>Skills show up once your resume is processed.</p>;
   } else {

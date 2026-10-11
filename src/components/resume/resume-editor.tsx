@@ -38,9 +38,6 @@ export function ResumeEditor() {
 
   return (
     <>
-      {data?.state === "processing" && (
-        <ResumeCallout>Preparing your resume. This takes a few seconds.</ResumeCallout>
-      )}
       {data?.state === "failed" && (
         <ResumeCallout
           tone="error"
