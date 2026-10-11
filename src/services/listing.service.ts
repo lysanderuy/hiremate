@@ -1,8 +1,9 @@
 import "server-only";
 
-import { and, countDistinct, desc, eq, inArray, max, notInArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, max, ne, notInArray } from "drizzle-orm";
 
 import { db } from "@/db";
+import { latestApplicationOnly } from "@/db/predicates";
 import { applications, companies, jobSkills, jobs, skills, type Job } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
 import { skillService, type DbExecutor } from "@/services/skill.service";
@@ -58,11 +59,17 @@ async function loadApplicantStats(jobIds: string[]): Promise<Map<string, Applica
   const rows = await db
     .select({
       jobId: applications.jobId,
-      total: countDistinct(applications.applicantId),
+      total: count(),
       topMatchScore: max(applications.matchScore),
     })
     .from(applications)
-    .where(inArray(applications.jobId, jobIds))
+    .where(
+      and(
+        inArray(applications.jobId, jobIds),
+        ne(applications.status, "withdrawn"),
+        latestApplicationOnly,
+      ),
+    )
     .groupBy(applications.jobId);
 
   return new Map(rows.map((row) => [row.jobId, row]));
