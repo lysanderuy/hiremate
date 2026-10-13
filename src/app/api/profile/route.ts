@@ -16,6 +16,7 @@ export async function GET() {
 
     const profile = await profileService.getById(user.id);
     if (!profile) return apiError("Profile not found", 404);
+    if (profile.accountStatus === "suspended") return apiError("This account is suspended.", 403);
 
     return apiSuccess(profile);
   } catch (error) {
@@ -31,6 +32,9 @@ export async function PATCH(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) return apiError("Unauthorized", 401);
+
+    const current = await profileService.getById(user.id);
+    if (current?.accountStatus === "suspended") return apiError("This account is suspended.", 403);
 
     const body = await request.json();
     const input = updateProfileSchema.parse(body);
