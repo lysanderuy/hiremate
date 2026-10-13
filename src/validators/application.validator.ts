@@ -129,10 +129,6 @@ export const applicationDetailResponseSchema = z
       description: "Applicant email address.",
       example: "maria@example.com",
     }),
-    resumeSnapshot: z.string().meta({
-      description: "Resume text as it was when the application was submitted.",
-      example: "Frontend engineer with five years of React experience...",
-    }),
     hasFile: z.boolean().meta({
       description: "Whether the applicant's resume PDF is on record for this application.",
       example: true,
@@ -225,10 +221,6 @@ export type MyApplicationListResponse = z.infer<typeof myApplicationListResponse
 export const myApplicationDetailResponseSchema = z
   .object({
     ...myApplicationSummaryShape,
-    resumeSnapshot: z.string().meta({
-      description: "Resume text as it was when the application was submitted.",
-      example: "Frontend engineer with five years of React experience...",
-    }),
     skillsMatched: summaryShape.skillsMatched,
     skillsMissing: summaryShape.skillsMissing,
     hasFile: z.boolean().meta({

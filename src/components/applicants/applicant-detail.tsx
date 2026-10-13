@@ -352,12 +352,18 @@ export function ApplicantDetail({ id }: { id: string }) {
 
           <Card className={CARD_CLASS}>
             <h2 className="mb-3 text-base font-semibold">Resume</h2>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Plain text, as submitted with the application.
-            </p>
-            <div className="text-sm leading-[1.6] break-words whitespace-pre-wrap text-text">
-              {application.resumeSnapshot}
-            </div>
+            {application.hasFile ? (
+              <a
+                href={`/api/applications/${application.id}/file`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                Open resume (PDF)
+              </a>
+            ) : (
+              <p className="text-sm text-muted-foreground">No resume file on record.</p>
+            )}
           </Card>
         </div>
 

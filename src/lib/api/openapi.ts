@@ -78,6 +78,13 @@ const applicationIdParams = z.object({ id: applicationIdSchema });
 
 const openListingIdParams = z.object({ id: openListingIdSchema });
 
+const pdfResponse = {
+  description: "The resume PDF, served inline as raw bytes instead of the JSON envelope.",
+  content: {
+    "application/pdf": { schema: z.string().meta({ format: "binary" }) },
+  },
+};
+
 const NOT_APPLICANT = "Account is not an approved applicant.";
 
 export const openApiDocument = createDocument({
@@ -304,7 +311,7 @@ export const openApiDocument = createDocument({
     "/api/resumes/me/pdf": {
       post: {
         summary:
-          "Upload a text-based PDF resume, replacing any existing one. The PDF is not stored.",
+          "Upload a text-based PDF resume, replacing any existing one. The original PDF is stored and can be opened from the file endpoints. Extracted text is used internally and is never returned.",
         requestBody: {
           content: {
             "multipart/form-data": {
@@ -323,6 +330,43 @@ export const openApiDocument = createDocument({
           "411": errorResponse("Content-Length header is missing."),
           "413": errorResponse("File is larger than 4 MB."),
           "422": errorResponse("Not a PDF, or no readable text."),
+        },
+      },
+    },
+    "/api/resumes/me/file": {
+      get: {
+        summary: "Open the applicant's resume PDF",
+        responses: {
+          "200": pdfResponse,
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "404": errorResponse("No resume file on record."),
+        },
+      },
+    },
+    "/api/applications/me/{id}/file": {
+      get: {
+        summary: "Open the PDF the applicant sent with an application",
+        requestParams: { path: applicationIdParams },
+        responses: {
+          "200": pdfResponse,
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse(NOT_APPLICANT),
+          "404": errorResponse("Application or resume file not found."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/applications/{id}/file": {
+      get: {
+        summary: "Open the PDF an applicant sent with an application",
+        requestParams: { path: applicationIdParams },
+        responses: {
+          "200": pdfResponse,
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an approved recruiter."),
+          "404": errorResponse("Application or resume file not found."),
+          "422": errorResponse("Validation error."),
         },
       },
     },
@@ -371,7 +415,7 @@ export const openApiDocument = createDocument({
           "403": errorResponse(NOT_APPLICANT),
           "404": errorResponse("Listing not found."),
           "409": errorResponse(
-            "Conflict. Returned when the listing is no longer open, the applicant has no saved resume, the saved resume is not ready, or the applicant already has an active (submitted, viewed, shortlisted or interview) or rejected application for this listing. An applicant who withdrew can apply again while the listing is open.",
+            "Conflict. Returned when the listing is no longer open, the applicant has no saved resume, the saved resume is not ready or has no PDF on record, or the applicant already has an active (submitted, viewed, shortlisted or interview) or rejected application for this listing. An applicant who withdrew can apply again while the listing is open.",
           ),
           "422": errorResponse("Validation error."),
         },

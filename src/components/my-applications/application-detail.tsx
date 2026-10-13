@@ -242,14 +242,18 @@ export function ApplicationDetail({ id }: { id: string }) {
           />
           <Card className={CARD_CLASS}>
             <h2 className={CARD_TITLE_CLASS}>Resume you sent</h2>
-            <div
-              tabIndex={0}
-              role="region"
-              aria-label="Resume you sent"
-              className="max-h-96 overflow-y-auto text-sm leading-[1.6] break-words whitespace-pre-wrap text-text"
-            >
-              {application.resumeSnapshot}
-            </div>
+            {application.hasFile ? (
+              <a
+                href={`/api/applications/me/${application.id}/file`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                Open resume (PDF)
+              </a>
+            ) : (
+              <p className="text-sm text-muted-foreground">No resume file on record.</p>
+            )}
           </Card>
         </div>
 

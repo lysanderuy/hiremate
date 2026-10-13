@@ -21,10 +21,6 @@ export const resumeResponseSchema = z
       description: "Resume ID.",
       example: "4b1e7a52-93c0-4f1d-8a6e-2d5c9b7f3e10",
     }),
-    text: z.string().meta({
-      description: "Plain-text resume.",
-      example: "Frontend engineer with five years of React and TypeScript experience...",
-    }),
     source: resumeSourceSchema,
     state: resumeStateSchema,
     skills: z.array(z.string()).meta({

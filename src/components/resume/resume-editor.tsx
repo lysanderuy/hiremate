@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useReprocessResume, useResume } from "@/hooks/use-resume";
 import { useUploadResumePdf } from "@/hooks/use-upload-resume-pdf";
@@ -67,8 +67,24 @@ export function ResumeEditor() {
           <p className="text-xs text-muted-foreground">
             {data
               ? "Uploading a new PDF replaces your current resume. Your existing applications keep the resume you sent with them."
-              : "Your PDF is read for text and skills. We do not keep the file itself."}
+              : "We keep your PDF so you and the recruiters you apply to can open it. We also read it for skills."}
           </p>
+          {data?.hasFile ? (
+            <a
+              href="/api/resumes/me/file"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              Open resume (PDF)
+            </a>
+          ) : (
+            data && (
+              <p className="text-xs text-muted-foreground">
+                Upload your PDF again to attach it to your resume.
+              </p>
+            )
+          )}
         </Card>
 
         <div className="grid gap-4">

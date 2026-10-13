@@ -53,7 +53,6 @@ const summaryColumns = {
 const detailColumns = {
   ...summaryColumns,
   applicantEmail: profiles.email,
-  resumeSnapshot: applications.resumeSnapshot,
   hasFile: sql<boolean>`${applications.resumeFileId} is not null`,
   viewedAt: applications.viewedAt,
   jobTitle: jobs.title,
@@ -72,7 +71,7 @@ type SummaryRow = Pick<
   | "band"
 > & { applicantName: string | null };
 type DetailRow = SummaryRow &
-  Pick<Application, "resumeSnapshot" | "viewedAt"> & {
+  Pick<Application, "viewedAt"> & {
     applicantEmail: string;
     jobTitle: string;
     hasFile: boolean;
@@ -97,7 +96,6 @@ function toDetail(row: DetailRow): ApplicationDetailResponse {
   return {
     ...toSummary(row),
     applicantEmail: row.applicantEmail,
-    resumeSnapshot: row.resumeSnapshot,
     hasFile: row.hasFile,
     viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
     jobTitle: row.jobTitle,
@@ -143,7 +141,6 @@ const mineSummaryColumns = {
 
 const mineDetailColumns = {
   ...mineSummaryColumns,
-  resumeSnapshot: applications.resumeSnapshot,
   hasFile: sql<boolean>`${applications.resumeFileId} is not null`,
   skillsMatched: applications.skillsMatched,
   skillsMissing: applications.skillsMissing,
@@ -161,7 +158,7 @@ type MineSummaryRow = Pick<
   jobStatus: MyApplicationSummaryResponse["jobStatus"];
 };
 type MineDetailRow = MineSummaryRow &
-  Pick<Application, "resumeSnapshot" | "skillsMatched" | "skillsMissing" | "viewedAt"> & {
+  Pick<Application, "skillsMatched" | "skillsMissing" | "viewedAt"> & {
     hasFile: boolean;
   };
 
@@ -185,7 +182,6 @@ function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
 function toMineDetail(row: MineDetailRow): MyApplicationDetailResponse {
   return {
     ...toMineSummary(row),
-    resumeSnapshot: row.resumeSnapshot,
     hasFile: row.hasFile,
     skillsMatched: row.skillsMatched,
     skillsMissing: row.skillsMissing,
