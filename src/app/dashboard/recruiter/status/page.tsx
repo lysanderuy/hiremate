@@ -27,8 +27,8 @@ export default async function RecruiterStatusPage() {
       body: "You can still browse jobs.",
     },
   } as const;
-  if (profile.accountStatus === "suspended") redirect("/login");
-  const { icon, tone, title, body } = copy[profile.accountStatus];
+  const { icon, tone, title, body } =
+    profile.accountStatus === "pending" ? copy.pending : copy.rejected;
 
   return (
     <AuthSplit role="recruiter">
