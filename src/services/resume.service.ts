@@ -26,19 +26,24 @@ export const resumeService = {
     return row ? toResponse(row) : null;
   },
 
-  async getMyFile(userId: string): Promise<Buffer> {
+  async getMyFile(userId: string): Promise<{ data: Buffer; fileName: string }> {
     const [row] = await db
-      .select({ data: resumeFiles.data })
+      .select({ data: resumeFiles.data, fileName: resumeFiles.fileName })
       .from(resumes)
       .innerJoin(resumeFiles, eq(resumeFiles.id, resumes.fileId))
       .where(eq(resumes.applicantId, userId));
     if (!row) throw new HttpError("No resume file on record.", 404);
-    return row.data;
+    return row;
   },
 
   async saveMine(
     userId: string,
-    { text, source, file }: { text: string; source: ResumeSource; file: Uint8Array },
+    {
+      text,
+      source,
+      file,
+      fileName,
+    }: { text: string; source: ResumeSource; file: Uint8Array; fileName: string },
   ): Promise<ResumeResponse> {
     let skills: string[];
     try {
@@ -56,7 +61,12 @@ export const resumeService = {
 
       const [stored] = await tx
         .insert(resumeFiles)
-        .values({ ownerId: userId, data: Buffer.from(file), byteSize: file.byteLength })
+        .values({
+          ownerId: userId,
+          fileName,
+          data: Buffer.from(file),
+          byteSize: file.byteLength,
+        })
         .returning({ id: resumeFiles.id });
 
       const values = {

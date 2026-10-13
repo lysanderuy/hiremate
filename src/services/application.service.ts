@@ -430,25 +430,31 @@ export const applicationService = {
     });
   },
 
-  async getFileForRecruiter(recruiterId: string, applicationId: string): Promise<Buffer> {
+  async getFileForRecruiter(
+    recruiterId: string,
+    applicationId: string,
+  ): Promise<{ data: Buffer; fileName: string }> {
     const [row] = await db
-      .select({ data: resumeFiles.data })
+      .select({ data: resumeFiles.data, fileName: resumeFiles.fileName })
       .from(applications)
       .innerJoin(jobs, eq(jobs.id, applications.jobId))
       .innerJoin(resumeFiles, eq(resumeFiles.id, applications.resumeFileId))
       .where(and(eq(applications.id, applicationId), eq(jobs.recruiterId, recruiterId)));
     if (!row) throw new HttpError(NO_FILE_MESSAGE, 404);
-    return row.data;
+    return row;
   },
 
-  async getMyFile(userId: string, applicationId: string): Promise<Buffer> {
+  async getMyFile(
+    userId: string,
+    applicationId: string,
+  ): Promise<{ data: Buffer; fileName: string }> {
     const [row] = await db
-      .select({ data: resumeFiles.data })
+      .select({ data: resumeFiles.data, fileName: resumeFiles.fileName })
       .from(applications)
       .innerJoin(resumeFiles, eq(resumeFiles.id, applications.resumeFileId))
       .where(and(eq(applications.id, applicationId), eq(applications.applicantId, userId)));
     if (!row) throw new HttpError(NO_FILE_MESSAGE, 404);
-    return row.data;
+    return row;
   },
 
   async withdraw(userId: string, id: string): Promise<MyApplicationDetailResponse> {

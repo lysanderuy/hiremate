@@ -1,5 +1,14 @@
 import { sql } from "drizzle-orm";
-import { customType, integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  customType,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 import { profiles } from "./profiles";
 
@@ -12,15 +21,20 @@ const bytea = customType<{ data: Buffer }>({
   },
 });
 
-export const resumeFiles = pgTable("resume_files", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  ownerId: uuid("owner_id")
-    .notNull()
-    .references(() => profiles.id, { onDelete: "cascade" }),
-  data: bytea("data").notNull(),
-  byteSize: integer("byte_size").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const resumeFiles = pgTable(
+  "resume_files",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    fileName: text("file_name").notNull().default("resume.pdf"),
+    data: bytea("data").notNull(),
+    byteSize: integer("byte_size").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("resume_files_owner_id_idx").on(table.ownerId)],
+);
 
 export const resumes = pgTable("resumes", {
   id: uuid("id").primaryKey().defaultRandom(),

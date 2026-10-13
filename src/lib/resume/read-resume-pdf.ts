@@ -7,7 +7,9 @@ import { isPdfBytes, normalizeResumeText } from "./pdf-text";
 
 const UNREADABLE_MESSAGE = "We could not read text from this file. Upload a text-based PDF.";
 
-export async function readResumePdf(file: File): Promise<{ text: string; bytes: Uint8Array }> {
+export async function readResumePdf(
+  file: File,
+): Promise<{ text: string; bytes: Uint8Array; fileName: string }> {
   if (file.size > PDF_MAX_BYTES) throw new HttpError(PDF_SIZE_ERROR, 413);
   if (!hasPdfExtension(file.name)) throw new HttpError(PDF_TYPE_ERROR, 422);
 
@@ -26,5 +28,5 @@ export async function readResumePdf(file: File): Promise<{ text: string; bytes: 
   const text = normalizeResumeText(raw);
   if (text.length < MIN_RESUME_LENGTH) throw new HttpError(UNREADABLE_MESSAGE, 422);
   if (text.length > MAX_RESUME_LENGTH) throw new HttpError("This resume is too long.", 422);
-  return { text, bytes };
+  return { text, bytes, fileName: file.name };
 }

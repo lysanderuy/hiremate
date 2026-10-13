@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   check,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -58,6 +59,7 @@ export const applications = pgTable(
     uniqueIndex("applications_job_applicant_active_idx")
       .on(table.jobId, table.applicantId)
       .where(sql`${table.status} <> 'withdrawn'`),
+    index("applications_resume_file_id_idx").on(table.resumeFileId),
     check("applications_match_score_check", sql`${table.matchScore} between 0 and 100`),
   ],
 );
