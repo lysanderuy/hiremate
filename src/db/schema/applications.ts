@@ -37,9 +37,9 @@ export const applications = pgTable(
       .notNull()
       .references(() => profiles.id, { onDelete: "cascade" }),
     resumeSnapshot: text("resume_snapshot").notNull(),
-    resumeFileId: uuid("resume_file_id").references(() => resumeFiles.id, {
-      onDelete: "no action",
-    }),
+    resumeFileId: uuid("resume_file_id")
+      .notNull()
+      .references(() => resumeFiles.id, { onDelete: "no action" }),
     skillsMatched: text("skills_matched")
       .array()
       .notNull()

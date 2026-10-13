@@ -69,7 +69,7 @@ export function ResumeEditor() {
               ? "Uploading a new PDF replaces your current resume. Your existing applications keep the resume you sent with them."
               : "We keep your PDF so you and the recruiters you apply to can open it. We also read it for skills."}
           </p>
-          {data?.hasFile ? (
+          {data && (
             <a
               href="/api/resumes/me/file"
               target="_blank"
@@ -78,12 +78,6 @@ export function ResumeEditor() {
             >
               Open resume (PDF)
             </a>
-          ) : (
-            data && (
-              <p className="text-xs text-muted-foreground">
-                Upload your PDF again to attach it to your resume.
-              </p>
-            )
           )}
         </Card>
 

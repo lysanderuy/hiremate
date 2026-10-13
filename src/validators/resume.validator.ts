@@ -27,10 +27,6 @@ export const resumeResponseSchema = z
       description: "Skills found in the resume.",
       example: ["react", "typescript"],
     }),
-    hasFile: z.boolean().meta({
-      description: "Whether the original PDF is on record and can be opened.",
-      example: true,
-    }),
     updatedAt: z.string().datetime().meta({
       description: "Timestamp the resume was last saved.",
       example: "2026-10-06T09:30:00.000Z",

@@ -415,7 +415,7 @@ export const openApiDocument = createDocument({
           "403": errorResponse(NOT_APPLICANT),
           "404": errorResponse("Listing not found."),
           "409": errorResponse(
-            "Conflict. Returned when the listing is no longer open, the applicant has no saved resume, the saved resume is not ready or has no PDF on record, or the applicant already has an active (submitted, viewed, shortlisted or interview) or rejected application for this listing. An applicant who withdrew can apply again while the listing is open.",
+            "Conflict. Returned when the listing is no longer open, the applicant has no saved resume, the saved resume is not ready, or the applicant already has an active (submitted, viewed, shortlisted or interview) or rejected application for this listing. An applicant who withdrew can apply again while the listing is open.",
           ),
           "422": errorResponse("Validation error."),
         },

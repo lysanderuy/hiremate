@@ -12,7 +12,6 @@ import type { ResumeResponse } from "@/validators/resume.validator";
 function toResponse(row: Resume): ResumeResponse {
   return {
     id: row.id,
-    hasFile: row.fileId !== null,
     source: row.source,
     state: row.state,
     skills: row.skills,

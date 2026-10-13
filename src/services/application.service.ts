@@ -53,7 +53,6 @@ const summaryColumns = {
 const detailColumns = {
   ...summaryColumns,
   applicantEmail: profiles.email,
-  hasFile: sql<boolean>`${applications.resumeFileId} is not null`,
   viewedAt: applications.viewedAt,
   jobTitle: jobs.title,
 };
@@ -74,7 +73,6 @@ type DetailRow = SummaryRow &
   Pick<Application, "viewedAt"> & {
     applicantEmail: string;
     jobTitle: string;
-    hasFile: boolean;
   };
 
 function toSummary(row: SummaryRow): ApplicationSummaryResponse {
@@ -96,7 +94,6 @@ function toDetail(row: DetailRow): ApplicationDetailResponse {
   return {
     ...toSummary(row),
     applicantEmail: row.applicantEmail,
-    hasFile: row.hasFile,
     viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
     jobTitle: row.jobTitle,
   };
@@ -141,7 +138,6 @@ const mineSummaryColumns = {
 
 const mineDetailColumns = {
   ...mineSummaryColumns,
-  hasFile: sql<boolean>`${applications.resumeFileId} is not null`,
   skillsMatched: applications.skillsMatched,
   skillsMissing: applications.skillsMissing,
   viewedAt: applications.viewedAt,
@@ -158,9 +154,7 @@ type MineSummaryRow = Pick<
   jobStatus: MyApplicationSummaryResponse["jobStatus"];
 };
 type MineDetailRow = MineSummaryRow &
-  Pick<Application, "skillsMatched" | "skillsMissing" | "viewedAt"> & {
-    hasFile: boolean;
-  };
+  Pick<Application, "skillsMatched" | "skillsMissing" | "viewedAt">;
 
 function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
   return {
@@ -182,7 +176,6 @@ function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
 function toMineDetail(row: MineDetailRow): MyApplicationDetailResponse {
   return {
     ...toMineSummary(row),
-    hasFile: row.hasFile,
     skillsMatched: row.skillsMatched,
     skillsMissing: row.skillsMissing,
     viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
@@ -392,10 +385,6 @@ export const applicationService = {
       if (!resume) throw new HttpError("Add your resume before applying.", 409);
       if (resume.state !== "ready") {
         throw new HttpError("Your resume is not ready. Save it again before applying.", 409);
-      }
-
-      if (!resume.fileId) {
-        throw new HttpError("Upload your resume PDF again before applying.", 409);
       }
 
       const jobSkillRows = await tx

@@ -243,18 +243,14 @@ export function ApplicationDetail({ id }: { id: string }) {
           />
           <Card className={CARD_CLASS}>
             <h2 className={CARD_TITLE_CLASS}>Resume you sent</h2>
-            {application.hasFile ? (
-              <a
-                href={`/api/applications/me/${application.id}/file`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                Open resume (PDF)
-              </a>
-            ) : (
-              <p className="text-sm text-muted-foreground">No resume file on record.</p>
-            )}
+            <a
+              href={`/api/applications/me/${application.id}/file`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              Open resume (PDF)
+            </a>
           </Card>
         </div>
 
