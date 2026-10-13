@@ -3,7 +3,7 @@ import "server-only";
 import { and, count, desc, eq, gte, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/db";
-import { applications, companies, jobSkills, jobs, resumes, skills } from "@/db/schema";
+import { applications, companies, jobSkills, jobs, profiles, resumes, skills } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
 import { scoreMatch } from "@/lib/matching/score";
@@ -161,8 +161,10 @@ function matchRanking(resumeSkills: string[]) {
   return { stats, ratio };
 }
 
+const visibleListing: SQL[] = [eq(jobs.status, "open"), eq(profiles.accountStatus, "active")];
+
 function filterConditions({ q, location, type, minPay }: ListOpenListingsQuery): SQL[] {
-  const conditions: SQL[] = [eq(jobs.status, "open")];
+  const conditions: SQL[] = [...visibleListing];
 
   if (q) {
     const pattern = `%${escapeLike(q)}%`;
@@ -195,6 +197,7 @@ export const openListingService = {
           .select(listingColumns)
           .from(jobs)
           .innerJoin(companies, eq(companies.id, jobs.companyId))
+          .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
           .leftJoin(ranking.stats, eq(ranking.stats.jobId, jobs.id))
           .where(where)
           .orderBy(sql`${ranking.ratio} desc nulls last`, desc(jobs.createdAt), desc(jobs.id))
@@ -204,6 +207,7 @@ export const openListingService = {
           .select(listingColumns)
           .from(jobs)
           .innerJoin(companies, eq(companies.id, jobs.companyId))
+          .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
           .where(where)
           .orderBy(desc(jobs.createdAt), desc(jobs.id))
           .limit(OPEN_LISTING_PAGE_SIZE)
@@ -215,6 +219,7 @@ export const openListingService = {
         .select({ total: count() })
         .from(jobs)
         .innerJoin(companies, eq(companies.id, jobs.companyId))
+        .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
         .where(where),
     ]);
 
@@ -231,7 +236,8 @@ export const openListingService = {
       .select({ ...listingColumns, description: jobs.description })
       .from(jobs)
       .innerJoin(companies, eq(companies.id, jobs.companyId))
-      .where(and(eq(jobs.id, id), eq(jobs.status, "open")));
+      .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
+      .where(and(eq(jobs.id, id), ...visibleListing));
     if (!row) throw new HttpError("Listing not found", 404);
 
     const [item] = await decorate(userId, [row], await loadResume(userId));
@@ -251,10 +257,11 @@ export const openListingService = {
       .select(listingColumns)
       .from(jobs)
       .innerJoin(companies, eq(companies.id, jobs.companyId))
+      .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
       .innerJoin(stats, eq(stats.jobId, jobs.id))
       .where(
         and(
-          eq(jobs.status, "open"),
+          ...visibleListing,
           sql`${ratio} > 0`,
           sql`not exists (
             select 1 from ${applications}

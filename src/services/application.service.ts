@@ -358,12 +358,15 @@ export const applicationService = {
   ): Promise<MyApplicationDetailResponse> {
     return db.transaction(async (tx) => {
       const [job] = await tx
-        .select({ status: jobs.status })
+        .select({ status: jobs.status, recruiterStatus: profiles.accountStatus })
         .from(jobs)
+        .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
         .where(eq(jobs.id, listingId))
-        .for("share");
+        .for("share", { of: jobs });
       if (!job) throw new HttpError("Listing not found", 404);
-      if (job.status !== "open") throw new HttpError("This listing is no longer open.", 409);
+      if (job.status !== "open" || job.recruiterStatus !== "active") {
+        throw new HttpError("This listing is no longer open.", 409);
+      }
 
       const [resume] = await tx
         .select({ text: resumes.text, state: resumes.state, skills: resumes.skills })
