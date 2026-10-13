@@ -385,7 +385,8 @@ export const applicationService = {
           skills: resumes.skills,
         })
         .from(resumes)
-        .where(eq(resumes.applicantId, userId));
+        .where(eq(resumes.applicantId, userId))
+        .for("share", { of: resumes });
       if (!resume) throw new HttpError("Add your resume before applying.", 409);
       if (resume.state !== "ready") {
         throw new HttpError("Your resume is not ready. Save it again before applying.", 409);
