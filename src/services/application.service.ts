@@ -23,7 +23,7 @@ import {
   toApplicantStatus,
   type ApplicantApplicationStatus,
 } from "@/types/applications";
-import type { EmploymentType } from "@/types/jobs";
+import type { EmploymentType, JobStatus } from "@/types/jobs";
 import type {
   ApplicationDetailResponse,
   ApplicationListResponse,
@@ -131,7 +131,7 @@ const mineSummaryColumns = {
   companyName: companies.name,
   location: jobs.location,
   employmentType: jobs.employmentType,
-  jobStatus: jobs.status,
+  jobStatus: sql<JobStatus>`case when ${jobs.status} = 'open' and ${profiles.accountStatus} <> 'active' then 'closed' else ${jobs.status} end`,
   status: applications.status,
   matchScore: applications.matchScore,
   band: applications.band,
@@ -195,6 +195,7 @@ function selectMine(executor: Pick<typeof db, "select">, userId: string, id: str
     .from(applications)
     .innerJoin(jobs, eq(jobs.id, applications.jobId))
     .innerJoin(companies, eq(companies.id, jobs.companyId))
+    .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
     .where(and(eq(applications.id, id), eq(applications.applicantId, userId)));
 }
 
@@ -329,6 +330,7 @@ export const applicationService = {
         .from(applications)
         .innerJoin(jobs, eq(jobs.id, applications.jobId))
         .innerJoin(companies, eq(companies.id, jobs.companyId))
+        .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
         .where(and(eq(applications.applicantId, userId), statusCondition))
         .orderBy(desc(applications.createdAt), desc(applications.id)),
       db

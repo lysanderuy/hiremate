@@ -194,6 +194,7 @@ export function ApplicationDetail({ id }: { id: string }) {
               <span>{application.location}</span>
               <span>{EMPLOYMENT_TYPE_LABELS[application.employmentType]}</span>
               <span>Applied {formatDate(application.createdAt)}</span>
+              {application.jobStatus !== "open" && <span>Listing closed</span>}
             </div>
           </div>
           <div className="grid gap-2 sm:justify-items-end">
