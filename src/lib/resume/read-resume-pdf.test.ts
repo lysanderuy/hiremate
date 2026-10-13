@@ -22,10 +22,12 @@ async function rejection(promise: Promise<unknown>): Promise<HttpError> {
 }
 
 describe("readResumePdf", () => {
-  it("returns normalised text for a valid text PDF", async () => {
+  it("returns normalised text and the original bytes for a valid text PDF", async () => {
     const body = "Experienced engineer with TypeScript and React. ".repeat(6);
-    const text = await readResumePdf(pdfFile(buildPdf(body)));
+    const pdf = buildPdf(body);
+    const { text, bytes } = await readResumePdf(pdfFile(pdf));
     expect(text).toContain("Experienced engineer with TypeScript and React.");
+    expect(bytes).toEqual(pdf);
   });
 
   it("rejects a file over the size limit", async () => {

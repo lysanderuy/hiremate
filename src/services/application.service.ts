@@ -10,6 +10,7 @@ import {
   jobSkills,
   jobs,
   profiles,
+  resumeFiles,
   resumes,
   skills,
   type Application,
@@ -53,6 +54,7 @@ const detailColumns = {
   ...summaryColumns,
   applicantEmail: profiles.email,
   resumeSnapshot: applications.resumeSnapshot,
+  hasFile: sql<boolean>`${applications.resumeFileId} is not null`,
   viewedAt: applications.viewedAt,
   jobTitle: jobs.title,
 };
@@ -70,7 +72,11 @@ type SummaryRow = Pick<
   | "band"
 > & { applicantName: string | null };
 type DetailRow = SummaryRow &
-  Pick<Application, "resumeSnapshot" | "viewedAt"> & { applicantEmail: string; jobTitle: string };
+  Pick<Application, "resumeSnapshot" | "viewedAt"> & {
+    applicantEmail: string;
+    jobTitle: string;
+    hasFile: boolean;
+  };
 
 function toSummary(row: SummaryRow): ApplicationSummaryResponse {
   return {
@@ -92,6 +98,7 @@ function toDetail(row: DetailRow): ApplicationDetailResponse {
     ...toSummary(row),
     applicantEmail: row.applicantEmail,
     resumeSnapshot: row.resumeSnapshot,
+    hasFile: row.hasFile,
     viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
     jobTitle: row.jobTitle,
   };
@@ -137,6 +144,7 @@ const mineSummaryColumns = {
 const mineDetailColumns = {
   ...mineSummaryColumns,
   resumeSnapshot: applications.resumeSnapshot,
+  hasFile: sql<boolean>`${applications.resumeFileId} is not null`,
   skillsMatched: applications.skillsMatched,
   skillsMissing: applications.skillsMissing,
   viewedAt: applications.viewedAt,
@@ -153,7 +161,9 @@ type MineSummaryRow = Pick<
   jobStatus: MyApplicationSummaryResponse["jobStatus"];
 };
 type MineDetailRow = MineSummaryRow &
-  Pick<Application, "resumeSnapshot" | "skillsMatched" | "skillsMissing" | "viewedAt">;
+  Pick<Application, "resumeSnapshot" | "skillsMatched" | "skillsMissing" | "viewedAt"> & {
+    hasFile: boolean;
+  };
 
 function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
   return {
@@ -176,6 +186,7 @@ function toMineDetail(row: MineDetailRow): MyApplicationDetailResponse {
   return {
     ...toMineSummary(row),
     resumeSnapshot: row.resumeSnapshot,
+    hasFile: row.hasFile,
     skillsMatched: row.skillsMatched,
     skillsMissing: row.skillsMissing,
     viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
@@ -190,6 +201,8 @@ function selectMine(executor: Pick<typeof db, "select">, userId: string, id: str
     .innerJoin(companies, eq(companies.id, jobs.companyId))
     .where(and(eq(applications.id, id), eq(applications.applicantId, userId)));
 }
+
+const NO_FILE_MESSAGE = "No resume file on record.";
 
 function notFound(): HttpError {
   return new HttpError("Application not found", 404);
@@ -369,12 +382,21 @@ export const applicationService = {
       }
 
       const [resume] = await tx
-        .select({ text: resumes.text, state: resumes.state, skills: resumes.skills })
+        .select({
+          text: resumes.text,
+          fileId: resumes.fileId,
+          state: resumes.state,
+          skills: resumes.skills,
+        })
         .from(resumes)
         .where(eq(resumes.applicantId, userId));
       if (!resume) throw new HttpError("Add your resume before applying.", 409);
       if (resume.state !== "ready") {
         throw new HttpError("Your resume is not ready. Save it again before applying.", 409);
+      }
+
+      if (!resume.fileId) {
+        throw new HttpError("Upload your resume PDF again before applying.", 409);
       }
 
       const jobSkillRows = await tx
@@ -394,6 +416,7 @@ export const applicationService = {
           jobId: listingId,
           applicantId: userId,
           resumeSnapshot: resume.text,
+          resumeFileId: resume.fileId,
           skillsMatched: result?.matched ?? [],
           skillsMissing: result?.missing ?? [],
           matchScore: result?.score ?? null,
@@ -409,6 +432,27 @@ export const applicationService = {
       const [row] = await selectMine(tx, userId, created.id);
       return toMineDetail(row);
     });
+  },
+
+  async getFileForRecruiter(recruiterId: string, applicationId: string): Promise<Buffer> {
+    const [row] = await db
+      .select({ data: resumeFiles.data })
+      .from(applications)
+      .innerJoin(jobs, eq(jobs.id, applications.jobId))
+      .innerJoin(resumeFiles, eq(resumeFiles.id, applications.resumeFileId))
+      .where(and(eq(applications.id, applicationId), eq(jobs.recruiterId, recruiterId)));
+    if (!row) throw new HttpError(NO_FILE_MESSAGE, 404);
+    return row.data;
+  },
+
+  async getMyFile(userId: string, applicationId: string): Promise<Buffer> {
+    const [row] = await db
+      .select({ data: resumeFiles.data })
+      .from(applications)
+      .innerJoin(resumeFiles, eq(resumeFiles.id, applications.resumeFileId))
+      .where(and(eq(applications.id, applicationId), eq(applications.applicantId, userId)));
+    if (!row) throw new HttpError(NO_FILE_MESSAGE, 404);
+    return row.data;
   },
 
   async withdraw(userId: string, id: string): Promise<MyApplicationDetailResponse> {

@@ -1,10 +1,10 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { HttpError } from "@/lib/api/errors";
-import { resumes, type Resume } from "@/db/schema";
+import { applications, resumeFiles, resumes, type Resume } from "@/db/schema";
 import { skillService } from "@/services/skill.service";
 import type { ResumeSource } from "@/types/resumes";
 import type { ResumeResponse } from "@/validators/resume.validator";
@@ -13,6 +13,7 @@ function toResponse(row: Resume): ResumeResponse {
   return {
     id: row.id,
     text: row.text,
+    hasFile: row.fileId !== null,
     source: row.source,
     state: row.state,
     skills: row.skills,
@@ -26,9 +27,19 @@ export const resumeService = {
     return row ? toResponse(row) : null;
   },
 
+  async getMyFile(userId: string): Promise<Buffer> {
+    const [row] = await db
+      .select({ data: resumeFiles.data })
+      .from(resumes)
+      .innerJoin(resumeFiles, eq(resumeFiles.id, resumes.fileId))
+      .where(eq(resumes.applicantId, userId));
+    if (!row) throw new HttpError("No resume file on record.", 404);
+    return row.data;
+  },
+
   async saveMine(
     userId: string,
-    { text, source }: { text: string; source: ResumeSource },
+    { text, source, file }: { text: string; source: ResumeSource; file: Uint8Array },
   ): Promise<ResumeResponse> {
     let skills: string[];
     try {
@@ -38,12 +49,44 @@ export const resumeService = {
       throw new HttpError("We could not process your resume. Please try again.", 503);
     }
 
-    const values = { text, source, state: "ready" as const, skills, updatedAt: new Date() };
-    const [row] = await db
-      .insert(resumes)
-      .values({ applicantId: userId, ...values })
-      .onConflictDoUpdate({ target: resumes.applicantId, set: values })
-      .returning();
+    const row = await db.transaction(async (tx) => {
+      const [current] = await tx
+        .select({ fileId: resumes.fileId })
+        .from(resumes)
+        .where(eq(resumes.applicantId, userId));
+
+      const [stored] = await tx
+        .insert(resumeFiles)
+        .values({ ownerId: userId, data: Buffer.from(file), byteSize: file.byteLength })
+        .returning({ id: resumeFiles.id });
+
+      const values = {
+        text,
+        source,
+        fileId: stored.id,
+        state: "ready" as const,
+        skills,
+        updatedAt: new Date(),
+      };
+      const [saved] = await tx
+        .insert(resumes)
+        .values({ applicantId: userId, ...values })
+        .onConflictDoUpdate({ target: resumes.applicantId, set: values })
+        .returning();
+
+      if (current?.fileId) {
+        await tx
+          .delete(resumeFiles)
+          .where(
+            and(
+              eq(resumeFiles.id, current.fileId),
+              sql`not exists (select 1 from ${applications} where ${applications.resumeFileId} = ${resumeFiles.id})`,
+            ),
+          );
+      }
+
+      return saved;
+    });
 
     return toResponse(row);
   },

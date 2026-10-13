@@ -22,8 +22,10 @@ export async function POST(request: Request) {
     const file = (await request.formData()).get("file");
     if (!(file instanceof File)) throw new HttpError(PDF_TYPE_ERROR, 422);
 
-    const text = await readResumePdf(file);
-    return apiSuccess(await resumeService.saveMine(auth.user.id, { text, source: "pdf" }));
+    const { text, bytes } = await readResumePdf(file);
+    return apiSuccess(
+      await resumeService.saveMine(auth.user.id, { text, source: "pdf", file: bytes }),
+    );
   } catch (error) {
     return handleApiError(error);
   }

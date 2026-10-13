@@ -133,6 +133,10 @@ export const applicationDetailResponseSchema = z
       description: "Resume text as it was when the application was submitted.",
       example: "Frontend engineer with five years of React experience...",
     }),
+    hasFile: z.boolean().meta({
+      description: "Whether the applicant's resume PDF is on record for this application.",
+      example: true,
+    }),
     viewedAt: z.string().datetime().nullable().meta({
       description: "Timestamp a recruiter first opened the application, or null.",
       example: "2026-01-02T08:00:00.000Z",
@@ -227,6 +231,10 @@ export const myApplicationDetailResponseSchema = z
     }),
     skillsMatched: summaryShape.skillsMatched,
     skillsMissing: summaryShape.skillsMissing,
+    hasFile: z.boolean().meta({
+      description: "Whether the applicant's resume PDF is on record for this application.",
+      example: true,
+    }),
     viewedAt: z.string().datetime().nullable().meta({
       description: "Timestamp a recruiter first opened the application, or null.",
       example: "2026-01-02T08:00:00.000Z",
