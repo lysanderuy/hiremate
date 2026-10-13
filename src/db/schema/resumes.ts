@@ -45,7 +45,7 @@ export const resumes = pgTable("resumes", {
   text: text("text").notNull(),
   fileId: uuid("file_id")
     .notNull()
-    .references(() => resumeFiles.id, { onDelete: "restrict" }),
+    .references(() => resumeFiles.id, { onDelete: "no action" }),
   source: resumeSource("source").notNull().default("pdf"),
   state: resumeState("state").notNull().default("ready"),
   skills: text("skills")
