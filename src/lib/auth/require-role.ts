@@ -16,6 +16,7 @@ export async function getSessionProfile() {
 
   const profile = await profileService.getById(user.id);
   if (!profile) redirect("/login");
+  if (profile.accountStatus === "suspended") redirect("/api/auth/logout");
 
   return { user, profile };
 }

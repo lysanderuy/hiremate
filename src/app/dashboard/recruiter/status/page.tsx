@@ -1,4 +1,4 @@
-import { CircleAlert, Clock, Lock } from "lucide-react";
+import { CircleAlert, Clock } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -26,13 +26,8 @@ export default async function RecruiterStatusPage() {
       title: "Your account was not approved",
       body: "You can still browse jobs.",
     },
-    suspended: {
-      icon: Lock,
-      tone: "warn",
-      title: "This account is suspended",
-      body: "You cannot post listings or review applicants while it is suspended.",
-    },
   } as const;
+  if (profile.accountStatus === "suspended") redirect("/login");
   const { icon, tone, title, body } = copy[profile.accountStatus];
 
   return (
