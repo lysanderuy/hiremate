@@ -1,5 +1,6 @@
 "use client";
 
+import { Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -62,7 +63,7 @@ function ApplicationRow({
         <ApplicationStatusPill status={application.status} />
       </Td>
       <Td className="whitespace-nowrap">
-        <ScoreCell score={application.matchScore} />
+        <ScoreCell score={application.matchScore} band={application.band} />
       </Td>
       <Td className="whitespace-nowrap max-sm:hidden">{formatDate(application.createdAt)}</Td>
       <Td className="whitespace-nowrap max-sm:hidden">{formatDate(application.statusChangedAt)}</Td>
@@ -87,6 +88,7 @@ function EmptyState({ status }: { status: StatusFilter }) {
           : "Applications with this status show up here."}
       </p>
       <Link href={JOBS_PATH} className={buttonVariants({ size: "sm" })}>
+        <Search aria-hidden="true" />
         Browse jobs
       </Link>
     </div>
