@@ -1,72 +1,1947 @@
 [
-  { "name": "javascript", "aliases": ["js"], "isActive": true },
-  { "name": "typescript", "aliases": ["ts"], "isActive": true },
-  { "name": "python", "aliases": [], "isActive": true },
-  { "name": "java", "aliases": [], "isActive": true },
-  { "name": "sql", "aliases": [], "isActive": true },
-  { "name": "postgresql", "aliases": ["postgres", "psql"], "isActive": true },
-  { "name": "mongodb", "aliases": ["mongo"], "isActive": true },
-  { "name": "node.js", "aliases": ["node", "nodejs"], "isActive": true },
-  { "name": "react", "aliases": ["reactjs"], "isActive": true },
-  { "name": "next.js", "aliases": ["nextjs"], "isActive": true },
-  { "name": "angular", "aliases": [], "isActive": true },
-  { "name": "vue", "aliases": ["vuejs"], "isActive": true },
-  { "name": "php", "aliases": [], "isActive": true },
-  { "name": "ruby", "aliases": [], "isActive": true },
-  { "name": "golang", "aliases": [], "isActive": true },
-  { "name": "c++", "aliases": [], "isActive": true },
-  { "name": "c#", "aliases": ["csharp"], "isActive": true },
-  { "name": "html", "aliases": [], "isActive": true },
-  { "name": "css", "aliases": [], "isActive": true },
-  { "name": "tailwind", "aliases": ["tailwindcss"], "isActive": true },
-  { "name": "docker", "aliases": [], "isActive": true },
-  { "name": "kubernetes", "aliases": ["k8s"], "isActive": true },
-  { "name": "aws", "aliases": ["amazon web services"], "isActive": true },
-  { "name": "azure", "aliases": ["microsoft azure"], "isActive": true },
-  { "name": "git", "aliases": [], "isActive": true },
-  { "name": "linux", "aliases": [], "isActive": true },
-  { "name": "graphql", "aliases": [], "isActive": true },
-  { "name": "rest api", "aliases": ["restful api", "rest apis"], "isActive": true },
-  { "name": "power bi", "aliases": ["powerbi"], "isActive": true },
-  { "name": "tableau", "aliases": [], "isActive": true },
-  { "name": "excel", "aliases": ["ms excel", "microsoft excel"], "isActive": true },
-  { "name": "word", "aliases": ["ms word", "microsoft word"], "isActive": true },
-  { "name": "powerpoint", "aliases": ["ms powerpoint", "microsoft powerpoint"], "isActive": true },
-  { "name": "outlook", "aliases": ["ms outlook", "microsoft outlook"], "isActive": true },
-  { "name": "jira", "aliases": [], "isActive": true },
-  { "name": "figma", "aliases": [], "isActive": true },
-  { "name": "photoshop", "aliases": ["adobe photoshop"], "isActive": true },
-  { "name": "illustrator", "aliases": ["adobe illustrator"], "isActive": true },
-  { "name": "customer service", "aliases": ["customer support"], "isActive": true },
-  { "name": "project management", "aliases": [], "isActive": true },
-  { "name": "bookkeeping", "aliases": [], "isActive": true },
-  { "name": "payroll", "aliases": [], "isActive": true },
-  { "name": "data entry", "aliases": [], "isActive": true },
-  { "name": "inventory management", "aliases": [], "isActive": true },
-  { "name": "scheduling", "aliases": [], "isActive": true },
-  { "name": "budgeting", "aliases": [], "isActive": true },
-  { "name": "social media", "aliases": ["social media management"], "isActive": true },
-  { "name": "recruiting", "aliases": ["talent acquisition"], "isActive": true },
-  { "name": "negotiation", "aliases": [], "isActive": true },
-  { "name": "quickbooks", "aliases": [], "isActive": true },
-  { "name": "sap", "aliases": [], "isActive": true },
-  { "name": "salesforce", "aliases": [], "isActive": true },
-  { "name": "crm", "aliases": ["customer relationship management"], "isActive": true },
-  { "name": "seo", "aliases": ["search engine optimization"], "isActive": true },
-  { "name": "copywriting", "aliases": [], "isActive": true },
-  { "name": "data analysis", "aliases": ["data analytics"], "isActive": true },
-  { "name": "accounting", "aliases": [], "isActive": true },
-  { "name": "go", "aliases": [], "isActive": false },
-  { "name": "flow", "aliases": [], "isActive": false },
-  { "name": "spring", "aliases": [], "isActive": false },
-  { "name": "express", "aliases": [], "isActive": false },
-  { "name": "unity", "aliases": [], "isActive": false },
-  { "name": "terminal", "aliases": [], "isActive": false },
-  { "name": "assembly", "aliases": [], "isActive": false },
-  { "name": "zoom", "aliases": [], "isActive": false },
-  { "name": "access", "aliases": [], "isActive": false },
-  { "name": "swift", "aliases": [], "isActive": false },
-  { "name": "spark", "aliases": [], "isActive": false },
-  { "name": "puppet", "aliases": [], "isActive": false },
-  { "name": "chef", "aliases": [], "isActive": false }
+  {
+    "name": ".net",
+    "aliases": [".net core", "dotnet"],
+    "isActive": true
+  },
+  {
+    "name": "active directory",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ada",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "adobe acrobat",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "adobe after effects",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "adobe creative cloud",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "adobe illustrator",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "adobe indesign",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "adobe photoshop",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "airflow",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "airtable",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ajax",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "alteryx",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "amazon dynamodb",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "amazon elastic compute cloud ec2",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "amazon redshift",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "amazon web services",
+    "aliases": ["aws"],
+    "isActive": true
+  },
+  {
+    "name": "amazon web services aws cloudformation",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "analytical",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "analyze",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "angular",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "angular.js",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ansible",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache airflow",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache cassandra",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache hadoop",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache hive",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache kafka",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache maven",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache spark",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache subversion svn",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apache tomcat",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apl",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apple ios",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apple macos",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "apple safari",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "arch",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "asana",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "asp.net",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "asp.net core",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "atlassian",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "atlassian bitbucket",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "atlassian confluence",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "atlassian jira",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "aurora",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "autodesk autocad",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "autodesk autocad civil 3d",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "autodesk revit",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "bash",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "bentley microstation",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "bigquery",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "billing",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "bitbucket",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "blazor",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "bootstrap",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "border gateway protocol bgp",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "c programming",
+    "aliases": ["c language"],
+    "isActive": true
+  },
+  {
+    "name": "c#",
+    "aliases": ["csharp"],
+    "isActive": true
+  },
+  {
+    "name": "c++",
+    "aliases": ["cpp"],
+    "isActive": true
+  },
+  {
+    "name": "call center",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "canva",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "capacitor",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "cascading style sheets css",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "cassandra",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "centos",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "chainer",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ci/cd",
+    "aliases": ["continuous integration"],
+    "isActive": true
+  },
+  {
+    "name": "cisco webex",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "clickup",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "clojure",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "cobol",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "codecommit",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "cognos",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "colocation",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "computer vision",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "confluence",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "cordova",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "couchbase",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "couchdb",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "css",
+    "aliases": ["css3"],
+    "isActive": true
+  },
+  {
+    "name": "dart",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "dassault systemes solidworks",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "data entry",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "data management",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "data visualization",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "databricks",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "datarobot",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "dax",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "db2",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "debian",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "debugging",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "deep learning",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "delphi",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "deployment",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "digitalocean",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "dingtalk",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "django",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "dlib",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "docker",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "dplyr",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "drupal",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "dynamodb",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "eclinicalworks ehr",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "eclipse ide",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "elasticsearch",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "electron",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "elixir",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "encryption",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "epic systems",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "erlang",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "esri arcgis",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "estimating",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "express.js",
+    "aliases": ["expressjs"],
+    "isActive": true
+  },
+  {
+    "name": "extensible markup language xml",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "f#",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "fastapi",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "fastify",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "fedora",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "figma",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "firebase",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "firestore",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "flask",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "flutter",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "fortran",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "gatsby",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "gdpr",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ggplot2",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "git",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "github",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "gitlab",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "golang",
+    "aliases": ["go lang"],
+    "isActive": true
+  },
+  {
+    "name": "google analytics",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "google android",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "google angular",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "google chat",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "google cloud platform",
+    "aliases": ["gcp"],
+    "isActive": true
+  },
+  {
+    "name": "google docs",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "google looker analytics",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "google sheets",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "google workspace",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "grafana labs grafana cloud",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "graphql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "groovy",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "hadoop",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "haskell",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "henry schein dentrix",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "heroku",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "hibernate orm",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "homebrew",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "html",
+    "aliases": ["html5"],
+    "isActive": true
+  },
+  {
+    "name": "hubspot",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "hugging face",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "hypertext markup language html",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ibm cloud",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ibm db2",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ibm spss statistics",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ibm terraform",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ibm websphere mq",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "imaging",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "informatica",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "intuit quickbooks",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "intuit turbotax",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ionic",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "java",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "javascript",
+    "aliases": ["ecmascript", "js"],
+    "isActive": true
+  },
+  {
+    "name": "javascript object notation json",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "jenkins",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "jenkins ci",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "jira",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "job posting",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "jquery",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "julia",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "julia language",
+    "aliases": ["julialang"],
+    "isActive": true
+  },
+  {
+    "name": "junit",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "jupyter",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "kafka",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "kali",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "keras",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "kotlin",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "kronos workforce timekeeper",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "kubernetes",
+    "aliases": ["k8s"],
+    "isActive": true
+  },
+  {
+    "name": "laravel",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "linkedin",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "linode",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "linux",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "lisp",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "looker",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "lua",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "machine learning",
+    "aliases": ["ml"],
+    "isActive": true
+  },
+  {
+    "name": "machine operation",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "macos",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mariadb",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "marketo marketing automation",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mathematical",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "matlab",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "matplotlib",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mattermost",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "meditech",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft .net framework",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft access",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft active directory",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft active server pages asp",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft asp.net",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft azure",
+    "aliases": ["azure"],
+    "isActive": true
+  },
+  {
+    "name": "microsoft edge",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft excel",
+    "aliases": ["excel"],
+    "isActive": true
+  },
+  {
+    "name": "microsoft lists",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft office",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft outlook",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft power automate",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft power bi",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft power platform",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft powerpoint",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft powershell",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft project",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft sharepoint",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft sql server",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft team foundation server",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft teams",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft visio",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft visual basic",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft visual studio",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft windows",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft windows server",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microsoft word",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "microstrategy",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mlpack",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mlr",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "modeling",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "monday.com",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mongodb",
+    "aliases": ["mongo"],
+    "isActive": true
+  },
+  {
+    "name": "mozilla firefox",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ms access",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "msaccess",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "multitask",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mxnet",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "mysql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "natural language processing",
+    "aliases": ["nlp"],
+    "isActive": true
+  },
+  {
+    "name": "neo4j",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "next.js",
+    "aliases": ["nextjs"],
+    "isActive": true
+  },
+  {
+    "name": "nltk",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "no-sql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "node.js",
+    "aliases": ["node", "nodejs"],
+    "isActive": true
+  },
+  {
+    "name": "nosql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "npm",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "nuix",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "numpy",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "objective-c",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ocaml",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "opencv",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "openstack",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "optimization",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "oracle",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "oracle cloud",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "oracle database",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "oracle java",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "oracle peoplesoft",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "oracle pl/sql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "oracle sql developer",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "outlook",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ovh",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "pandas",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "pascal",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "perl",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "pharmaceutical",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "php",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "planner",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "play framework",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "plotly",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "postgresql",
+    "aliases": ["postgres", "psql"],
+    "isActive": true
+  },
+  {
+    "name": "power bi",
+    "aliases": ["powerbi"],
+    "isActive": true
+  },
+  {
+    "name": "powerpoint",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "powershell",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "pricing",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "procore",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "programming languages",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "prometheus",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "pulumi",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "puppet",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "pyspark",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "python",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "pytorch",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "qlik",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "qt",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "r programming",
+    "aliases": ["r language"],
+    "isActive": true
+  },
+  {
+    "name": "react",
+    "aliases": ["react.js", "reactjs"],
+    "isActive": true
+  },
+  {
+    "name": "red hat enterprise linux",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "red hat openshift",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "redhat",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "redis",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "redshift",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "relational database",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "report writing",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "requirements analysis",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "resource management",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "rest api",
+    "aliases": ["rest apis", "restful api", "restful apis"],
+    "isActive": true
+  },
+  {
+    "name": "ringcentral",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "rshiny",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ruby",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ruby on rails",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "rust",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "salesforce",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sap",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sap concur",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sap erp",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sas",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sass",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "scala",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "scheduling",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "scikit-learn",
+    "aliases": ["sklearn"],
+    "isActive": true
+  },
+  {
+    "name": "scripting",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "seaborn",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "search engine optimization seo",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "selenium",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "servicenow",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sharepoint",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "shell scripting",
+    "aliases": ["bash scripting", "shell script", "shell scripts"],
+    "isActive": true
+  },
+  {
+    "name": "shogun",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "simulation",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "slack",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "smartsheet",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "snowflake",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "software testing",
+    "aliases": ["automated testing", "manual testing", "qa testing", "test automation"],
+    "isActive": true
+  },
+  {
+    "name": "solidity",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "spark",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "splunk",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "splunk enterprise",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "spreadsheet",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "spring boot",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "spring framework",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "spss",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sql server",
+    "aliases": ["ms sql", "mssql"],
+    "isActive": true
+  },
+  {
+    "name": "sqlite",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "sqlserver",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ssis",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "ssrs",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "structured query language sql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "suse",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "svelte",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "svn",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "swift",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "symfony",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "symphony",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "t-sql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "tableau",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "tensorflow",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "teradata database",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "terraform",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "the mathworks matlab",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "theano",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "tidyr",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "tidyverse",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "tiktok",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "transact-sql",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "trello",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "trimble sketchup pro",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "troubleshooting",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "twilio",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "typescript",
+    "aliases": ["ts"],
+    "isActive": true
+  },
+  {
+    "name": "ubuntu",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "unify",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "unity3d",
+    "aliases": ["unity engine"],
+    "isActive": true
+  },
+  {
+    "name": "unix",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "unix shell",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "unreal",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "vb.net",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "vba",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "verification",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "version control",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "visio",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "visual basic",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "vmware",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "vue.js",
+    "aliases": ["vue", "vuejs"],
+    "isActive": true
+  },
+  {
+    "name": "web application",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "web design",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "webex",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "windows",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "windows server",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "wordpress",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "workday",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "workflow",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "workfront",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "wrike",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "wsl",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "xamarin",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "yardi",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "yarn",
+    "aliases": [],
+    "isActive": true
+  },
+  {
+    "name": "zoom",
+    "aliases": [],
+    "isActive": true
+  }
 ]

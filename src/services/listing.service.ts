@@ -1,33 +1,54 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, max, ne, notInArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, max, ne, notInArray, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { latestApplicationOnly } from "@/db/predicates";
 import { applications, companies, jobSkills, jobs, skills, type Job } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
+import {
+  matcherService,
+  MatcherUnavailableError,
+  PREPARE_COOLDOWN_MESSAGE,
+  prepareCooldownElapsed,
+} from "@/services/matcher.service";
 import { skillService, type DbExecutor } from "@/services/skill.service";
+import type { MatchBand } from "@/validators/application.validator";
 import type { CreateListingInput, UpdateListingInput } from "@/validators/listing.validator";
 import type { SkillResponse } from "@/validators/skill.validator";
 
-export type ListingView = Job & {
+type ListingRow = Omit<Job, "embedding" | "prepareAttemptedAt">;
+
+export type ListingView = ListingRow & {
   skills: SkillResponse[];
   applicantCount: number;
   topMatchScore: number | null;
+  topMatchBand: MatchBand | null;
 };
 
-type ApplicantStats = { total: number; topMatchScore: number | null };
-const NO_APPLICANTS: ApplicantStats = { total: 0, topMatchScore: null };
+type ApplicantStats = {
+  total: number;
+  topMatchScore: number | null;
+  topMatchBand: MatchBand | null;
+};
+const NO_APPLICANTS: ApplicantStats = { total: 0, topMatchScore: null, topMatchBand: null };
 
 const REMOVED_MESSAGE = "Removed by an administrator.";
 const SKILLS_INVALID_MESSAGE = "One or more skills are not in the skills list.";
 
+function omit<T extends object, K extends keyof T>(value: T, keys: K[]): Omit<T, K> {
+  const copy = { ...value };
+  for (const key of keys) delete copy[key];
+  return copy;
+}
+
 function toView(job: Job, jobSkillList: SkillResponse[], stats: ApplicantStats): ListingView {
   return {
-    ...job,
+    ...omit(job, ["embedding", "prepareAttemptedAt"]),
     skills: jobSkillList,
     applicantCount: stats.total,
     topMatchScore: stats.topMatchScore,
+    topMatchBand: stats.topMatchBand,
   };
 }
 
@@ -61,6 +82,7 @@ async function loadApplicantStats(jobIds: string[]): Promise<Map<string, Applica
       jobId: applications.jobId,
       total: count(),
       topMatchScore: max(applications.matchScore),
+      topMatchBand: sql<MatchBand | null>`(array_agg(${applications.band} order by ${applications.matchScore} desc))[1]`,
     })
     .from(applications)
     .where(
@@ -79,6 +101,37 @@ async function assertSkillsActive(ids: string[], executor: DbExecutor): Promise<
   if (ids.length === 0) return;
   const found = await skillService.getActiveByIds(ids, executor);
   if (found.length !== new Set(ids).size) throw new HttpError(SKILLS_INVALID_MESSAGE, 422);
+}
+
+async function embedDescription(userId: string, id: string, description: string): Promise<void> {
+  const embedding = await matcherService.tryEmbedOne("listing", description);
+  if (!embedding) return;
+  await storeEmbedding(userId, id, description, embedding);
+}
+
+async function storeEmbedding(
+  userId: string,
+  id: string,
+  description: string,
+  embedding: number[],
+): Promise<boolean> {
+  const stored = await db
+    .update(jobs)
+    .set({ embedding, matchReady: true })
+    .where(and(eq(jobs.id, id), eq(jobs.recruiterId, userId), eq(jobs.description, description)))
+    .returning({ id: jobs.id });
+  return stored.length > 0;
+}
+
+async function storeEmbeddingForViewer(
+  id: string,
+  description: string,
+  embedding: number[],
+): Promise<void> {
+  await db
+    .update(jobs)
+    .set({ embedding, matchReady: true })
+    .where(and(eq(jobs.id, id), eq(jobs.description, description)));
 }
 
 export const listingService = {
@@ -111,6 +164,8 @@ export const listingService = {
       }
       return job.id;
     });
+
+    await embedDescription(userId, jobId, fields.description);
 
     return listingService.getById(userId, jobId);
   },
@@ -151,7 +206,7 @@ export const listingService = {
   async update(userId: string, id: string, input: UpdateListingInput): Promise<ListingView> {
     const { skillIds, status, salaryMin, salaryMax, ...fields } = input;
 
-    await db.transaction(async (tx) => {
+    const descriptionToEmbed = await db.transaction(async (tx) => {
       // Row lock serialises concurrent edits of the same listing.
       const [job] = await tx
         .select()
@@ -166,9 +221,13 @@ export const listingService = {
       if (salaryMax !== undefined) changes.salaryMax = salaryMax;
       if (status !== undefined && status !== job.status) changes.status = status;
 
-      let matchInvalidated =
-        (fields.title !== undefined && fields.title !== job.title) ||
-        (fields.description !== undefined && fields.description !== job.description);
+      const descriptionChanged =
+        fields.description !== undefined && fields.description !== job.description;
+      if (descriptionChanged) {
+        changes.matchReady = false;
+        changes.embedding = null;
+        changes.prepareAttemptedAt = null;
+      }
 
       if (skillIds !== undefined) {
         const current = await tx
@@ -192,18 +251,81 @@ export const listingService = {
         if (toAdd.length > 0) {
           await tx.insert(jobSkills).values(toAdd.map((skillId) => ({ jobId: id, skillId })));
         }
-        if (toAdd.length > 0 || toRemove.length > 0) matchInvalidated = true;
       }
-
-      if (matchInvalidated) changes.matchReady = false;
 
       await tx
         .update(jobs)
         .set({ ...changes, updatedAt: new Date() })
         .where(and(eq(jobs.id, id), eq(jobs.recruiterId, userId)));
+
+      return descriptionChanged ? fields.description : undefined;
     });
 
+    if (descriptionToEmbed !== undefined) await embedDescription(userId, id, descriptionToEmbed);
+
     return listingService.getById(userId, id);
+  },
+
+  async prepareById(userId: string, id: string): Promise<ListingView> {
+    const [job] = await db
+      .select({
+        status: jobs.status,
+        matchReady: jobs.matchReady,
+        hasEmbedding: sql<boolean>`${jobs.embedding} is not null`,
+      })
+      .from(jobs)
+      .where(and(eq(jobs.id, id), eq(jobs.recruiterId, userId)));
+    if (!job) throw new HttpError("Listing not found", 404);
+    if (job.status === "removed") throw new HttpError(REMOVED_MESSAGE, 403);
+    if (job.matchReady && job.hasEmbedding) return listingService.getById(userId, id);
+
+    const [claimed] = await db
+      .update(jobs)
+      .set({ prepareAttemptedAt: sql`now()` })
+      .where(
+        and(
+          eq(jobs.id, id),
+          eq(jobs.recruiterId, userId),
+          ne(jobs.status, "removed"),
+          prepareCooldownElapsed(jobs.prepareAttemptedAt),
+        ),
+      )
+      .returning({ description: jobs.description });
+    if (!claimed) throw new HttpError(PREPARE_COOLDOWN_MESSAGE, 429);
+
+    let embedding: number[];
+    try {
+      [embedding] = await matcherService.embed("listing", [claimed.description]);
+    } catch (error) {
+      console.error(
+        "[matcher] listing embedding failed",
+        error instanceof MatcherUnavailableError ? error.message : "unknown error",
+      );
+      throw new HttpError("Matching is temporarily unavailable. Please try again.", 503);
+    }
+
+    await storeEmbedding(userId, id, claimed.description, embedding);
+    return listingService.getById(userId, id);
+  },
+
+  async prepareForViewer(id: string): Promise<void> {
+    const [claimed] = await db
+      .update(jobs)
+      .set({ prepareAttemptedAt: sql`now()` })
+      .where(
+        and(
+          eq(jobs.id, id),
+          eq(jobs.status, "open"),
+          sql`(${jobs.embedding} is null or ${jobs.matchReady} = false)`,
+          prepareCooldownElapsed(jobs.prepareAttemptedAt),
+        ),
+      )
+      .returning({ description: jobs.description });
+    if (!claimed) return;
+
+    const embedding = await matcherService.tryEmbedOne("listing", claimed.description);
+    if (!embedding) return;
+    await storeEmbeddingForViewer(id, claimed.description, embedding);
   },
 
   async remove(userId: string, id: string): Promise<{ id: string }> {

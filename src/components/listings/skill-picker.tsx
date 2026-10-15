@@ -8,6 +8,8 @@ import { FIELD_CLASS } from "@/components/shared/field-label";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSkills } from "@/hooks/use-skills";
 import { useSuggestSkills } from "@/hooks/use-suggest-skills";
+import { cn } from "@/lib/utils";
+import { MIN_LISTING_SKILLS } from "@/validators/listing.validator";
 import type { SkillResponse } from "@/validators/skill.validator";
 
 type SkillPickerProps = {
@@ -16,12 +18,22 @@ type SkillPickerProps = {
   title: string;
   description: string;
   max?: number;
+  min?: number;
+  invalid?: boolean;
 };
 
 const chipButtonClassName =
   "inline-flex h-7 items-center gap-1 rounded-full border border-line bg-white px-3 text-chip font-medium text-ink outline-none transition-colors hover:border-primary-soft-line hover:bg-primary-soft focus-visible:shadow-focus";
 
-export function SkillPicker({ value, onChange, title, description, max = 30 }: SkillPickerProps) {
+export function SkillPicker({
+  value,
+  onChange,
+  title,
+  description,
+  max = 30,
+  min = MIN_LISTING_SKILLS,
+  invalid = false,
+}: SkillPickerProps) {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query.trim(), 250);
   const debouncedTitle = useDebounce(title.trim(), 800);
@@ -55,11 +67,17 @@ export function SkillPicker({ value, onChange, title, description, max = 30 }: S
     <div>
       <div className="mb-1 flex items-baseline gap-2">
         <h2 className="font-display text-base font-semibold text-ink">Skills</h2>
-        <span className="text-xs text-muted-foreground">Optional</span>
       </div>
-      <p className="mb-4 text-xs text-muted-foreground">
+      <p className="mb-1 text-xs text-muted-foreground">
         Found from your title and description. Remove any that do not belong, or add more from the
         list.
+      </p>
+      <p
+        id="skills-hint"
+        role={invalid ? "alert" : undefined}
+        className={cn("mb-4 text-xs", invalid ? "text-error" : "text-muted-foreground")}
+      >
+        Pick at least {min} skills. They are used to match applicants.
       </p>
 
       <div className="space-y-3">
@@ -122,7 +140,7 @@ export function SkillPicker({ value, onChange, title, description, max = 30 }: S
             disabled={atLimit}
             maxLength={40}
             autoComplete="off"
-            placeholder="Search for a skill"
+            placeholder="Search by skill name"
             className={FIELD_CLASS}
           />
           <p className="text-xs text-muted-foreground" aria-live="polite">

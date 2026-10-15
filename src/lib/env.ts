@@ -6,6 +6,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   DATABASE_URL: z.string().min(1),
+  MATCHER_URL: z.url().optional(),
+  MATCHER_API_KEY: z.string().min(16).optional(),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -18,6 +20,8 @@ export const env: Env = new Proxy({} as Env, {
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       DATABASE_URL: process.env.DATABASE_URL,
+      MATCHER_URL: process.env.MATCHER_URL,
+      MATCHER_API_KEY: process.env.MATCHER_API_KEY,
     });
     return cached[key as keyof Env];
   },

@@ -6,9 +6,14 @@ function escapeRegExp(value: string): string {
 
 export function createSkillMatcher(entries: SkillLexiconEntry[]): (text: string) => string[] {
   const canonicalByTerm = new Map<string, string>();
+  // An entry's own name always beats another entry's alias, matching the Python loader.
   for (const entry of entries) {
-    for (const term of [entry.name, ...entry.aliases]) {
-      const key = term.trim().toLowerCase();
+    const key = entry.name.trim().toLowerCase();
+    if (key) canonicalByTerm.set(key, entry.name);
+  }
+  for (const entry of entries) {
+    for (const alias of entry.aliases) {
+      const key = alias.trim().toLowerCase();
       if (key && !canonicalByTerm.has(key)) canonicalByTerm.set(key, entry.name);
     }
   }
@@ -19,7 +24,10 @@ export function createSkillMatcher(entries: SkillLexiconEntry[]): (text: string)
     .sort((a, b) => b.length - a.length)
     .map((term) => escapeRegExp(term).replace(/\s+/g, "\\s+"))
     .join("|");
-  const pattern = new RegExp(`(?<![\\w+#])(?:${alternation})(?![\\w+#])`, "gi");
+  const pattern = new RegExp(
+    `(?<![\\p{L}\\p{N}_+#])(?:${alternation})(?![\\p{L}\\p{N}_+#])`,
+    "giu",
+  );
 
   return (text: string): string[] => {
     if (!text) return [];

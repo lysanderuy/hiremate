@@ -3,11 +3,21 @@ import { z } from "zod";
 import { APPLICANT_APPLICATION_STATUSES } from "@/types/applications";
 import { EMPLOYMENT_TYPES } from "@/types/jobs";
 
-import { APPLICATION_BANDS, applicationIdSchema } from "./application.validator";
+import {
+  APPLICATION_BANDS,
+  applicationIdSchema,
+  matchBreakdownSchema,
+} from "./application.validator";
 
 export const OPEN_LISTING_PAGE_SIZE = 10;
 export const OPEN_LISTING_SORTS = ["newest", "best_match"] as const;
-export const MATCH_STATUSES = ["ok", "no_resume", "resume_not_ready", "no_listing_skills"] as const;
+export const MATCH_STATUSES = [
+  "ok",
+  "no_resume",
+  "resume_not_ready",
+  "listing_not_ready",
+  "model_mismatch",
+] as const;
 export type MatchStatus = (typeof MATCH_STATUSES)[number];
 
 export const openListingIdSchema = z.string().uuid().meta({
@@ -34,7 +44,8 @@ export const listOpenListingsQuerySchema = z.object({
     example: 40000,
   }),
   sort: z.enum(OPEN_LISTING_SORTS).default("newest").meta({
-    description: "Order by posting date (newest first) or by match with the caller's resume.",
+    description:
+      "Order by posting date (newest first) or by match with the caller's resume. Best match ranks only the 500 newest listings.",
     example: "newest",
   }),
   page: z.coerce.number().int().min(1).max(1000).default(1).meta({
@@ -48,7 +59,7 @@ export type ListOpenListingsQuery = z.infer<typeof listOpenListingsQuerySchema>;
 export const matchSummarySchema = z
   .object({
     score: z.number().int().min(0).max(100).meta({
-      description: "Match score from 0 to 100.",
+      description: "AI match score from 0 to 100.",
       example: 75,
     }),
     band: z.enum(APPLICATION_BANDS).meta({ description: "Match band.", example: "strong" }),
@@ -60,10 +71,32 @@ export const matchSummarySchema = z
       description: "Listing skills not found in the resume.",
       example: ["postgresql"],
     }),
+    breakdown: matchBreakdownSchema,
   })
-  .meta({ id: "MatchSummary", description: "How well the caller's resume fits a listing." });
+  .meta({
+    id: "MatchSummary",
+    description: "AI estimate of how well the caller's resume fits a listing.",
+  });
 
 export type MatchSummary = z.infer<typeof matchSummarySchema>;
+
+export const skillsMatchSchema = z
+  .object({
+    matched: z.array(z.string()).meta({
+      description: "Listing skills found in the resume.",
+      example: ["react", "typescript"],
+    }),
+    missing: z.array(z.string()).meta({
+      description: "Listing skills not found in the resume.",
+      example: ["postgresql"],
+    }),
+  })
+  .meta({
+    id: "SkillsMatch",
+    description: "Skills-only comparison between a resume and a listing.",
+  });
+
+export type SkillsMatch = z.infer<typeof skillsMatchSchema>;
 
 const openListingShape = {
   id: openListingIdSchema,
@@ -91,11 +124,15 @@ const openListingShape = {
     example: ["react", "typescript"],
   }),
   match: matchSummarySchema.nullable().meta({
-    description: "Match with the caller's resume, or null when it cannot be computed.",
+    description: "AI match with the caller's resume, or null when it cannot be computed.",
+  }),
+  skillsMatch: skillsMatchSchema.nullable().meta({
+    description:
+      "Skills-only comparison with the caller's resume, or null when there is no resume or the listing has no skills.",
   }),
   matchStatus: z.enum(MATCH_STATUSES).meta({
     description:
-      "Why match is present or null: ok, no_resume, resume_not_ready or no_listing_skills.",
+      "Why match is present or null: ok, no_resume, resume_not_ready, listing_not_ready or model_mismatch.",
     example: "ok",
   }),
   application: z

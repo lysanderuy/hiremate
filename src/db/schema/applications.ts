@@ -3,6 +3,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -10,6 +11,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+
+import type { MatchBreakdown } from "@/validators/application.validator";
 
 import { jobs } from "./jobs";
 import { profiles } from "./profiles";
@@ -50,6 +53,8 @@ export const applications = pgTable(
       .default(sql`'{}'`),
     matchScore: integer("match_score"),
     band: matchBand("band"),
+    matchBreakdown: jsonb("match_breakdown").$type<MatchBreakdown>(),
+    modelVersion: text("model_version"),
     status: applicationStatus("status").notNull().default("submitted"),
     viewedAt: timestamp("viewed_at", { withTimezone: true }),
     statusChangedAt: timestamp("status_changed_at", { withTimezone: true }).defaultNow().notNull(),

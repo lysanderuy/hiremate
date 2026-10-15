@@ -157,7 +157,13 @@ function StatCards({ data }: { data: ApplicantDashboardResponse | undefined }) {
             "None"
           )
         }
-        hint={best ? best.title : "Add a resume to see scores"}
+        hint={
+          best
+            ? best.title
+            : state === "ready"
+              ? "No Fair or Strong matches yet"
+              : "Add a resume to see scores"
+        }
       />
     </div>
   );
@@ -244,7 +250,7 @@ function BestMatches({
       data.resume.state === null
         ? "Add a resume to see your best matches."
         : data.resume.state === "ready"
-          ? "No open jobs left to apply to."
+          ? "No Fair or Strong matches yet. Check back when new jobs are posted."
           : "Your matches show up when your resume is ready.";
     body = <SectionMessage message={message} />;
   } else {
@@ -262,7 +268,7 @@ function BestMatches({
                   {job.companyName} &middot; {job.location}
                 </small>
               </span>
-              <ScoreCell score={job.match.score} />
+              <ScoreCell score={job.match.score} band={job.match.band} />
             </Link>
           </li>
         ))}
@@ -323,7 +329,7 @@ function RecentApplications({
                 <ApplicationStatusPill status={application.status} />
               </Td>
               <Td>
-                <ScoreCell score={application.matchScore} />
+                <ScoreCell score={application.matchScore} band={application.band} />
               </Td>
               <Td className="max-sm:hidden">{formatDate(application.createdAt)}</Td>
             </tr>

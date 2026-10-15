@@ -44,6 +44,7 @@ export const dashboardService = {
           jobTitle: jobs.title,
           applicantName: profiles.displayName,
           matchScore: applications.matchScore,
+          band: applications.band,
           status: applications.status,
           createdAt: applications.createdAt,
         })
@@ -74,6 +75,7 @@ export const dashboardService = {
         state: resumes.state,
         source: resumes.source,
         skills: resumes.skills,
+        embedding: resumes.embedding,
         updatedAt: resumes.updatedAt,
       })
       .from(resumes)

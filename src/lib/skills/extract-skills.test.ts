@@ -47,6 +47,18 @@ describe("createSkillMatcher", () => {
     expect(createSkillMatcher([])("java")).toEqual([]);
   });
 
+  it("treats accented letters as part of a word", () => {
+    expect(match("Développeur sql, ésql, sqlé")).toEqual(["sql"]);
+  });
+
+  it("lets an entry name win over another entry's alias", () => {
+    const named = createSkillMatcher([
+      { name: "spring boot", aliases: ["spring framework"] },
+      { name: "spring framework", aliases: [] },
+    ]);
+    expect(named("Spring Framework")).toEqual(["spring framework"]);
+  });
+
   it("matches names containing a dot", () => {
     expect(match("Built APIs in Node.js and nodejs")).toEqual(["node.js"]);
     expect(match("nodexjs")).toEqual([]);

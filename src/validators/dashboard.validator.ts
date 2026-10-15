@@ -26,6 +26,10 @@ export const recentApplicationSchema = z.object({
     description: "Match score from 0 to 100, or null if not scored.",
     example: 82,
   }),
+  band: z.enum(APPLICATION_BANDS).nullable().meta({
+    description: "Match band, or null if not scored.",
+    example: "strong",
+  }),
   status: z.enum(APPLICATION_STATUSES).meta({
     description: "Application status.",
     example: "submitted",

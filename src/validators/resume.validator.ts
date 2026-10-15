@@ -11,7 +11,7 @@ export const resumeSourceSchema = z.enum(RESUME_SOURCES).meta({
 });
 
 export const resumeStateSchema = z.enum(RESUME_STATES).meta({
-  description: "Whether skills have been extracted from the resume.",
+  description: "ready when skills and the match embedding were prepared, failed otherwise.",
   example: "ready",
 });
 

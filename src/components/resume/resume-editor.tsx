@@ -74,7 +74,7 @@ export function ResumeEditor() {
               href="/api/resumes/me/file"
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              className={buttonVariants({ variant: "default", size: "sm" })}
             >
               Open resume (PDF)
             </a>

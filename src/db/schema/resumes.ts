@@ -5,6 +5,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  real,
   text,
   timestamp,
   uuid,
@@ -52,6 +53,8 @@ export const resumes = pgTable("resumes", {
     .array()
     .notNull()
     .default(sql`'{}'`),
+  embedding: real("embedding").array(),
+  prepareAttemptedAt: timestamp("prepare_attempted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

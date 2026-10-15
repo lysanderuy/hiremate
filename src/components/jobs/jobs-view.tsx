@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { JobCard } from "@/components/jobs/job-card";
-import { FIELD_CLASS, FieldLabel } from "@/components/shared/field-label";
+import { FIELD_CLASS } from "@/components/shared/field-label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -81,7 +81,7 @@ function Results({
 
   return (
     <div aria-busy={isPlaceholderData} className={cn(isPlaceholderData && "opacity-60")}>
-      <p aria-live="polite" className="mb-4 min-h-6">
+      <p aria-live="polite" className="mb-3 min-h-6">
         {data.total} {data.total === 1 ? "job" : "jobs"} found
       </p>
       {data.items.length === 0 ? (
@@ -192,10 +192,12 @@ export function JobsView() {
 
   return (
     <div>
-      <Card className="mb-4 gap-4 p-5">
-        <div className="space-y-1.5">
-          <FieldLabel htmlFor="jobs-search">Search</FieldLabel>
-          <div className="relative">
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative min-w-60 flex-1">
+            <label htmlFor="jobs-search" className="sr-only">
+              Search
+            </label>
             <Search
               aria-hidden="true"
               className="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground"
@@ -210,10 +212,38 @@ export function JobsView() {
               className={cn(FIELD_CLASS, "pl-10.5")}
             />
           </div>
+          <div
+            role="group"
+            aria-label="Sort jobs"
+            className="inline-flex gap-1 rounded-md border border-line bg-white p-1"
+          >
+            {SORT_TABS.map((tab) => {
+              const selected = sort === tab.value;
+              const disabled = tab.value === "best_match" && !canBestMatch;
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  aria-pressed={selected}
+                  disabled={disabled}
+                  title={disabled ? BEST_MATCH_HINT : undefined}
+                  onClick={() => navigate({ sort: tab.value })}
+                  className={cn(
+                    "h-8 rounded-lg px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                    selected ? "bg-primary-soft text-primary" : "text-text enabled:hover:bg-page",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="space-y-1.5">
-            <FieldLabel htmlFor="jobs-location">Location</FieldLabel>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="min-w-40 flex-1 sm:max-w-56">
+            <label htmlFor="jobs-location" className="sr-only">
+              Location
+            </label>
             <input
               id="jobs-location"
               type="text"
@@ -224,84 +254,57 @@ export function JobsView() {
               className={FIELD_CLASS}
             />
           </div>
-          <div className="space-y-1.5">
-            <FieldLabel htmlFor="jobs-type">Employment type</FieldLabel>
-            <div className="relative">
-              <select
-                id="jobs-type"
-                value={state.type ?? ""}
-                onChange={(event) =>
-                  navigate({ type: EMPLOYMENT_TYPES.find((type) => type === event.target.value) })
-                }
-                className={cn(FIELD_CLASS, "appearance-none pr-10")}
-              >
-                <option value="">All types</option>
-                {EMPLOYMENT_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {EMPLOYMENT_TYPE_LABELS[type]}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 right-3 size-5 -translate-y-1/2 text-muted-foreground"
-              />
-            </div>
+          <div className="relative min-w-40 flex-1 sm:max-w-48">
+            <label htmlFor="jobs-type" className="sr-only">
+              Employment type
+            </label>
+            <select
+              id="jobs-type"
+              value={state.type ?? ""}
+              onChange={(event) =>
+                navigate({ type: EMPLOYMENT_TYPES.find((type) => type === event.target.value) })
+              }
+              className={cn(FIELD_CLASS, "appearance-none pr-10")}
+            >
+              <option value="">All types</option>
+              {EMPLOYMENT_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {EMPLOYMENT_TYPE_LABELS[type]}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 right-3 size-5 -translate-y-1/2 text-muted-foreground"
+            />
           </div>
-          <div className="space-y-1.5">
-            <FieldLabel htmlFor="jobs-min-pay">Minimum pay per month</FieldLabel>
-            <div className="relative">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-sm text-muted-foreground"
-              >
-                PHP
-              </span>
-              <input
-                id="jobs-min-pay"
-                type="text"
-                inputMode="numeric"
-                value={inputs.minPay}
-                onChange={(event) =>
-                  setInputs({ ...inputs, minPay: event.target.value.replace(/\D/g, "") })
-                }
-                placeholder="Any"
-                className={cn(FIELD_CLASS, "pl-12")}
-              />
-            </div>
+          <div className="relative min-w-40 flex-1 sm:max-w-52">
+            <label htmlFor="jobs-min-pay" className="sr-only">
+              Minimum pay per month
+            </label>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-sm text-muted-foreground"
+            >
+              Min PHP
+            </span>
+            <input
+              id="jobs-min-pay"
+              type="text"
+              inputMode="numeric"
+              value={inputs.minPay}
+              onChange={(event) =>
+                setInputs({ ...inputs, minPay: event.target.value.replace(/\D/g, "") })
+              }
+              placeholder="Any amount"
+              className={cn(FIELD_CLASS, "pl-20")}
+            />
           </div>
-        </div>
-      </Card>
-
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <Button variant="ghost" size="sm" disabled={!filtersActive} onClick={clearFilters}>
-          Clear filters
-        </Button>
-        <div
-          role="group"
-          aria-label="Sort jobs"
-          className="inline-flex gap-1 rounded-md border border-line bg-white p-1"
-        >
-          {SORT_TABS.map((tab) => {
-            const selected = sort === tab.value;
-            const disabled = tab.value === "best_match" && !canBestMatch;
-            return (
-              <button
-                key={tab.value}
-                type="button"
-                aria-pressed={selected}
-                disabled={disabled}
-                title={disabled ? BEST_MATCH_HINT : undefined}
-                onClick={() => navigate({ sort: tab.value })}
-                className={cn(
-                  "h-9 rounded-lg px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-                  selected ? "bg-primary-soft text-primary" : "text-text enabled:hover:bg-page",
-                )}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+          {filtersActive && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              Clear filters
+            </Button>
+          )}
         </div>
       </div>
 

@@ -161,14 +161,16 @@ function ApplicantRow({
             >
               {name}
             </Link>
-            <small className="block text-xs text-muted-foreground">
-              {application.skillsMatched.length} of {totalSkills} skills
-            </small>
           </div>
         </div>
       </Td>
       <Td className="whitespace-nowrap">
-        <ScoreCell score={application.matchScore} />
+        <ScoreCell score={application.matchScore} band={application.band} />
+        {totalSkills > 0 && (
+          <small className="block text-xs text-muted-foreground">
+            Skills {application.skillsMatched.length}/{totalSkills}
+          </small>
+        )}
       </Td>
       <Td className="max-sm:hidden">
         <MissingSkills skills={application.skillsMissing} />
@@ -205,7 +207,7 @@ function ApplicantsTable({
         <thead>
           <tr>
             <Th>Applicant</Th>
-            <Th>Match{sort === "match" ? " ↓" : ""}</Th>
+            <Th>AI match{sort === "match" ? " ↓" : ""}</Th>
             <Th className="max-sm:hidden">Missing skills</Th>
             <Th>Status</Th>
             <Th className="max-sm:hidden">Applied</Th>

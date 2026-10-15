@@ -5,19 +5,45 @@ import { createListingSchema, updateListingSchema } from "./listing.validator";
 const SALARY_MESSAGE = "Enter both amounts, with the minimum at or below the maximum.";
 const skillId = "0b7d3f1e-6a52-4c8a-8d0e-3f2a9c1b4e77";
 const otherSkillId = "1b7d3f1e-6a52-4c8a-8d0e-3f2a9c1b4e78";
+const thirdSkillId = "2b7d3f1e-6a52-4c8a-8d0e-3f2a9c1b4e79";
+const MIN_SKILLS_MESSAGE = "Pick at least 3 skills.";
 
 const valid = {
   title: "Senior Engineer",
   description: "x".repeat(50),
   location: "Remote",
   employmentType: "full_time",
+  skillIds: [skillId, otherSkillId, thirdSkillId],
 };
 
 describe("createListingSchema", () => {
-  it("accepts a minimal listing and defaults skillIds", () => {
+  it("accepts a minimal listing with three skills", () => {
     const result = createListingSchema.parse(valid);
-    expect(result.skillIds).toEqual([]);
+    expect(result.skillIds).toHaveLength(3);
     expect(result.salaryMin).toBeUndefined();
+  });
+
+  it("requires at least 3 skills", () => {
+    expect(createListingSchema.safeParse({ ...valid, skillIds: undefined }).success).toBe(false);
+    for (const skillIds of [[], [skillId, otherSkillId]]) {
+      const result = createListingSchema.safeParse({ ...valid, skillIds });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(MIN_SKILLS_MESSAGE);
+        expect(result.error.issues[0].path).toEqual(["skillIds"]);
+      }
+    }
+    expect(
+      createListingSchema.safeParse({ ...valid, skillIds: [skillId, otherSkillId, thirdSkillId] })
+        .success,
+    ).toBe(true);
+  });
+
+  it("does not count a duplicate toward the minimum", () => {
+    expect(
+      createListingSchema.safeParse({ ...valid, skillIds: [skillId, otherSkillId, otherSkillId] })
+        .success,
+    ).toBe(false);
   });
 
   it("trims and enforces field limits", () => {
@@ -56,9 +82,10 @@ describe("createListingSchema", () => {
   });
 
   it("requires unique uuid skillIds, max 30", () => {
-    expect(createListingSchema.safeParse({ ...valid, skillIds: [skillId, skillId] }).success).toBe(
-      false,
-    );
+    expect(
+      createListingSchema.safeParse({ ...valid, skillIds: [skillId, skillId, otherSkillId] })
+        .success,
+    ).toBe(false);
     expect(createListingSchema.safeParse({ ...valid, skillIds: ["nope"] }).success).toBe(false);
     const thirtyOne = Array.from(
       { length: 31 },
@@ -66,7 +93,8 @@ describe("createListingSchema", () => {
     );
     expect(createListingSchema.safeParse({ ...valid, skillIds: thirtyOne }).success).toBe(false);
     expect(
-      createListingSchema.safeParse({ ...valid, skillIds: [skillId, otherSkillId] }).success,
+      createListingSchema.safeParse({ ...valid, skillIds: [skillId, otherSkillId, thirdSkillId] })
+        .success,
     ).toBe(true);
   });
 });
@@ -100,8 +128,24 @@ describe("updateListingSchema", () => {
     }
   });
 
+  it("requires at least 3 skills when skillIds is provided", () => {
+    const result = updateListingSchema.safeParse({ skillIds: [skillId, otherSkillId] });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error.issues[0].message).toBe(MIN_SKILLS_MESSAGE);
+    expect(updateListingSchema.safeParse({ skillIds: [] }).success).toBe(false);
+    expect(
+      updateListingSchema.safeParse({ skillIds: [skillId, otherSkillId, thirdSkillId] }).success,
+    ).toBe(true);
+  });
+
+  it("accepts an update that omits skillIds", () => {
+    expect(updateListingSchema.safeParse({ title: "New title" }).success).toBe(true);
+  });
+
   it("applies the same field limits", () => {
     expect(updateListingSchema.safeParse({ title: "ab" }).success).toBe(false);
-    expect(updateListingSchema.safeParse({ skillIds: [skillId, skillId] }).success).toBe(false);
+    expect(
+      updateListingSchema.safeParse({ skillIds: [skillId, skillId, otherSkillId] }).success,
+    ).toBe(false);
   });
 });

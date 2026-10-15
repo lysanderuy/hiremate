@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "matcher:dev": "python -m uvicorn --app-dir matcher main:app --port 8000",
+    "dev:all": "concurrently -n web,matcher -c cyan,magenta \"npm:dev\" \"npm:matcher:dev\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -60,6 +62,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^10.0.6",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",

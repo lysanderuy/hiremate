@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { EMPLOYMENT_TYPES, JOB_STATUSES } from "@/types/jobs";
 
+import { APPLICATION_BANDS } from "./application.validator";
 import { skillResponseSchema } from "./skill.validator";
 
 const SALARY_MESSAGE = "Enter both amounts, with the minimum at or below the maximum.";
@@ -40,12 +41,15 @@ const salaryMaxSchema = salaryAmount.meta({
   example: 60000,
 });
 
+export const MIN_LISTING_SKILLS = 3;
+
 const skillIdsSchema = z
   .array(z.string().uuid())
+  .min(MIN_LISTING_SKILLS, { message: `Pick at least ${MIN_LISTING_SKILLS} skills.` })
   .max(30)
   .refine((ids) => new Set(ids).size === ids.length, { message: "Skills must be unique." })
   .meta({
-    description: "IDs of active skills required for the role.",
+    description: `IDs of active skills required for the role. At least ${MIN_LISTING_SKILLS} unique skills, at most 30.`,
     example: ["0b7d3f1e-6a52-4c8a-8d0e-3f2a9c1b4e77"],
   });
 
@@ -59,7 +63,7 @@ export const createListingSchema = z
     employmentType: employmentTypeSchema,
     salaryMin: salaryMinSchema.optional(),
     salaryMax: salaryMaxSchema.optional(),
-    skillIds: skillIdsSchema.default([]),
+    skillIds: skillIdsSchema,
   })
   .superRefine((value, ctx) => {
     const { salaryMin, salaryMax } = value;
@@ -154,6 +158,10 @@ export const listingResponseSchema = z
     topMatchScore: z.number().int().nullable().meta({
       description: "Highest applicant match score from 0 to 100, or null if none is scored.",
       example: 88,
+    }),
+    topMatchBand: z.enum(APPLICATION_BANDS).nullable().meta({
+      description: "Match band of the highest applicant score, or null if none is scored.",
+      example: "strong",
     }),
     createdAt: z.string().datetime().meta({
       description: "Timestamp the listing was created.",

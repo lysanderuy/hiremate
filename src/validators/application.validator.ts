@@ -90,6 +90,32 @@ const summaryShape = {
   }),
 };
 
+export const matchBreakdownSchema = z
+  .object({
+    start: z.number().int().meta({
+      description: "Points every pair starts from before looking at this resume and listing.",
+      example: 25,
+    }),
+    skills: z.number().int().meta({
+      description: "Points added or removed by skill overlap and counts.",
+      example: 41,
+    }),
+    content: z.number().int().meta({
+      description: "Points added or removed by how closely the resume text matches the listing.",
+      example: -3,
+    }),
+  })
+  .meta({
+    id: "MatchBreakdown",
+    description: "Integer points that sum exactly to the match score.",
+  });
+
+export type MatchBreakdown = z.infer<typeof matchBreakdownSchema>;
+
+const matchBreakdownField = matchBreakdownSchema.nullable().meta({
+  description: "How the match score is made up, or null if not recorded.",
+});
+
 export const applicationSummaryResponseSchema = z
   .object(summaryShape)
   .meta({ id: "ApplicationSummary", description: "An application, as shown in a listing's list." });
@@ -137,6 +163,7 @@ export const applicationDetailResponseSchema = z
       description: "Title of the listing applied to.",
       example: "Senior Frontend Engineer",
     }),
+    matchBreakdown: matchBreakdownField,
   })
   .meta({ id: "ApplicationDetail", description: "A full application for recruiter review." });
 
@@ -223,6 +250,7 @@ export const myApplicationDetailResponseSchema = z
       description: "Timestamp a recruiter first opened the application, or null.",
       example: "2026-01-02T08:00:00.000Z",
     }),
+    matchBreakdown: matchBreakdownField,
   })
   .meta({
     id: "MyApplicationDetail",

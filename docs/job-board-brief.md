@@ -5,7 +5,7 @@ Recruiters post job listings. Applicants upload a PDF resume and apply. An AI ma
 Two parts:
 
 - **Part A: Web app.** This pass. Boilerplate only.
-- **Part B: ML matcher.** Later. Summary below so Part A leaves room for it.
+- **Part B: ML matcher.** Built. The section below is the original plan, kept for history. The current design is in the PRD (section 6.4) and the README ("ML matching").
 
 ## Part A: Web app
 
@@ -78,7 +78,7 @@ Two parts:
 | resumes      | id, applicant_id (unique), text (extracted from the uploaded PDF), source (`pdf`), state (`ready`/`failed`), created_at, updated_at                                                                                                     |
 | applications | id, job_id, applicant_id, resume_id, status (`submitted`/`viewed`/`shortlisted`/`interview`/`rejected`/`withdrawn`), created_at. Unique (job_id, applicant_id) among non-withdrawn rows, so an applicant can re-apply after withdrawing |
 
-Part B will add: `skills text[]` and `embedding vector(384)` on `jobs` and `resumes`, and a `match_scores` cache if needed.
+Part B added `embedding real[]` on `jobs` and `resumes` and `skills text[]` on `resumes`. There is no `match_scores` cache: scores are computed from the stored embeddings.
 
 ### Access rules
 
@@ -144,7 +144,7 @@ src/
 - Snapshot resume text on apply? [yes, `resume_snapshot` on the application]
 - Email confirmation on signup? [off in dev]
 
-## Part B: ML matcher (later)
+## Part B: ML matcher (original plan, now built)
 
 ### What it does
 
