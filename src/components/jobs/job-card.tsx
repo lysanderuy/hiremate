@@ -7,26 +7,20 @@ import { ApplicationStatusPill } from "@/components/shared/status-pill";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatPostedAgo, formatSalaryRange } from "@/lib/format";
+import { matchStatusMessage } from "@/lib/matching/copy";
 import { cn } from "@/lib/utils";
 import { EMPLOYMENT_TYPE_LABELS } from "@/types/jobs";
-import type { MatchStatus, OpenListingSummaryResponse } from "@/validators/open-listing.validator";
+import type { OpenListingSummaryResponse } from "@/validators/open-listing.validator";
 
 export const JOBS_PATH = "/dashboard/applicant/jobs";
 const MAX_CHIPS = 6;
-
-const REASON_TEXT: Record<MatchStatus, string> = {
-  ok: "No score yet",
-  no_resume: "No score yet",
-  resume_not_ready: "Preparing your resume",
-  listing_not_ready: "Match score is being prepared. Try again in a moment.",
-};
 
 function JobSkills({ job }: { job: OpenListingSummaryResponse }) {
   if (job.skills.length === 0)
     return <span className="text-muted-foreground">No skills listed</span>;
 
-  const { match } = job;
-  if (!match) {
+  const { skillsMatch } = job;
+  if (!skillsMatch) {
     return (
       <ChipList
         label="Skills this job asks for"
@@ -37,10 +31,10 @@ function JobSkills({ job }: { job: OpenListingSummaryResponse }) {
     );
   }
 
-  const shown = [...match.matched, ...match.missing].slice(0, MAX_CHIPS);
-  const hidden = match.matched.length + match.missing.length - shown.length;
-  const matchedShown = shown.filter((skill) => match.matched.includes(skill));
-  const missingShown = shown.filter((skill) => !match.matched.includes(skill));
+  const shown = [...skillsMatch.matched, ...skillsMatch.missing].slice(0, MAX_CHIPS);
+  const hidden = skillsMatch.matched.length + skillsMatch.missing.length - shown.length;
+  const matchedShown = shown.filter((skill) => skillsMatch.matched.includes(skill));
+  const missingShown = shown.filter((skill) => !skillsMatch.matched.includes(skill));
 
   return (
     <ul aria-label="Skills this job asks for" className="flex flex-wrap gap-2">
@@ -76,7 +70,9 @@ function JobSkills({ job }: { job: OpenListingSummaryResponse }) {
 
 function JobScore({ job }: { job: OpenListingSummaryResponse }) {
   if (!job.match) {
-    return <span className="text-sm text-muted-foreground">{REASON_TEXT[job.matchStatus]}</span>;
+    return (
+      <span className="text-sm text-muted-foreground">{matchStatusMessage(job.matchStatus)}</span>
+    );
   }
 
   return (

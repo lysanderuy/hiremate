@@ -6,17 +6,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
-import { MatchedChip, MissingChip } from "@/components/applicants/skill-chip";
 import { Avatar } from "@/components/shared/avatar";
-import {
-  BAND_TEXT,
-  MATCH_BAND_LABELS,
-  ScoreCell,
-  getMatchBand,
-} from "@/components/shared/match-score";
+import { MatchAnalysis } from "@/components/shared/match-analysis";
+import { ScoreCell } from "@/components/shared/match-score";
 import { CRUMB_CLASS } from "@/components/shared/page-header";
 import { ApplicationStatusPill } from "@/components/shared/status-pill";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useApplication } from "@/hooks/use-application";
@@ -53,92 +47,25 @@ function BackLink({ listingId }: { listingId?: string }) {
   );
 }
 
-function SkillGroup({
-  title,
-  skills,
-  chip: Chip,
-}: {
-  title: string;
-  skills: string[];
-  chip: typeof MatchedChip;
-}) {
-  return (
-    <div>
-      <h3 className="mb-2 text-sm font-semibold">
-        {title} ({skills.length})
-      </h3>
-      {skills.length === 0 ? (
-        <span className="text-muted-foreground">None</span>
-      ) : (
-        <ul aria-label={title} className="flex flex-wrap gap-2">
-          {skills.map((skill) => (
-            <Chip key={skill}>{skill}</Chip>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function ScoreCard({ application }: { application: ApplicationDetailResponse }) {
-  const { matchScore } = application;
-  const band = matchScore === null ? null : getMatchBand(matchScore);
-  const matched = application.skillsMatched.length;
-  const total = matched + application.skillsMissing.length;
-  const firstName = application.applicantName?.trim().split(/\s+/)[0] ?? "This applicant";
+function AnalysisCard({ application }: { application: ApplicationDetailResponse }) {
+  const { matchScore, band, matchBreakdown, skillsMatched, skillsMissing } = application;
+  const match =
+    matchScore !== null && band !== null
+      ? { score: matchScore, band, breakdown: matchBreakdown }
+      : null;
+  const skills =
+    skillsMatched.length + skillsMissing.length > 0
+      ? { matched: skillsMatched, missing: skillsMissing }
+      : null;
 
   return (
-    <Card className={CARD_CLASS}>
-      {matchScore === null || band === null ? (
-        <ScoreCell score={null} />
-      ) : (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <div
-            className={cn(
-              "font-display text-score-sm leading-none font-bold tracking-[-0.04em] tabular-nums sm:text-score",
-              BAND_TEXT[band],
-            )}
-          >
-            {matchScore}
-            <small className="text-lg font-medium tracking-normal text-muted-foreground">
-              /100
-            </small>
-          </div>
-          <div className="min-w-55 flex-1">
-            <Badge variant={band}>{MATCH_BAND_LABELS[band]} match</Badge>
-            <p className="mt-2 font-medium text-ink">
-              {total === 0
-                ? "This job lists no skills, so the score is based on meaning only."
-                : `${firstName} has ${matched} of ${total} skills this job asks for.`}
-            </p>
-          </div>
-        </div>
-      )}
-      {total > 0 && (
-        <div className="mt-5 border-t border-line pt-5">
-          <div className="mb-1.5 flex justify-between text-sm">
-            <span>Skills match</span>
-            <b className="font-semibold text-ink">
-              {matched} of {total}
-            </b>
-          </div>
-          <div
-            role="meter"
-            aria-label="Skills match"
-            aria-valuemin={0}
-            aria-valuemax={total}
-            aria-valuenow={matched}
-            aria-valuetext={`${matched} of ${total}`}
-            className="h-2 overflow-hidden rounded-full bg-weak-soft"
-          >
-            <span
-              className="block h-full rounded-full bg-primary"
-              style={{ width: `${(matched / total) * 100}%` }}
-            />
-          </div>
-        </div>
-      )}
-    </Card>
+    <MatchAnalysis
+      audience="recruiter"
+      match={match}
+      skills={skills}
+      fallback={<ScoreCell score={null} band={null} />}
+      className={CARD_CLASS}
+    />
   );
 }
 
@@ -340,15 +267,7 @@ export function ApplicantDetail({ id }: { id: string }) {
             </div>
           </Card>
 
-          <ScoreCard application={application} />
-
-          <Card className={CARD_CLASS}>
-            <h2 className={CARD_TITLE_CLASS}>Skills</h2>
-            <div className="grid gap-4">
-              <SkillGroup title="Matched" skills={application.skillsMatched} chip={MatchedChip} />
-              <SkillGroup title="Missing" skills={application.skillsMissing} chip={MissingChip} />
-            </div>
-          </Card>
+          <AnalysisCard application={application} />
 
           <Card className={CARD_CLASS}>
             <h2 className="mb-3 text-base font-semibold">Resume</h2>
@@ -356,7 +275,7 @@ export function ApplicantDetail({ id }: { id: string }) {
               href={`/api/applications/${application.id}/file`}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              className={buttonVariants({ variant: "default", size: "sm" })}
             >
               Open resume (PDF)
             </a>

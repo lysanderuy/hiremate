@@ -7,8 +7,8 @@ import { useState } from "react";
 import { ApplyDialog } from "@/components/jobs/apply-dialog";
 import { JOBS_PATH } from "@/components/jobs/job-card";
 import { JobLogo } from "@/components/jobs/job-logo";
-import { MatchCard } from "@/components/jobs/match-card";
 import { ChipList } from "@/components/jobs/skill-chips";
+import { MatchAnalysis } from "@/components/shared/match-analysis";
 import { CRUMB_CLASS } from "@/components/shared/page-header";
 import { ApplicationStatusPill } from "@/components/shared/status-pill";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { useOpenListing } from "@/hooks/use-open-listing";
 import { useResume } from "@/hooks/use-resume";
 import { ApiError } from "@/lib/api/client";
 import { formatDate, formatPostedAgo, formatSalaryRange } from "@/lib/format";
+import { matchStatusMessage } from "@/lib/matching/copy";
 import { EMPLOYMENT_TYPE_LABELS } from "@/types/jobs";
 
 const RESUME_PATH = "/dashboard/applicant/resume";
@@ -37,7 +38,7 @@ function BackLink() {
 
 export function JobDetail({ id }: { id: string }) {
   const { data: listing, isPending, error, refetch } = useOpenListing(id);
-  const { data: resume, refetch: refetchResume } = useResume();
+  const { data: resume } = useResume();
   const { data: application } = useMyApplication(listing?.application?.id ?? "");
   const apply = useApply();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -84,8 +85,6 @@ export function JobDetail({ id }: { id: string }) {
     );
   }
 
-  const resumeFailed = resume?.state === "failed";
-
   function openConfirm() {
     apply.reset();
     setConfirmOpen(true);
@@ -115,16 +114,16 @@ export function JobDetail({ id }: { id: string }) {
   if (listing.matchStatus === "no_resume") {
     matchFallback = (
       <>
-        <p className="font-medium text-ink">Add a resume to see your match score.</p>
+        <p className="font-medium text-ink">{matchStatusMessage("no_resume")}</p>
         <Link href={RESUME_PATH} className={`${buttonVariants({ size: "sm" })} mt-4`}>
           Add resume
         </Link>
       </>
     );
   } else if (listing.matchStatus === "resume_not_ready") {
-    matchFallback = resumeFailed ? (
+    matchFallback = (
       <>
-        <p className="font-medium text-ink">We could not process your resume. Try again.</p>
+        <p className="font-medium text-ink">{matchStatusMessage("resume_not_ready")}</p>
         <Link
           href={RESUME_PATH}
           className={`${buttonVariants({ variant: "outline", size: "sm" })} mt-4`}
@@ -132,10 +131,12 @@ export function JobDetail({ id }: { id: string }) {
           Go to My resume
         </Link>
       </>
-    ) : (
+    );
+  } else {
+    matchFallback = (
       <>
-        <p className="font-medium text-ink">
-          Your resume is being prepared. Try again in a moment.
+        <p role="status" className="font-medium text-ink">
+          {matchStatusMessage(listing.matchStatus)}
         </p>
         <Button
           variant="outline"
@@ -143,18 +144,11 @@ export function JobDetail({ id }: { id: string }) {
           className="mt-4"
           onClick={() => {
             void refetch();
-            void refetchResume();
           }}
         >
           Try again
         </Button>
       </>
-    );
-  } else {
-    matchFallback = (
-      <p className="font-medium text-ink">
-        No skills are listed for this job, so there is no score.
-      </p>
     );
   }
 
@@ -175,7 +169,7 @@ export function JobDetail({ id }: { id: string }) {
         </div>
         <Link
           href={`${APPLICATIONS_PATH}/${listing.application.id}`}
-          className={`${buttonVariants({ variant: "outline" })} w-full`}
+          className={`${buttonVariants({ variant: "soft" })} w-full`}
         >
           View application
         </Link>
@@ -199,9 +193,18 @@ export function JobDetail({ id }: { id: string }) {
           Apply
         </Button>
         <span className="text-xs text-muted-foreground">
-          {resumeFailed
-            ? "Retry processing your resume to apply."
-            : "Apply opens when your resume is ready."}
+          Apply opens when your resume is ready.
+        </span>
+      </>
+    );
+  } else if (listing.matchStatus === "listing_not_ready") {
+    applyBlock = (
+      <>
+        <Button disabled className="w-full">
+          Apply
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          Apply opens when the match score is ready.
         </span>
       </>
     );
@@ -250,12 +253,11 @@ export function JobDetail({ id }: { id: string }) {
         </div>
 
         <div className="grid gap-5 min-[1100px]:sticky min-[1100px]:top-6">
-          <MatchCard
-            heading="Your match"
-            tense="present"
+          <MatchAnalysis
+            audience="applicant"
             match={listing.match}
+            skills={listing.skillsMatch}
             fallback={matchFallback}
-            note="A score helps you decide. It does not decide for you."
           />
           <div className="grid gap-3">{applyBlock}</div>
         </div>

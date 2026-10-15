@@ -4,8 +4,8 @@ import { ArrowLeft, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { MatchCard } from "@/components/jobs/match-card";
 import { WithdrawDialog } from "@/components/my-applications/withdraw-dialog";
+import { MatchAnalysis } from "@/components/shared/match-analysis";
 import { CRUMB_CLASS } from "@/components/shared/page-header";
 import { ApplicationStatusPill } from "@/components/shared/status-pill";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -172,9 +172,12 @@ export function ApplicationDetail({ id }: { id: string }) {
       ? {
           score: application.matchScore,
           band: application.band,
-          matched: application.skillsMatched,
-          missing: application.skillsMissing,
+          breakdown: application.matchBreakdown,
         }
+      : null;
+  const skillsMatch =
+    application.skillsMatched.length + application.skillsMissing.length > 0
+      ? { matched: application.skillsMatched, missing: application.skillsMissing }
       : null;
 
   return (
@@ -232,14 +235,13 @@ export function ApplicationDetail({ id }: { id: string }) {
 
       <div className="grid items-start gap-5 min-[1100px]:grid-cols-[minmax(0,1fr)_21.25rem]">
         <div className="grid min-w-0 gap-5">
-          <MatchCard
-            heading="Match when you applied"
-            tense="past"
+          <MatchAnalysis
+            audience="applicant"
             match={match}
+            skills={skillsMatch}
             fallback={
               <p className="font-medium text-ink">No score was saved for this application.</p>
             }
-            note="This score is saved with your application. It does not change after you apply."
           />
           <Card className={CARD_CLASS}>
             <h2 className={CARD_TITLE_CLASS}>Resume you sent</h2>
@@ -247,7 +249,7 @@ export function ApplicationDetail({ id }: { id: string }) {
               href={`/api/applications/me/${application.id}/file`}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              className={buttonVariants({ variant: "default", size: "sm" })}
             >
               Open resume (PDF)
             </a>
