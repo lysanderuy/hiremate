@@ -11,7 +11,13 @@ import {
 
 export const OPEN_LISTING_PAGE_SIZE = 10;
 export const OPEN_LISTING_SORTS = ["newest", "best_match"] as const;
-export const MATCH_STATUSES = ["ok", "no_resume", "resume_not_ready", "listing_not_ready"] as const;
+export const MATCH_STATUSES = [
+  "ok",
+  "no_resume",
+  "resume_not_ready",
+  "listing_not_ready",
+  "model_mismatch",
+] as const;
 export type MatchStatus = (typeof MATCH_STATUSES)[number];
 
 export const openListingIdSchema = z.string().uuid().meta({
@@ -38,7 +44,8 @@ export const listOpenListingsQuerySchema = z.object({
     example: 40000,
   }),
   sort: z.enum(OPEN_LISTING_SORTS).default("newest").meta({
-    description: "Order by posting date (newest first) or by match with the caller's resume.",
+    description:
+      "Order by posting date (newest first) or by match with the caller's resume. Best match ranks only the 500 newest listings.",
     example: "newest",
   }),
   page: z.coerce.number().int().min(1).max(1000).default(1).meta({
@@ -125,7 +132,7 @@ const openListingShape = {
   }),
   matchStatus: z.enum(MATCH_STATUSES).meta({
     description:
-      "Why match is present or null: ok, no_resume, resume_not_ready or listing_not_ready.",
+      "Why match is present or null: ok, no_resume, resume_not_ready, listing_not_ready or model_mismatch.",
     example: "ok",
   }),
   application: z

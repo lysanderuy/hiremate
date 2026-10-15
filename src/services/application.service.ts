@@ -409,6 +409,9 @@ export const applicationService = {
         },
       );
       if (status === "resume_not_ready") throw notReady;
+      if (status === "model_mismatch") {
+        throw new HttpError("Match score is unavailable right now. Try again later.", 409);
+      }
       if (status === "listing_not_ready" || !match) {
         throw new HttpError("This listing is still being prepared. Try again in a moment.", 409);
       }

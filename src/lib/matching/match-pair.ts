@@ -45,7 +45,7 @@ export function matchPair(resume: MatchPairResume | null, job: MatchPairJob): Ma
     return { match: null, skillsMatch, status: "listing_not_ready" };
   }
   if (job.embedding.length !== resume.embedding.length) {
-    return { match: null, skillsMatch, status: "listing_not_ready" };
+    return { match: null, skillsMatch, status: "model_mismatch" };
   }
 
   const { score, band, matched, missing, breakdown } = scorePair({

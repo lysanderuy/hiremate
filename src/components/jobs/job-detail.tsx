@@ -208,6 +208,15 @@ export function JobDetail({ id }: { id: string }) {
         </span>
       </>
     );
+  } else if (listing.matchStatus === "model_mismatch") {
+    applyBlock = (
+      <>
+        <Button disabled className="w-full">
+          Apply
+        </Button>
+        <span className="text-xs text-muted-foreground">Apply is unavailable right now.</span>
+      </>
+    );
   } else {
     applyBlock = (
       <Button className="w-full" onClick={openConfirm}>

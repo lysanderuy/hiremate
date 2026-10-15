@@ -6,6 +6,7 @@ export const MATCH_STATUS_MESSAGES: Record<Exclude<MatchStatus, "ok">, string> =
   no_resume: "Add a resume to see your match score.",
   resume_not_ready: "Your resume is not ready. Open My resume to try again.",
   listing_not_ready: "Match score is being prepared. Try again in a moment.",
+  model_mismatch: "Match score is unavailable right now.",
 };
 
 export function matchStatusMessage(status: MatchStatus): string {

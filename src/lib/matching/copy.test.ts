@@ -8,6 +8,7 @@ describe("matchStatusMessage", () => {
     expect(matchStatusMessage("listing_not_ready")).toBe(
       "Match score is being prepared. Try again in a moment.",
     );
+    expect(matchStatusMessage("model_mismatch")).toBe("Match score is unavailable right now.");
     expect(matchStatusMessage("resume_not_ready")).toContain("not ready");
   });
 });
