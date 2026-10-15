@@ -3,6 +3,8 @@ import type { MatchBand } from "@/validators/application.validator";
 import model from "./model.json";
 import { bandFromScore } from "./score";
 
+export const MODEL_VERSION: string = model.trainedAt;
+
 export type PairFeatures = {
   sbertCosine: number;
   skillsOverlap: number;
