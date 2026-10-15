@@ -10,7 +10,9 @@ import { skillService, type DbExecutor } from "@/services/skill.service";
 import type { CreateListingInput, UpdateListingInput } from "@/validators/listing.validator";
 import type { SkillResponse } from "@/validators/skill.validator";
 
-export type ListingView = Job & {
+type ListingRow = Omit<Job, "embedding" | "prepareAttemptedAt">;
+
+export type ListingView = ListingRow & {
   skills: SkillResponse[];
   applicantCount: number;
   topMatchScore: number | null;
@@ -22,9 +24,15 @@ const NO_APPLICANTS: ApplicantStats = { total: 0, topMatchScore: null };
 const REMOVED_MESSAGE = "Removed by an administrator.";
 const SKILLS_INVALID_MESSAGE = "One or more skills are not in the skills list.";
 
+function omit<T extends object, K extends keyof T>(value: T, keys: K[]): Omit<T, K> {
+  const copy = { ...value };
+  for (const key of keys) delete copy[key];
+  return copy;
+}
+
 function toView(job: Job, jobSkillList: SkillResponse[], stats: ApplicantStats): ListingView {
   return {
-    ...job,
+    ...omit(job, ["embedding", "prepareAttemptedAt"]),
     skills: jobSkillList,
     applicantCount: stats.total,
     topMatchScore: stats.topMatchScore,
