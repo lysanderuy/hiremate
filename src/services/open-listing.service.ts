@@ -260,7 +260,7 @@ export const openListingService = {
         items: pageItems.map(({ row, skills: jobSkillNames, result }) =>
           toSummary(row, jobSkillNames, result, applicationByJob.get(row.id) ?? null),
         ),
-        total: totalRow.total,
+        total: Math.min(totalRow.total, BEST_MATCH_CANDIDATE_LIMIT),
         page: query.page,
         pageSize: OPEN_LISTING_PAGE_SIZE,
       };
