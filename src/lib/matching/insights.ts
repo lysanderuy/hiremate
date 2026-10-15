@@ -37,7 +37,7 @@ function contentClause(points: number, audience: InsightAudience): Clause {
 
 export function describeBreakdown(breakdown: MatchBreakdown, audience: InsightAudience): string {
   const first = skillsClause(breakdown.skills, audience);
-  const second = contentClause(breakdown.wording, audience);
+  const second = contentClause(breakdown.content, audience);
   const opposed =
     first.tone !== "neutral" && second.tone !== "neutral" && first.tone !== second.tone;
 

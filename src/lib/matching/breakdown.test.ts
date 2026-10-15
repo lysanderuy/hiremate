@@ -19,7 +19,7 @@ describe("breakdownFor", () => {
     expect(result.score).toBe(63);
     expect(Math.abs(result.start - 25)).toBeLessThanOrEqual(1);
     expect(Math.abs(result.skills - 41)).toBeLessThanOrEqual(1);
-    expect(Math.abs(result.wording - -3)).toBeLessThanOrEqual(1);
+    expect(Math.abs(result.content - -3)).toBeLessThanOrEqual(1);
   });
 
   it("always sums to the score, including clipped extremes and empty jobs", () => {
@@ -42,8 +42,8 @@ describe("breakdownFor", () => {
               resumeSkillCount,
             };
             const result = breakdownOf(features);
-            expect(Number.isInteger(result.wording)).toBe(true);
-            expect(result.start + result.skills + result.wording).toBe(result.score);
+            expect(Number.isInteger(result.content)).toBe(true);
+            expect(result.start + result.skills + result.content).toBe(result.score);
             const raw = predictRating(features);
             if (raw <= 0) clippedLow++;
             if (raw >= 4) clippedHigh++;

@@ -23,8 +23,8 @@ describe("matchPair", () => {
 
   it("exposes a breakdown that sums to the score only when match is present", () => {
     const ok = matchPair(resume, job);
-    const { start, skills, wording } = ok.match?.breakdown ?? { start: 0, skills: 0, wording: 0 };
-    expect(start + skills + wording).toBe(ok.match?.score);
+    const { start, skills, content } = ok.match?.breakdown ?? { start: 0, skills: 0, content: 0 };
+    expect(start + skills + content).toBe(ok.match?.score);
     expect(matchPair(null, job).match).toBeNull();
     expect(matchPair(resume, { ...job, embedding: null }).match).toBeNull();
   });
@@ -69,9 +69,9 @@ describe("matchPair", () => {
     expect(result.skillsMatch).toBeNull();
   });
 
-  it("treats mismatched dimensions as not ready", () => {
+  it("reports model_mismatch when embedding dimensions differ", () => {
     const result = matchPair(resume, { ...job, embedding: [1, 0] });
-    expect(result.status).toBe("listing_not_ready");
+    expect(result.status).toBe("model_mismatch");
     expect(result.match).toBeNull();
   });
 

@@ -95,7 +95,7 @@ export function breakdownFor(features: PairFeatures, score: number): MatchBreakd
 
   const start = Math.round(model.intercept * pointsPerRating);
   const skills = Math.round(contribution(1) + contribution(2) + contribution(3) + contribution(4));
-  return { start, skills, wording: score - start - skills };
+  return { start, skills, content: score - start - skills };
 }
 
 export function scorePair(input: ScorePairInput): PairScore {

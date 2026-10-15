@@ -100,7 +100,7 @@ export const matchBreakdownSchema = z
       description: "Points added or removed by skill overlap and counts.",
       example: 41,
     }),
-    wording: z.number().int().meta({
+    content: z.number().int().meta({
       description: "Points added or removed by how closely the resume text matches the listing.",
       example: -3,
     }),

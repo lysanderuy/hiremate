@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { describeBreakdown } from "./insights";
 
-const base = { start: 25, skills: 0, wording: 0 };
+const base = { start: 25, skills: 0, content: 0 };
 const NEUTRAL_CONTENT = "Your resume covers some of the same ground as this job.";
 
 describe("describeBreakdown skills sentence", () => {
@@ -32,8 +32,8 @@ describe("describeBreakdown resume content sentence", () => {
     [4, "Your resume covers some of the same ground as this job."],
     [-4, "Your resume covers some of the same ground as this job."],
     [-5, "Your resume covers different ground than this job."],
-  ])("wording %i", (wording, expected) => {
-    expect(describeBreakdown({ ...base, wording }, "applicant")).toBe(
+  ])("content %i", (content, expected) => {
+    expect(describeBreakdown({ ...base, content }, "applicant")).toBe(
       `Skills made little difference here. ${expected}`,
     );
   });
@@ -41,32 +41,32 @@ describe("describeBreakdown resume content sentence", () => {
 
 describe("describeBreakdown joining", () => {
   it("joins opposing tones with but", () => {
-    expect(describeBreakdown({ start: 25, skills: 30, wording: -8 }, "applicant")).toBe(
+    expect(describeBreakdown({ start: 25, skills: 30, content: -8 }, "applicant")).toBe(
       "Your skills line up well with what this job asks for, but your resume covers different ground than this job.",
     );
-    expect(describeBreakdown({ start: 25, skills: -9, wording: 6 }, "applicant")).toBe(
+    expect(describeBreakdown({ start: 25, skills: -9, content: 6 }, "applicant")).toBe(
       "Few of your skills line up with what this job asks for, but your resume covers very similar ground to this job.",
     );
   });
 
   it("joins matching tones as two sentences", () => {
-    expect(describeBreakdown({ start: 25, skills: 10, wording: 6 }, "applicant")).toBe(
+    expect(describeBreakdown({ start: 25, skills: 10, content: 6 }, "applicant")).toBe(
       "Some of your skills line up with what this job asks for. Your resume covers very similar ground to this job.",
     );
   });
 
   it("uses third person for recruiters", () => {
-    expect(describeBreakdown({ start: 25, skills: 30, wording: -8 }, "recruiter")).toBe(
+    expect(describeBreakdown({ start: 25, skills: 30, content: -8 }, "recruiter")).toBe(
       "The applicant's skills line up well with what this job asks for, but the applicant's resume covers different ground than this job.",
     );
-    expect(describeBreakdown({ start: 25, skills: -9, wording: 0 }, "recruiter")).toBe(
+    expect(describeBreakdown({ start: 25, skills: -9, content: 0 }, "recruiter")).toBe(
       "Few of the applicant's skills line up with what this job asks for. The applicant's resume covers some of the same ground as this job.",
     );
   });
 
   it("ignores the starting points", () => {
-    expect(describeBreakdown({ start: 0, skills: 0, wording: 0 }, "applicant")).toBe(
-      describeBreakdown({ start: 99, skills: 0, wording: 0 }, "applicant"),
+    expect(describeBreakdown({ start: 0, skills: 0, content: 0 }, "applicant")).toBe(
+      describeBreakdown({ start: 99, skills: 0, content: 0 }, "applicant"),
     );
   });
 });
