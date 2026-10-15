@@ -1,6 +1,6 @@
 # TalentFlow AI: PRD (MVP)
 
-Version: MVP v1.2. Date: 2026-10-14.
+Version: MVP v1.3. Date: 2026-10-15.
 Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms here match that file.
 
 ## 0. Glossary
@@ -22,6 +22,7 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 | Fit               | Plain word for how well a resume matches a listing. Shown to users as the match score and its band.                                                                               |
 | Skill             | A named skill or tool, such as Python or SQL, kept in the skills list.                                                                                                            |
 | Skills list       | The curated list of skills the system looks for in resumes and listings. Managed by administrators.                                                                               |
+| Skills comparison | The skills the listing asks for, split into matched and missing. Shown beside the match score. It is not part of the AI result.                                                   |
 | Skills matched    | Skills the listing asks for that the resume has.                                                                                                                                  |
 | Skills missing    | Skills the listing asks for that the resume does not have.                                                                                                                        |
 | Status            | Where an application is in review: Submitted, Viewed, Shortlisted, Interview, Rejected, Withdrawn. Interview is a label the recruiter sets. It carries no date and no scheduling. |
@@ -29,7 +30,7 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 | Ranked applicants | The applicants of one listing, sorted by match score, highest first.                                                                                                              |
 | Salary range      | Optional monthly pay range on a listing, in PHP, as a minimum and a maximum.                                                                                                      |
 | Employment type   | One of Full-time, Part-time, Contract, Internship.                                                                                                                                |
-| Processing        | The short step after a resume or listing is saved, while skills are found and the text is prepared for scoring.                                                                   |
+| Preparing         | The short step after a resume or listing is saved, while skills are found and the text is turned into an embedding (a list of 384 numbers) for scoring.                           |
 
 ## 1. What the product is, and is not
 
@@ -38,21 +39,21 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 - A job board with three roles: Applicant, Recruiter, Administrator.
 - A match score for any resume and listing pair, shown to the applicant before applying and to the recruiter on every application.
 - Text-first. The match score reads the meaning of the text, not only keywords.
-- Transparent. Every match score shows skills matched and skills missing.
+- Transparent. Every match score comes with a skills comparison and a short insight.
 
 **TalentFlow AI is not:**
 
 - A gatekeeper. It never rejects, hides or blocks an applicant because of a score.
-- A black box. No score is shown without its reasons.
+- A black box. No score is shown without its skills comparison and insight.
 - A resume builder, career coach or messaging tool.
 - An applicant tracking system with workflows, interview scheduling or offers. The Interview status is a plain label. It does not schedule, invite or notify.
 - A replacement for the recruiter's decision.
-- A matcher for every field. The score model is trained on tech jobs and tech resumes. Scores for other fields can be less reliable.
+- A matcher for every field. The score model is trained on tech jobs and tech resumes. Scores for other fields can be less reliable (see 6.4, Limits).
 
 ## 2. Core product principles
 
 1. **Show the fit before the apply.** The match score is visible on a listing before the applicant applies.
-2. **Every score has a reason.** Show skills matched and skills missing next to the match score.
+2. **Every score has a reason.** Show the skills comparison and a short insight next to the match score.
 3. **A score is a ranking aid.** The recruiter decides. Nothing is automated based on a score.
 4. **One of each, to stay simple.** One resume per applicant, one company per recruiter, one active application per applicant per listing.
 5. **The PDF is the resume.** Applicants and recruiters open the original PDF. Text read from it is internal, used only to find skills and score.
@@ -97,32 +98,34 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 
 **Listing**
 
-| Field                  | Rules                                                                                              |
-| ---------------------- | -------------------------------------------------------------------------------------------------- |
-| id                     | unique                                                                                             |
-| company, recruiter     | set from the logged-in recruiter                                                                   |
-| title                  | required, 3 to 120 characters                                                                      |
-| description            | required, 50 to 10,000 characters                                                                  |
-| location               | required, 2 to 120 characters. "Remote" is allowed.                                                |
-| employment_type        | required. Full-time, Part-time, Contract, Internship                                               |
-| salary_min, salary_max | optional, whole numbers, PHP per month, 0 to 10,000,000. Both or neither. min must not exceed max. |
-| skills                 | list of Skills, up to 30. Filled from the title and description, editable by the recruiter.        |
-| status                 | Open, Closed, Removed                                                                              |
-| match_ready            | true when Processing is done. Match scores for this listing need it.                               |
-| created_at, updated_at | timestamps                                                                                         |
+| Field                  | Rules                                                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| id                     | unique                                                                                                     |
+| company, recruiter     | set from the logged-in recruiter                                                                           |
+| title                  | required, 3 to 120 characters                                                                              |
+| description            | required, 50 to 10,000 characters                                                                          |
+| location               | required, 2 to 120 characters. "Remote" is allowed.                                                        |
+| employment_type        | required. Full-time, Part-time, Contract, Internship                                                       |
+| salary_min, salary_max | optional, whole numbers, PHP per month, 0 to 10,000,000. Both or neither. min must not exceed max.         |
+| skills                 | list of Skills, at least 3 and up to 30. Filled from the title and description, editable by the recruiter. |
+| status                 | Open, Closed, Removed                                                                                      |
+| match_ready            | true when the description has an embedding. Match scores for this listing need it. Internal.               |
+| embedding              | 384 numbers made from the description. Internal. Never returned by the API.                                |
+| created_at, updated_at | timestamps                                                                                                 |
 
 **Resume** (one per applicant)
 
-| Field            | Rules                                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| id               | unique                                                                                           |
-| applicant        | the Applicant user, one resume per applicant                                                     |
-| text             | required, 200 to 200,000 characters, read from the PDF. Internal only. Never shown.              |
-| source           | PDF. Information only.                                                                           |
-| file             | the original PDF, up to 4 MB, kept so the applicant and the recruiters they apply to can open it |
-| processing_state | Processing, Ready, Failed                                                                        |
-| skills           | derived from the text. Not editable in the MVP.                                                  |
-| updated_at       | timestamp                                                                                        |
+| Field      | Rules                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| id         | unique                                                                                           |
+| applicant  | the Applicant user, one resume per applicant                                                     |
+| text       | required, 200 to 200,000 characters, read from the PDF. Internal only. Never shown.              |
+| source     | PDF. Information only.                                                                           |
+| file       | the original PDF, up to 4 MB, kept so the applicant and the recruiters they apply to can open it |
+| state      | Ready, Failed. Ready only when skills and the embedding were both stored.                        |
+| embedding  | 384 numbers made from the text. Internal. Never returned by the API.                             |
+| skills     | derived from the text. Not editable in the MVP.                                                  |
+| updated_at | timestamp                                                                                        |
 
 **Application**
 
@@ -133,6 +136,7 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 | resume_snapshot                          | the resume file and text at submission. Never change.                                                                       |
 | skills_matched, skills_missing           | stored at submission                                                                                                        |
 | match_score, band                        | stored at submission. Not recalculated later.                                                                               |
+| model_version, match_breakdown           | stored at submission. The model that scored it, and the points from the start, skills and resume content. Never change.     |
 | status                                   | Submitted, Viewed, Shortlisted, Interview, Rejected, Withdrawn                                                              |
 | applied_at, viewed_at, status_changed_at | timestamps                                                                                                                  |
 
@@ -147,12 +151,13 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 
 **Match score** (calculated, shown live; stored only inside an application)
 
-| Field                          | Rules                   |
-| ------------------------------ | ----------------------- |
-| inputs                         | one resume, one listing |
-| match_score                    | whole number, 0 to 100  |
-| band                           | Strong, Fair, Weak      |
-| skills_matched, skills_missing | lists of skill names    |
+| Field                          | Rules                                                      |
+| ------------------------------ | ---------------------------------------------------------- |
+| inputs                         | one resume, one listing                                    |
+| match_score                    | whole number, 0 to 100                                     |
+| band                           | Strong, Fair, Weak                                         |
+| skills_matched, skills_missing | lists of skill names                                       |
+| breakdown                      | points from the start, skills and wording (resume content) |
 
 **Relationships:** a Recruiter has one Company and many Listings. A Listing has many Applications. An Applicant has one Resume and many Applications. A Listing and a Resume have many Skills through the skills list.
 
@@ -216,7 +221,7 @@ Acceptance criteria:
 1. Applicant opens My resume.
 2. Chooses a PDF file to upload.
 3. The system reads the text from the PDF on the server and keeps the file.
-4. The resume is Processing, then Ready.
+4. The resume is prepared. It is Ready, or Failed.
 5. The applicant can open the PDF from My resume.
 
 Acceptance criteria:
@@ -229,8 +234,10 @@ Acceptance criteria:
 - [ ] The resume is saved as soon as the PDF is read. There is no text box to edit.
 - [ ] Uploading a new PDF replaces the old resume. The Applicant never has more than one. The old file is deleted unless an existing application uses it.
 - [ ] My resume shows an "Open resume (PDF)" button that opens the stored PDF in a new tab.
-- [ ] After saving, processing_state is Processing and then Ready, within 10 seconds for a typical resume.
-- [ ] If processing fails, the state is Failed and the page shows "We could not process your resume. Try saving again." with a Retry button.
+- [ ] After saving, the resume is Ready within 10 seconds for a typical resume. It is Ready only when skills were found and the embedding was stored.
+- [ ] Otherwise the state is Failed and the page shows "We could not process your resume. Try saving again." with a Retry button.
+- [ ] Retry prepares the stored resume again without a new upload. It can be used once every 30 seconds.
+- [ ] Saving never fails because preparing failed. The resume is kept as Failed.
 - [ ] Existing applications keep their snapshot and PDF and are not changed.
 
 ### FL-05 Browse and search listings
@@ -247,32 +254,35 @@ Acceptance criteria:
 - [ ] Location filter matches location text, ignoring case. Employment type filter is a single choice or all.
 - [ ] Minimum salary filter shows listings where salary_max is at least the entered amount. Listings with no salary range are left out when this filter is used.
 - [ ] Each card shows title, company, location, employment type and salary range ("Not specified" if none).
-- [ ] Best match sort appears only for an Applicant whose resume is Ready, and orders by match score, highest first. Listings with no score go last.
+- [ ] Best match sort appears only for an Applicant whose resume is Ready. The filters apply first, then up to 500 of the newest matching listings are scored and sorted by match score, highest first. Listings with no score go last. 10 per page.
 - [ ] An empty result shows "No listings match your search."
 - [ ] A Closed or Removed listing opened by direct link shows "This listing is not open."
 
 ### FL-06 See the match score on a listing (before applying)
 
 1. Applicant opens a listing detail page.
-2. The page shows the match score card.
+2. The page shows the Match analysis card.
 
 Acceptance criteria:
 
-- [ ] A logged-in Applicant with a Ready resume sees the match score, its band, skills matched and skills missing on the listing page.
-- [ ] The card reads like "Strong match. You have 6 of 8 skills this job asks for." The first words match the band: "Strong match.", "Fair match.", "Weak match."
-- [ ] If the listing has no skills, the card says "This listing has no skills listed. The score is based on the text only."
+- [ ] A logged-in Applicant with a Ready resume sees one Match analysis card on the listing page. It shows the AI match score and its band first.
+- [ ] The card also shows a separate skills comparison: "X of Y" skills, with chips for skills matched and skills missing.
+- [ ] The card includes a one-paragraph insight. It comes from the points for skills and for resume content.
+- [ ] The band comes from the server. The cutoffs live in the model file only, never in the page.
+- [ ] A listing with no skills is still scored. The skills part says "This listing has no skills listed, so the score is less reliable."
 - [ ] An Applicant with no resume sees "Add a resume to see your match score." with a link to My resume.
-- [ ] An Applicant whose resume is Processing sees "Your resume is being prepared. Try again in a moment."
-- [ ] If the listing is not match_ready, the card says "Match score is being prepared. Try again in a moment."
+- [ ] An Applicant whose resume is Failed sees "Your resume is not ready. Open My resume to try again." The skills comparison still shows.
+- [ ] If the listing is not match_ready, the card says "Match score is being prepared. Try again in a moment." The skills comparison still shows.
+- [ ] When an Applicant opens an Open listing that is not match_ready, the server tries to prepare it again, at most once every 30 seconds.
 - [ ] A logged-out visitor sees "Log in as an applicant to see your match score."
 - [ ] Recruiters and Administrators do not see the match score card on listings.
 - [ ] The card shows in under 2 seconds for at least 95 percent of views.
-- [ ] The card always includes the note "A score helps you decide. It does not decide for you."
+- [ ] The score never blocks or hides anything. It is a ranking aid (principle 3).
 
 ### FL-07 Apply to a listing
 
 1. Applicant presses Apply on an Open listing.
-2. A confirmation shows the resume that will be sent and the current match score.
+2. A confirmation shows the resume that will be sent and the current match score. For a Weak band it adds "This is a weak match. You can still apply."
 3. Applicant confirms.
 4. The application is created with status Submitted.
 
@@ -282,7 +292,9 @@ Acceptance criteria:
 - [ ] An Applicant with no resume is sent to My resume. After saving, they return to the listing.
 - [ ] An Applicant who has an application to this listing that is not Withdrawn sees "You applied on <date>" instead of Apply.
 - [ ] An Applicant whose resume has no stored PDF sees "Upload your resume PDF again before applying."
-- [ ] On confirm, the application stores the resume snapshot (the PDF and its text), skills matched, skills missing, match score and band.
+- [ ] Apply is blocked with "This listing is still being prepared. Try again in a moment." while the listing is not match_ready.
+- [ ] Apply is blocked with "Your resume is not ready. Save it again before applying." while the resume is not Ready.
+- [ ] On confirm, the application stores the resume snapshot (the PDF and its text), skills matched, skills missing, match score, band, model version and breakdown. Every application therefore has a score.
 - [ ] The application starts as Submitted with applied_at set.
 - [ ] A low match score never blocks applying. Weak applications are allowed.
 - [ ] If the listing was closed meanwhile, the confirm fails with "This listing is no longer open." and no application is created.
@@ -310,17 +322,18 @@ Acceptance criteria:
 2. Enters title, description, location, employment type, and optional salary range.
 3. The form suggests skills found in the title and description. The Recruiter can add or remove skills.
 4. Presses Publish.
-5. The listing is Open and goes through Processing.
+5. The listing is Open and is prepared for scoring.
 
 Acceptance criteria:
 
 - [ ] Only an Active Recruiter can open the form.
 - [ ] Title, description, location and employment type are required and follow the limits in section 4.
 - [ ] If salary is entered, both minimum and maximum are required and the minimum is not above the maximum. Otherwise show "Enter both amounts, with the minimum at or below the maximum."
-- [ ] Suggested skills come from active skills in the skills list, found in the title and description. The Recruiter can add skills from the skills list and remove suggested ones. Up to 30.
+- [ ] Suggested skills come from active skills in the skills list, found in the title and description. The Recruiter can add skills from the skills list and remove suggested ones. At least 3 and up to 30.
 - [ ] The Recruiter cannot add a skill that is not in the skills list.
 - [ ] After Publish, status is Open and the listing appears in Jobs.
-- [ ] The listing's match_ready becomes true within 10 seconds for a typical listing.
+- [ ] The listing's match_ready becomes true within 10 seconds for a typical listing. If preparing fails, the listing still saves and stays not ready.
+- [ ] While a listing is not ready, the Recruiter sees "Preparing" with a Retry button. Retry can be used once every 30 seconds.
 - [ ] The listing is linked to the Recruiter's Company.
 
 ### FL-10 Edit, close, reopen or delete a listing
@@ -331,7 +344,7 @@ Acceptance criteria:
 Acceptance criteria:
 
 - [ ] A Recruiter can act only on their own listings.
-- [ ] Edit changes any field. After a title, description or skills change, match_ready is false until Processing is done.
+- [ ] Edit changes any field. After a description change, match_ready is false until the listing is prepared again. A title or skills change does not change match_ready.
 - [ ] Editing a listing does not change existing applications or their stored match scores.
 - [ ] Close sets status Closed. The listing leaves Jobs and Apply is blocked. Applications stay.
 - [ ] Reopen sets a Closed listing back to Open. It does not work on a Removed listing.
@@ -350,9 +363,9 @@ Acceptance criteria:
 
 - [ ] Only the listing's own Recruiter can open its Applicants page.
 - [ ] The default order is match score, highest first. The Recruiter can switch to Newest first.
-- [ ] Each row shows applicant display name, match score, band, status, applied date.
+- [ ] Each row shows applicant display name, match score, band, status, applied date. Ranking and the band filter use the score and band saved at submission.
 - [ ] The Recruiter can filter by status and by band.
-- [ ] Opening an application shows an "Open resume (PDF)" button, skills matched and skills missing. The extracted text is not shown.
+- [ ] Opening an application shows an "Open resume (PDF)" button and the same Match analysis card the applicant saw, built from the saved score and breakdown: score, band, skills comparison and insight. The extracted text is not shown.
 - [ ] Opening a Submitted application sets status Viewed and viewed_at, once.
 - [ ] The Recruiter can set status to Viewed, Shortlisted, Interview or Rejected, in any order among those four.
 - [ ] Setting Interview records no date, sends no invite and sends no message. It only changes the status.
@@ -448,28 +461,30 @@ Acceptance criteria:
 ### 6.2 Resume handling
 
 - Input: PDF only (up to 4 MB, text-based).
-- The text read from the PDF is used inside the product to find skills and prepare scoring. It keeps reading order as best it can. Columns and tables can come out jumbled. The text is never shown to applicants or recruiters. The PDF reader library is chosen by the PDF check notebook (notebook 3).
+- The text read from the PDF is used inside the product to find skills and make the embedding. It keeps reading order as best it can. Columns and tables can come out jumbled. The text is never shown to applicants or recruiters. The PDF reader library is chosen by the PDF check notebook (notebook 3).
 - A PDF with fewer than 200 readable characters is treated as scanned and rejected.
 - The original PDF is stored privately, with the extracted text. It opens only for the applicant, and for the recruiter of a listing the applicant applied to, through the app. It is never public. Administrators cannot open it.
 - One resume per applicant. A new save replaces the old one.
-- After saving, the system finds skills in the text and prepares it for scoring. This is Processing. It runs once per save, not once per view.
+- After saving, the system finds skills in the text and makes an embedding for scoring. This is Preparing. It runs once per save, not once per view.
+- The resume is Ready only when skills and the embedding were both stored. Otherwise it is Failed, and the applicant can retry (once every 30 seconds).
 
 ### 6.3 Skills list and skill finding
 
 - A skill is found in a text when its name or one of its aliases appears as a whole word or phrase, ignoring case.
 - Longer names win over shorter ones ("power bi" over "power").
 - Names with symbols, such as "c++" and "c#", match correctly.
+- One extractor finds skills in resumes and listings.
 - Only active skills are used.
-- The list is built once from three sources: the skills that appear in the `data_jobs` job postings dataset (Hugging Face), the O*NET software skills file, and skills the team adds by hand. It is reviewed by hand in the skills notebook (notebook 0). Ambiguous everyday words (such as go, flow, spring) start as inactive.
-- The match model counts skills, so large changes to the list after training shift its inputs. After a large change, the model is retrained (see 6.4).
+- The list is seeded from the model's own list of 389 skills (`src/db/seeds/skills.json`). It was built once from three sources: the skills that appear in the `data_jobs` job postings dataset (Hugging Face), the O*NET software skills file, and skills the team adds by hand. It is reviewed by hand in the skills notebook (notebook 0). Ambiguous everyday words (such as go, flow, spring) start as inactive.
+- The match model counts skills, so the model and the skills list change together. Changing the list needs a retrain (see 6.4).
 
 ### 6.4 Match score
 
-Inputs: the resume text, the listing's title and description, and the listing's skills.
+Inputs: the resume's skills and embedding, and the listing's skills and embedding. The listing embedding is made from the description only, never the title.
 
 Features. Five numbers are made for each resume and listing pair:
 
-- `sbert_cosine`: how alike the meaning of the two texts is. Each text is read by the model all-MiniLM-L6-v2 (SBERT), which turns it into numbers. Long texts are split into 150-word pieces and the results are averaged. The value is the cosine similarity of the two results.
+- `sbert_cosine`: how alike the meaning of the two texts is. Each text is read by the model all-MiniLM-L6-v2 (SBERT), which turns it into 384 numbers (an embedding). Long texts are split into 150-word pieces and the results are averaged into a vector of length 1. The value is the cosine similarity of the two vectors.
 - `skills_overlap`: skills matched divided by the number of skills on the listing. It is 0 if the listing has no skills.
 - `matched_count`: number of skills matched.
 - `job_skill_count`: number of skills on the listing.
@@ -477,7 +492,7 @@ Features. Five numbers are made for each resume and listing pair:
 
 Calculation:
 
-1. Make the five features.
+1. Make the five features from the stored embeddings and skills.
 2. A trained Ridge regression (a linear model with a penalty that keeps the weights small) predicts a rating from 0 to 4. The rating is clipped to that range.
 3. `match_score = round(rating * 25)`.
 4. `band`: Strong for 70 to 100, Fair for 40 to 69, Weak for 0 to 39.
@@ -487,7 +502,7 @@ Training:
 - Data: 600 resume and listing pairs, tech roles only, rated 0 to 4 by four raters using one written rubric. The label is the average of the four ratings.
 - Split by resume: about 70 percent train, 15 percent validation, 15 percent test. Validation sets the Ridge penalty. The final model is refit on train and validation. The test set is used once.
 - The model is compared against two others on the test set: the earlier hand-made formula (0.4 skills overlap + 0.6 meaning) and an untrained pretrained cross-encoder.
-- The same feature code runs in training and in the live product. A small Python service (FastAPI) loads SBERT and the saved model once at startup. The cross-encoder is not used live.
+- The cross-encoder is not used live.
 
 Rules:
 
@@ -496,15 +511,31 @@ Rules:
 - Skills matched and skills missing come from the same skills used for the features.
 - Skills missing shows up to 8 names, then "and N more."
 - The match score reads the resume text and listing text only. No other user data is an input.
-- Scores are calculated when asked for, using results stored when the resume and listing were saved.
+- Scores are calculated when asked for, in the app, from the embeddings stored when the resume and listing were saved. No outside call is made at score time.
 - An application stores its own match score at submission. It does not change afterward.
-- Copy by band: "Strong match.", "Fair match.", "Weak match." followed by "You have X of Y skills this job asks for." Add "Missing: A, B." when skills are missing.
+- The skills comparison ("X of Y", matched and missing chips) is separate from the AI score. A listing with no skills is still scored.
+- The insight is one paragraph made from the saved breakdown: the points from skills and from resume content. It is never recalculated for an existing application.
+- Score and band shown to the recruiter come from the application. The Match analysis card is the same for both roles.
+
+Where it runs:
+
+- A separate Python service in `matcher/` (FastAPI) only makes embeddings. `POST /embed` takes a kind (resume or listing) and texts and returns 384 numbers per text. It does its own text prep: resumes are cleaned; listings use the description only, lowercased, with digits and punctuation deleted, to match the training listings.
+- The app calls it when a resume or listing is saved. If the service is not set up or fails, the save still works, and the resume is Failed or the listing is not ready until a retry works.
+- Scoring and skill finding run in the app (TypeScript). The model weights and the 389-skill list come from the trained model through an export script. Tests check that the TypeScript code gives the same features as the Python training code.
+- Hosting of the matcher is not decided. It needs an always-on host, separate from the web app.
+
+Limits:
+
+- The model is trained on tech roles only. Scores for other fields are less reliable.
+- Resume PDFs can come out with jumbled columns. The training resumes were plain text.
+- Training listings had digits and punctuation removed. Live listing text is prepared the same way for the embedding. Skills written with punctuation (c++, c#, ci/cd, .net) were rarely matched on the listing side in training.
+- The model counts skills. Changing the skills list needs a retrain, and the model and the list are replaced together.
 
 ### 6.5 Listings
 
 - Fields and limits are in section 4.
 - Status: Open, Closed, Removed (see section 8).
-- Skills are suggested from the text and editable, from the skills list only.
+- Skills are suggested from the text and editable, from the skills list only. A listing needs at least 3 skills.
 - Salary is optional, monthly, in PHP only. Shown as "PHP 30,000 to 45,000 per month" or "Not specified."
 - Delete only with zero applications. Otherwise Close.
 - Listings of a Suspended or non-Active Recruiter are hidden from Jobs.
@@ -512,14 +543,16 @@ Rules:
 ### 6.6 Job search
 
 - Keyword, location, employment type, minimum salary. Sort: Newest (default) and Best match (for Applicants with a Ready resume).
+- Best match: the filters apply in the database. Up to 500 of the newest matching listings are scored in memory and sorted by score, with unscored ones last.
+- The Applicant dashboard shows Best matches: only listings in the Fair and Strong bands.
 - 10 listings per page.
 - Only Open listings of Active Recruiters are shown.
 
 ### 6.7 Applications
 
 - One active application per applicant per listing. After Withdrawn, the applicant can apply again while the listing is Open.
-- Created only for Open listings by Applicants with a Ready resume.
-- Stores a snapshot (the resume PDF and its text), skills matched, skills missing, match score and band at submission.
+- Created only for Open listings that are match_ready, by Applicants with a Ready resume.
+- Stores a snapshot (the resume PDF and its text), skills matched, skills missing, match score, band, model version and breakdown at submission.
 - Statuses and who can set them are in section 8.
 - Recruiters see applicant display name and email, and can open the resume PDF, only for their own listings.
 - No messages and no email are sent when a status changes. Applicants see the new status in My applications.
@@ -550,8 +583,8 @@ Rules:
 
 ### 6.12 Quality targets
 
-- Match score card in under 2 seconds, 95 percent of views.
-- Resume or listing Processing done within 10 seconds for a typical text.
+- Match analysis card in under 2 seconds, 95 percent of views.
+- Resume or listing Preparing done within 10 seconds for a typical text.
 - Pages for each role respond in under 1 second for lists of up to 10 rows, after the first load.
 - Works on current desktop and mobile browsers. Layout adapts down to a 360 pixel width.
 
@@ -608,22 +641,23 @@ Recruiter (Active) is a Recruiter with account status Active. Recruiter (not act
 
 A listing with zero applications can also be deleted by its Recruiter, which removes it permanently. Deleted is not a state.
 
-**Resume processing_state**
+**Resume state**
 
-| State      | Meaning                                        | Moves to                       |
-| ---------- | ---------------------------------------------- | ------------------------------ |
-| Processing | Saved. Skills and scoring data being prepared. | Ready, Failed                  |
-| Ready      | Match scores and Apply work.                   | Processing (on a new save)     |
-| Failed     | Preparation failed.                            | Processing (Retry or new save) |
+| State  | Meaning                                                        | Moves to                                                    |
+| ------ | -------------------------------------------------------------- | ----------------------------------------------------------- |
+| Ready  | Skills and embedding stored. Match scores and Apply work.      | Ready or Failed (on a new save)                             |
+| Failed | Skills or embedding could not be stored. Scores and Apply off. | Ready or Failed (Retry, once per 30 seconds, or a new save) |
 
 No resume: the Applicant has no resume yet. Scores and Apply are unavailable.
 
 **Listing match_ready**
 
-| State | Meaning                                                                                              |
-| ----- | ---------------------------------------------------------------------------------------------------- |
-| false | Processing, or title, description or skills just changed. Match scores unavailable for this listing. |
-| true  | Match scores available.                                                                              |
+| State | Meaning                                                                                                   |
+| ----- | --------------------------------------------------------------------------------------------------------- |
+| false | No description embedding yet, or the description just changed. Match scores and Apply unavailable for it. |
+| true  | Match scores available.                                                                                   |
+
+Only a changed description clears it. Title and skills edits do not. The Recruiter can retry preparing (once per 30 seconds). When an Applicant opens a not-ready Open listing, the server retries too.
 
 **Application status**
 
@@ -650,14 +684,13 @@ No resume: the Applicant has no resume yet. Scores and Apply are unavailable.
 
 **Match score availability** (shown on a listing to an Applicant)
 
-| State                   | Shown message                                            |
-| ----------------------- | -------------------------------------------------------- |
-| Available               | The score card with band, skills matched, skills missing |
-| No resume               | "Add a resume to see your match score."                  |
-| Resume Processing       | "Your resume is being prepared. Try again in a moment."  |
-| Resume Failed           | "We could not process your resume. Try saving again."    |
-| Listing not match_ready | "Match score is being prepared. Try again in a moment."  |
-| Logged out              | "Log in as an applicant to see your match score."        |
+| State                   | Shown message                                                    |
+| ----------------------- | ---------------------------------------------------------------- |
+| Available               | The Match analysis card: score, band, skills comparison, insight |
+| No resume               | "Add a resume to see your match score."                          |
+| Resume Failed           | "Your resume is not ready. Open My resume to try again."         |
+| Listing not match_ready | "Match score is being prepared. Try again in a moment."          |
+| Logged out              | "Log in as an applicant to see your match score."                |
 
 ## 9. Deferred to after the MVP
 
@@ -676,7 +709,7 @@ Out of scope for this version:
 - Explaining a score with highlighted text
 - Settings to change the score formula or bands inside the product
 - Years of experience as a score input (see 6.4 for the reason)
-- Match scoring for fields outside tech
+- Match scoring for fields outside tech (the model is trained on tech only)
 - Social login
 - Account deletion and data export tools
 - Administrator audit log
@@ -699,7 +732,7 @@ Targets are first goals. Adjust them after the first real data.
 | Application fit rate | Share of applications whose band is Strong or Fair                                                                                                   | 60 percent or more                                                               | Application records   |
 | Resume read rate     | Share of text-based PDFs in a test set of 30 that give at least 200 readable characters                                                              | 95 percent or more                                                               | Notebook 3            |
 | Score speed          | 95th percentile time to show the match score card                                                                                                    | Under 2 seconds                                                                  | Server timing         |
-| Processing speed     | 95th percentile time from save to Ready                                                                                                              | Under 10 seconds                                                                 | Server timing         |
+| Preparing speed      | 95th percentile time from save to Ready                                                                                                              | Under 10 seconds                                                                 | Server timing         |
 | Task success         | Share of test users who finish each core flow without help, in a usability test with 5 applicants, 3 recruiters and 1 administrator                  | 90 percent or more                                                               | Moderated test        |
 | Screening effort     | Time for a recruiter to shortlist 3 applicants from 20 using ranked applicants                                                                       | Under 5 minutes                                                                  | Usability test        |
 | Listing activity     | Open listings with at least 1 application, as a share of Open listings                                                                               | Report only, no target yet                                                       | Dashboard             |
