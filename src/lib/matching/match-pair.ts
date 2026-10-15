@@ -48,11 +48,11 @@ export function matchPair(resume: MatchPairResume | null, job: MatchPairJob): Ma
     return { match: null, skillsMatch, status: "listing_not_ready" };
   }
 
-  const { score, band, matched, missing } = scorePair({
+  const { score, band, matched, missing, breakdown } = scorePair({
     resumeSkills: resume.skills,
     jobSkills: job.skills,
     resumeEmbedding: resume.embedding,
     jobEmbedding: job.embedding,
   });
-  return { match: { score, band, matched, missing }, skillsMatch, status: "ok" };
+  return { match: { score, band, matched, missing, breakdown }, skillsMatch, status: "ok" };
 }

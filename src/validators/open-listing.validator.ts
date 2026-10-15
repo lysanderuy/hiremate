@@ -3,7 +3,11 @@ import { z } from "zod";
 import { APPLICANT_APPLICATION_STATUSES } from "@/types/applications";
 import { EMPLOYMENT_TYPES } from "@/types/jobs";
 
-import { APPLICATION_BANDS, applicationIdSchema } from "./application.validator";
+import {
+  APPLICATION_BANDS,
+  applicationIdSchema,
+  matchBreakdownSchema,
+} from "./application.validator";
 
 export const OPEN_LISTING_PAGE_SIZE = 10;
 export const OPEN_LISTING_SORTS = ["newest", "best_match"] as const;
@@ -60,6 +64,7 @@ export const matchSummarySchema = z
       description: "Listing skills not found in the resume.",
       example: ["postgresql"],
     }),
+    breakdown: matchBreakdownSchema,
   })
   .meta({
     id: "MatchSummary",

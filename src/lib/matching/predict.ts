@@ -1,4 +1,4 @@
-import type { MatchBand } from "@/validators/application.validator";
+import type { MatchBand, MatchBreakdown } from "@/validators/application.validator";
 
 import model from "./model.json";
 import { bandFromScore } from "./score";
@@ -20,6 +20,7 @@ export type PairScore = {
   matched: string[];
   missing: string[];
   features: PairFeatures;
+  breakdown: MatchBreakdown;
 };
 
 export type ScorePairInput = {
@@ -86,6 +87,17 @@ export function ratingToScore(rating: number): number {
   return Math.floor((clipped * 100) / model.relevanceMax + 0.5);
 }
 
+export function breakdownFor(features: PairFeatures, score: number): MatchBreakdown {
+  const x = featureVector(features);
+  const pointsPerRating = 100 / model.relevanceMax;
+  const contribution = (i: number) =>
+    ((model.coef[i] * (x[i] - model.mean[i])) / model.scale[i]) * pointsPerRating;
+
+  const start = Math.round(model.intercept * pointsPerRating);
+  const skills = Math.round(contribution(1) + contribution(2) + contribution(3) + contribution(4));
+  return { start, skills, wording: score - start - skills };
+}
+
 export function scorePair(input: ScorePairInput): PairScore {
   const features = pairFeatures(
     input.resumeSkills,
@@ -105,5 +117,6 @@ export function scorePair(input: ScorePairInput): PairScore {
     matched: jobUnique.filter((skill) => have.has(skill)),
     missing: jobUnique.filter((skill) => !have.has(skill)),
     features,
+    breakdown: breakdownFor(features, score),
   };
 }

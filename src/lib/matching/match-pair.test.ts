@@ -21,6 +21,14 @@ describe("matchPair", () => {
     expect(result.match?.missing).toEqual(["docker"]);
   });
 
+  it("exposes a breakdown that sums to the score only when match is present", () => {
+    const ok = matchPair(resume, job);
+    const { start, skills, wording } = ok.match?.breakdown ?? { start: 0, skills: 0, wording: 0 };
+    expect(start + skills + wording).toBe(ok.match?.score);
+    expect(matchPair(null, job).match).toBeNull();
+    expect(matchPair(resume, { ...job, embedding: null }).match).toBeNull();
+  });
+
   it("keeps listing order in skillsMatch", () => {
     expect(matchPair(resume, job).skillsMatch).toEqual({
       matched: ["sql", "react"],

@@ -56,6 +56,7 @@ const detailColumns = {
   applicantEmail: profiles.email,
   viewedAt: applications.viewedAt,
   jobTitle: jobs.title,
+  matchBreakdown: applications.matchBreakdown,
 };
 
 type SummaryRow = Pick<
@@ -71,7 +72,7 @@ type SummaryRow = Pick<
   | "band"
 > & { applicantName: string | null };
 type DetailRow = SummaryRow &
-  Pick<Application, "viewedAt"> & {
+  Pick<Application, "viewedAt" | "matchBreakdown"> & {
     applicantEmail: string;
     jobTitle: string;
   };
@@ -97,6 +98,7 @@ function toDetail(row: DetailRow): ApplicationDetailResponse {
     applicantEmail: row.applicantEmail,
     viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
     jobTitle: row.jobTitle,
+    matchBreakdown: row.matchBreakdown,
   };
 }
 
@@ -136,6 +138,7 @@ const mineDetailColumns = {
   skillsMatched: applications.skillsMatched,
   skillsMissing: applications.skillsMissing,
   viewedAt: applications.viewedAt,
+  matchBreakdown: applications.matchBreakdown,
 };
 
 type MineSummaryRow = Pick<
@@ -149,7 +152,7 @@ type MineSummaryRow = Pick<
   jobStatus: MyApplicationSummaryResponse["jobStatus"];
 };
 type MineDetailRow = MineSummaryRow &
-  Pick<Application, "skillsMatched" | "skillsMissing" | "viewedAt">;
+  Pick<Application, "skillsMatched" | "skillsMissing" | "viewedAt" | "matchBreakdown">;
 
 function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
   return {
@@ -174,6 +177,7 @@ function toMineDetail(row: MineDetailRow): MyApplicationDetailResponse {
     skillsMatched: row.skillsMatched,
     skillsMissing: row.skillsMissing,
     viewedAt: row.viewedAt ? row.viewedAt.toISOString() : null,
+    matchBreakdown: row.matchBreakdown,
   };
 }
 
@@ -405,6 +409,9 @@ export const applicationService = {
         },
       );
       if (status === "resume_not_ready") throw notReady;
+      if (status === "listing_not_ready" || !match) {
+        throw new HttpError("This listing is still being prepared. Try again in a moment.", 409);
+      }
 
       const [created] = await tx
         .insert(applications)
@@ -415,9 +422,10 @@ export const applicationService = {
           resumeFileId: resume.fileId,
           skillsMatched: skillsMatch?.matched ?? [],
           skillsMissing: skillsMatch?.missing ?? [],
-          matchScore: match?.score ?? null,
-          band: match?.band ?? null,
-          modelVersion: match ? MODEL_VERSION : null,
+          matchScore: match.score,
+          band: match.band,
+          matchBreakdown: match.breakdown,
+          modelVersion: MODEL_VERSION,
         })
         .onConflictDoNothing({
           target: [applications.jobId, applications.applicantId],
