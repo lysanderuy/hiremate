@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { latestApplicationOnly } from "@/db/predicates";
 import { applications, companies, jobSkills, jobs, skills, type Job } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
+import { bandFromScore } from "@/lib/matching/score";
 import {
   matcherService,
   MatcherUnavailableError,
@@ -13,6 +14,7 @@ import {
   prepareCooldownElapsed,
 } from "@/services/matcher.service";
 import { skillService, type DbExecutor } from "@/services/skill.service";
+import type { MatchBand } from "@/validators/application.validator";
 import type { CreateListingInput, UpdateListingInput } from "@/validators/listing.validator";
 import type { SkillResponse } from "@/validators/skill.validator";
 
@@ -22,6 +24,7 @@ export type ListingView = ListingRow & {
   skills: SkillResponse[];
   applicantCount: number;
   topMatchScore: number | null;
+  topMatchBand: MatchBand | null;
 };
 
 type ApplicantStats = { total: number; topMatchScore: number | null };
@@ -42,6 +45,7 @@ function toView(job: Job, jobSkillList: SkillResponse[], stats: ApplicantStats):
     skills: jobSkillList,
     applicantCount: stats.total,
     topMatchScore: stats.topMatchScore,
+    topMatchBand: stats.topMatchScore === null ? null : bandFromScore(stats.topMatchScore),
   };
 }
 
@@ -113,6 +117,17 @@ async function storeEmbedding(
     .where(and(eq(jobs.id, id), eq(jobs.recruiterId, userId), eq(jobs.description, description)))
     .returning({ id: jobs.id });
   return stored.length > 0;
+}
+
+async function storeEmbeddingForViewer(
+  id: string,
+  description: string,
+  embedding: number[],
+): Promise<void> {
+  await db
+    .update(jobs)
+    .set({ embedding, matchReady: true })
+    .where(and(eq(jobs.id, id), eq(jobs.description, description)));
 }
 
 export const listingService = {
@@ -287,6 +302,26 @@ export const listingService = {
 
     await storeEmbedding(userId, id, claimed.description, embedding);
     return listingService.getById(userId, id);
+  },
+
+  async prepareForViewer(id: string): Promise<void> {
+    const [claimed] = await db
+      .update(jobs)
+      .set({ prepareAttemptedAt: sql`now()` })
+      .where(
+        and(
+          eq(jobs.id, id),
+          eq(jobs.status, "open"),
+          sql`(${jobs.embedding} is null or ${jobs.matchReady} = false)`,
+          prepareCooldownElapsed(jobs.prepareAttemptedAt),
+        ),
+      )
+      .returning({ description: jobs.description });
+    if (!claimed) return;
+
+    const embedding = await matcherService.tryEmbedOne("listing", claimed.description);
+    if (!embedding) return;
+    await storeEmbeddingForViewer(id, claimed.description, embedding);
   },
 
   async remove(userId: string, id: string): Promise<{ id: string }> {

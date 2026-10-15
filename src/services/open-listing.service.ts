@@ -7,6 +7,7 @@ import { applications, companies, jobSkills, jobs, profiles, resumes, skills } f
 import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
 import { matchPair, type MatchPairResult } from "@/lib/matching/match-pair";
+import { listingService } from "@/services/listing.service";
 import { toApplicantStatus } from "@/types/applications";
 import type { EmploymentType } from "@/types/jobs";
 import type { ResumeState } from "@/types/resumes";
@@ -294,6 +295,9 @@ export const openListingService = {
       .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
       .where(and(eq(jobs.id, id), ...visibleListing));
     if (!row) throw new HttpError("Listing not found", 404);
+
+    const jobData = (await loadJobMatchData([id])).get(id);
+    if (!jobData?.matchReady || !jobData.embedding) await listingService.prepareForViewer(id);
 
     const [item] = await decorate(userId, [row], await loadResume(userId));
     return { ...item, description: row.description };
