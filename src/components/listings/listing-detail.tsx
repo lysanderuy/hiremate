@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ListingActions } from "@/components/listings/listing-actions";
+import { ListingMatchStatus } from "@/components/listings/listing-match-status";
 import { ListingStatusBadge } from "@/components/listings/listing-status-badge";
 import { TopScore } from "@/components/shared/match-score";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -61,6 +62,9 @@ export function ListingDetail({ id }: { id: string }) {
               <span>{formatSalaryRange(listing.salaryMin, listing.salaryMax)}</span>
               <span>Posted {formatDate(listing.createdAt)}</span>
             </div>
+            <div className="mt-3">
+              <ListingMatchStatus listing={listing} />
+            </div>
           </div>
 
           {!isRemoved && (
@@ -87,7 +91,11 @@ export function ListingDetail({ id }: { id: string }) {
             </div>
             <div>
               <div className="leading-tight">
-                <TopScore score={listing.topMatchScore} className="text-3xl" />
+                <TopScore
+                  score={listing.topMatchScore}
+                  band={listing.topMatchBand}
+                  className="text-3xl"
+                />
               </div>
               <span className="text-sm text-muted-foreground">Top match</span>
             </div>

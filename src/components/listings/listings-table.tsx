@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { DataTable, Td, Th } from "@/components/shared/data-table";
 import { TopScore } from "@/components/shared/match-score";
+import { ListingMatchStatus } from "@/components/listings/listing-match-status";
 import { ListingRowMenu } from "@/components/listings/listing-row-menu";
 import { ListingStatusBadge } from "@/components/listings/listing-status-badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -141,6 +142,9 @@ function ListingRow({ listing }: { listing: ListingResponse }) {
         <small className="block text-xs break-words text-muted-foreground">
           {listing.location} · {EMPLOYMENT_TYPE_LABELS[listing.employmentType]}
         </small>
+        <div className="mt-1">
+          <ListingMatchStatus listing={listing} />
+        </div>
         {isRemoved && (
           <small className="block text-xs text-error">
             Removed by an administrator.
@@ -165,7 +169,7 @@ function ListingRow({ listing }: { listing: ListingResponse }) {
       </Td>
       <Td className="text-right tabular-nums">{listing.applicantCount}</Td>
       <Td className="text-right tabular-nums max-sm:hidden">
-        <TopScore score={listing.topMatchScore} />
+        <TopScore score={listing.topMatchScore} band={listing.topMatchBand} />
       </Td>
       <Td className="whitespace-nowrap max-sm:hidden">{formatDate(listing.createdAt)}</Td>
       <Td className="relative text-right">
