@@ -6,7 +6,6 @@ import { db } from "@/db";
 import { latestApplicationOnly } from "@/db/predicates";
 import { applications, companies, jobSkills, jobs, skills, type Job } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
-import { bandFromScore } from "@/lib/matching/score";
 import {
   matcherService,
   MatcherUnavailableError,
@@ -27,8 +26,12 @@ export type ListingView = ListingRow & {
   topMatchBand: MatchBand | null;
 };
 
-type ApplicantStats = { total: number; topMatchScore: number | null };
-const NO_APPLICANTS: ApplicantStats = { total: 0, topMatchScore: null };
+type ApplicantStats = {
+  total: number;
+  topMatchScore: number | null;
+  topMatchBand: MatchBand | null;
+};
+const NO_APPLICANTS: ApplicantStats = { total: 0, topMatchScore: null, topMatchBand: null };
 
 const REMOVED_MESSAGE = "Removed by an administrator.";
 const SKILLS_INVALID_MESSAGE = "One or more skills are not in the skills list.";
@@ -45,7 +48,7 @@ function toView(job: Job, jobSkillList: SkillResponse[], stats: ApplicantStats):
     skills: jobSkillList,
     applicantCount: stats.total,
     topMatchScore: stats.topMatchScore,
-    topMatchBand: stats.topMatchScore === null ? null : bandFromScore(stats.topMatchScore),
+    topMatchBand: stats.topMatchBand,
   };
 }
 
@@ -79,6 +82,7 @@ async function loadApplicantStats(jobIds: string[]): Promise<Map<string, Applica
       jobId: applications.jobId,
       total: count(),
       topMatchScore: max(applications.matchScore),
+      topMatchBand: sql<MatchBand | null>`(array_agg(${applications.band} order by ${applications.matchScore} desc))[1]`,
     })
     .from(applications)
     .where(
