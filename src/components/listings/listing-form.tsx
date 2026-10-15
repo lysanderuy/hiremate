@@ -16,6 +16,7 @@ import { formatSalaryRange } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { EMPLOYMENT_TYPES, EMPLOYMENT_TYPE_LABELS, type EmploymentType } from "@/types/jobs";
 import {
+  MIN_LISTING_SKILLS,
   createListingSchema,
   updateListingSchema,
   type ListingResponse,
@@ -114,6 +115,9 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
   const complete = (mode === "create" ? createListingSchema : updateListingSchema).safeParse(
     draft,
   ).success;
+  const skillsInvalid =
+    skills.length < MIN_LISTING_SKILLS &&
+    (mode === "edit" || skills.length > 0 || Boolean(errors.skillIds));
   const canSubmit = complete && (mode === "create" || dirty);
 
   useEffect(() => {
@@ -349,8 +353,9 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
               onChange={setSkills}
               title={title}
               description={description}
+              invalid={skillsInvalid}
             />
-            {errors.skillIds && (
+            {errors.skillIds && skills.length >= MIN_LISTING_SKILLS && (
               <p role="alert" className="mt-2 text-xs text-error">
                 {errors.skillIds}
               </p>
@@ -382,7 +387,7 @@ export function ListingForm({ mode, listing }: ListingFormProps) {
           {!isRemoved && !canSubmit && (
             <p className="mr-auto text-xs text-muted-foreground">
               {mode === "create"
-                ? "Complete the title, description and location to publish."
+                ? `Complete the title, description, location and at least ${MIN_LISTING_SKILLS} skills to publish.`
                 : "Make a valid change to save."}
             </p>
           )}
