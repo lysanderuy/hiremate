@@ -122,7 +122,7 @@ export function SkillPicker({ value, onChange, title, description, max = 30 }: S
             disabled={atLimit}
             maxLength={40}
             autoComplete="off"
-            placeholder="Search for a skill"
+            placeholder="Search by skill name"
             className={FIELD_CLASS}
           />
           <p className="text-xs text-muted-foreground" aria-live="polite">
