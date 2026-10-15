@@ -17,7 +17,8 @@ import {
 } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
-import { scoreMatch } from "@/lib/matching/score";
+import { matchPair } from "@/lib/matching/match-pair";
+import { MODEL_VERSION } from "@/lib/matching/predict";
 import {
   canWithdraw,
   toApplicantStatus,
@@ -115,12 +116,6 @@ function orderBy(sort: ListApplicationsQuery["sort"]) {
   return [sql`${applications.matchScore} desc nulls last`, desc(applications.createdAt)];
 }
 
-const bandScoreRange = {
-  strong: sql`${applications.matchScore} >= 70`,
-  fair: sql`${applications.matchScore} between 40 and 69`,
-  weak: sql`${applications.matchScore} <= 39`,
-};
-
 const mineSummaryColumns = {
   id: applications.id,
   jobId: applications.jobId,
@@ -215,7 +210,7 @@ export const applicationService = {
     const baseConditions = [
       eq(applications.jobId, listingId),
       pattern ? ilike(profiles.displayName, pattern) : undefined,
-      band ? bandScoreRange[band] : undefined,
+      band ? eq(applications.band, band) : undefined,
       latestApplicationOnly,
     ];
 
@@ -362,7 +357,12 @@ export const applicationService = {
   ): Promise<MyApplicationDetailResponse> {
     return db.transaction(async (tx) => {
       const [job] = await tx
-        .select({ status: jobs.status, recruiterStatus: profiles.accountStatus })
+        .select({
+          status: jobs.status,
+          recruiterStatus: profiles.accountStatus,
+          embedding: jobs.embedding,
+          matchReady: jobs.matchReady,
+        })
         .from(jobs)
         .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
         .where(eq(jobs.id, listingId))
@@ -378,14 +378,17 @@ export const applicationService = {
           fileId: resumes.fileId,
           state: resumes.state,
           skills: resumes.skills,
+          embedding: resumes.embedding,
         })
         .from(resumes)
         .where(eq(resumes.applicantId, userId))
         .for("share", { of: resumes });
       if (!resume) throw new HttpError("Add your resume before applying.", 409);
-      if (resume.state !== "ready") {
-        throw new HttpError("Your resume is not ready. Save it again before applying.", 409);
-      }
+      const notReady = new HttpError(
+        "Your resume is not ready. Save it again before applying.",
+        409,
+      );
+      if (resume.state !== "ready") throw notReady;
 
       const jobSkillRows = await tx
         .select({ name: skills.name })
@@ -393,10 +396,15 @@ export const applicationService = {
         .innerJoin(skills, eq(skills.id, jobSkills.skillId))
         .where(eq(jobSkills.jobId, listingId))
         .orderBy(skills.name);
-      const result = scoreMatch(
-        resume.skills,
-        jobSkillRows.map((row) => row.name),
+      const { match, skillsMatch, status } = matchPair(
+        { skills: resume.skills, embedding: resume.embedding },
+        {
+          skills: jobSkillRows.map((row) => row.name),
+          embedding: job.embedding,
+          matchReady: job.matchReady,
+        },
       );
+      if (status === "resume_not_ready") throw notReady;
 
       const [created] = await tx
         .insert(applications)
@@ -405,10 +413,11 @@ export const applicationService = {
           applicantId: userId,
           resumeSnapshot: resume.text,
           resumeFileId: resume.fileId,
-          skillsMatched: result?.matched ?? [],
-          skillsMissing: result?.missing ?? [],
-          matchScore: result?.score ?? null,
-          band: result?.band ?? null,
+          skillsMatched: skillsMatch?.matched ?? [],
+          skillsMissing: skillsMatch?.missing ?? [],
+          matchScore: match?.score ?? null,
+          band: match?.band ?? null,
+          modelVersion: match ? MODEL_VERSION : null,
         })
         .onConflictDoNothing({
           target: [applications.jobId, applications.applicantId],

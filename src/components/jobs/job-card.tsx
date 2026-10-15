@@ -18,7 +18,7 @@ const REASON_TEXT: Record<MatchStatus, string> = {
   ok: "No score yet",
   no_resume: "No score yet",
   resume_not_ready: "Preparing your resume",
-  no_listing_skills: "No skills listed",
+  listing_not_ready: "Match score is being prepared. Try again in a moment.",
 };
 
 function JobSkills({ job }: { job: OpenListingSummaryResponse }) {

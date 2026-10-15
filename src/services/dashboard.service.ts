@@ -74,6 +74,7 @@ export const dashboardService = {
         state: resumes.state,
         source: resumes.source,
         skills: resumes.skills,
+        embedding: resumes.embedding,
         updatedAt: resumes.updatedAt,
       })
       .from(resumes)
