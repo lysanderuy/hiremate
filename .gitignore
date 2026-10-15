@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# matcher service
+matcher/.venv
+__pycache__/
+matcher/.env
