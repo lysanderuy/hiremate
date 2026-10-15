@@ -5,11 +5,26 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { HttpError } from "@/lib/api/errors";
 import { applications, resumeFiles, resumes, type Resume } from "@/db/schema";
+import {
+  matcherService,
+  PREPARE_COOLDOWN_MESSAGE,
+  prepareCooldownElapsed,
+} from "@/services/matcher.service";
 import { skillService } from "@/services/skill.service";
 import type { ResumeSource } from "@/types/resumes";
 import type { ResumeResponse } from "@/validators/resume.validator";
 
-function toResponse(row: Resume): ResumeResponse {
+const responseColumns = {
+  id: resumes.id,
+  source: resumes.source,
+  state: resumes.state,
+  skills: resumes.skills,
+  updatedAt: resumes.updatedAt,
+};
+
+type ResumeSummary = Pick<Resume, keyof typeof responseColumns>;
+
+function toResponse(row: ResumeSummary): ResumeResponse {
   return {
     id: row.id,
     source: row.source,
@@ -21,7 +36,10 @@ function toResponse(row: Resume): ResumeResponse {
 
 export const resumeService = {
   async getMine(userId: string): Promise<ResumeResponse | null> {
-    const [row] = await db.select().from(resumes).where(eq(resumes.applicantId, userId));
+    const [row] = await db
+      .select(responseColumns)
+      .from(resumes)
+      .where(eq(resumes.applicantId, userId));
     return row ? toResponse(row) : null;
   },
 
@@ -45,8 +63,12 @@ export const resumeService = {
     }: { text: string; source: ResumeSource; file: Uint8Array; fileName: string },
   ): Promise<ResumeResponse> {
     let skills: string[];
+    let embedding: number[] | null;
     try {
-      skills = await skillService.extractFromText(text);
+      [skills, embedding] = await Promise.all([
+        skillService.extractFromText(text),
+        matcherService.tryEmbedOne("resume", text),
+      ]);
     } catch (error) {
       console.error("[resume] skill extraction failed", error);
       throw new HttpError("We could not process your resume. Please try again.", 503);
@@ -72,15 +94,17 @@ export const resumeService = {
         text,
         source,
         fileId: stored.id,
-        state: "ready" as const,
+        state: embedding ? ("ready" as const) : ("failed" as const),
         skills,
+        embedding,
+        prepareAttemptedAt: null,
         updatedAt: new Date(),
       };
       const [saved] = await tx
         .insert(resumes)
         .values({ applicantId: userId, ...values })
         .onConflictDoUpdate({ target: resumes.applicantId, set: values })
-        .returning();
+        .returning(responseColumns);
 
       if (current?.fileId) {
         await tx
@@ -100,28 +124,53 @@ export const resumeService = {
   },
 
   async reprocessMine(userId: string): Promise<ResumeResponse> {
-    const [existing] = await db.select().from(resumes).where(eq(resumes.applicantId, userId));
-    if (!existing) throw new HttpError("Resume not found", 404);
+    const [claimed] = await db
+      .update(resumes)
+      .set({ prepareAttemptedAt: sql`now()` })
+      .where(
+        and(eq(resumes.applicantId, userId), prepareCooldownElapsed(resumes.prepareAttemptedAt)),
+      )
+      .returning({ text: resumes.text });
+
+    if (!claimed) {
+      const [existing] = await db
+        .select({ id: resumes.id })
+        .from(resumes)
+        .where(eq(resumes.applicantId, userId));
+      if (!existing) throw new HttpError("Resume not found", 404);
+      throw new HttpError(PREPARE_COOLDOWN_MESSAGE, 429);
+    }
 
     let skills: string[] = [];
-    let state: Resume["state"] = "ready";
-    try {
-      skills = await skillService.extractFromText(existing.text);
-    } catch (error) {
-      console.error("[resume] skill extraction failed", error);
-      state = "failed";
-    }
+    let skillsOk = true;
+    const [, embedding] = await Promise.all([
+      skillService.extractFromText(claimed.text).then(
+        (extracted) => {
+          skills = extracted;
+        },
+        (error: unknown) => {
+          console.error("[resume] skill extraction failed", error);
+          skillsOk = false;
+        },
+      ),
+      matcherService.tryEmbedOne("resume", claimed.text),
+    ]);
+    const state: Resume["state"] = skillsOk && embedding ? "ready" : "failed";
 
     const [row] = await db
       .update(resumes)
-      .set({ state, skills, updatedAt: new Date() })
-      .where(and(eq(resumes.applicantId, userId), eq(resumes.text, existing.text)))
-      .returning();
+      .set({ state, skills, embedding, updatedAt: new Date() })
+      .where(and(eq(resumes.applicantId, userId), eq(resumes.text, claimed.text)))
+      .returning(responseColumns);
 
     if (row) return toResponse(row);
 
-    // The resume was replaced while skills were being extracted; keep the newer one.
-    const [current] = await db.select().from(resumes).where(eq(resumes.applicantId, userId));
-    return toResponse(current ?? existing);
+    // The resume was replaced while it was being processed; keep the newer one.
+    const [current] = await db
+      .select(responseColumns)
+      .from(resumes)
+      .where(eq(resumes.applicantId, userId));
+    if (!current) throw new HttpError("Resume not found", 404);
+    return toResponse(current);
   },
 };
