@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { EMPLOYMENT_TYPES, JOB_STATUSES } from "@/types/jobs";
 
+import { APPLICATION_BANDS } from "./application.validator";
 import { skillResponseSchema } from "./skill.validator";
 
 const SALARY_MESSAGE = "Enter both amounts, with the minimum at or below the maximum.";
@@ -154,6 +155,10 @@ export const listingResponseSchema = z
     topMatchScore: z.number().int().nullable().meta({
       description: "Highest applicant match score from 0 to 100, or null if none is scored.",
       example: 88,
+    }),
+    topMatchBand: z.enum(APPLICATION_BANDS).nullable().meta({
+      description: "Match band of the highest applicant score, or null if none is scored.",
+      example: "strong",
     }),
     createdAt: z.string().datetime().meta({
       description: "Timestamp the listing was created.",

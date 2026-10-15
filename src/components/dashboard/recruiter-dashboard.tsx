@@ -189,7 +189,7 @@ function RecentApplications({
                 </Td>
                 <Td className="max-sm:hidden">{application.jobTitle}</Td>
                 <Td>
-                  <ScoreCell score={application.matchScore} />
+                  <ScoreCell score={application.matchScore} band={application.band} />
                 </Td>
                 <Td>
                   <ApplicationStatusPill status={application.status} />

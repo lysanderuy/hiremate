@@ -44,6 +44,7 @@ export const dashboardService = {
           jobTitle: jobs.title,
           applicantName: profiles.displayName,
           matchScore: applications.matchScore,
+          band: applications.band,
           status: applications.status,
           createdAt: applications.createdAt,
         })
