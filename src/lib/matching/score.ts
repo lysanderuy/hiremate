@@ -1,5 +1,7 @@
 import type { MatchBand } from "@/validators/application.validator";
 
+import model from "./model.json";
+
 export type MatchResult = {
   score: number;
   band: MatchBand;
@@ -8,8 +10,8 @@ export type MatchResult = {
 };
 
 export function bandFromScore(score: number): MatchBand {
-  if (score >= 70) return "strong";
-  if (score >= 40) return "fair";
+  if (score >= model.bandCutoffs.strong) return "strong";
+  if (score >= model.bandCutoffs.fair) return "fair";
   return "weak";
 }
 
