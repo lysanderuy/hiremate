@@ -222,6 +222,23 @@ export const openApiDocument = createDocument({
         },
       },
     },
+    "/api/listings/{id}/prepare": {
+      post: {
+        summary: "Compute the listing's match embedding if it is missing",
+        requestParams: { path: listingIdParams },
+        responses: {
+          "200": successResponse("Listing is match ready.", listingResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an approved recruiter, or the listing was removed."),
+          "404": errorResponse("Listing not found."),
+          "422": errorResponse("Validation error."),
+          "429": errorResponse(
+            "A recent attempt is still cooling down. Retry in about 30 seconds.",
+          ),
+          "503": errorResponse("The matching service is unavailable."),
+        },
+      },
+    },
     "/api/listings/{id}/applications": {
       get: {
         summary: "List applications to one of the authenticated recruiter's listings",
@@ -299,12 +316,15 @@ export const openApiDocument = createDocument({
     },
     "/api/resumes/me/reprocess": {
       post: {
-        summary: "Re-run skill extraction on the stored resume text",
+        summary: "Re-run skill extraction and embedding on the stored resume text",
         responses: {
           "200": successResponse("Resume reprocessed successfully.", resumeResponseSchema),
           "401": errorResponse("Unauthorized."),
           "403": errorResponse(NOT_APPLICANT),
           "404": errorResponse("Resume not found."),
+          "429": errorResponse(
+            "A recent attempt is still cooling down. Retry in about 30 seconds.",
+          ),
         },
       },
     },
