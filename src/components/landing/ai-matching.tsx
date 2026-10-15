@@ -3,23 +3,27 @@ import { Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
+import model from "@/lib/matching/model.json";
+
 import { MatchBar, MissingSkills } from "./match-bar";
+
+const { strong, fair } = model.bandCutoffs;
 
 const bands = [
   {
-    range: "70 to 100",
+    range: `${strong} to 100`,
     name: "Strong",
     variant: "strong",
     text: "Most of what the job asks for is in your resume.",
   },
   {
-    range: "40 to 69",
+    range: `${fair} to ${strong - 1}`,
     name: "Fair",
     variant: "fair",
     text: "Some overlap. Check the missing skills.",
   },
   {
-    range: "0 to 39",
+    range: `0 to ${fair - 1}`,
     name: "Weak",
     variant: "weak",
     text: "Little overlap with this listing.",
