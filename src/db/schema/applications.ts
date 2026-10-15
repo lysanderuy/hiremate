@@ -50,6 +50,7 @@ export const applications = pgTable(
       .default(sql`'{}'`),
     matchScore: integer("match_score"),
     band: matchBand("band"),
+    modelVersion: text("model_version"),
     status: applicationStatus("status").notNull().default("submitted"),
     viewedAt: timestamp("viewed_at", { withTimezone: true }),
     statusChangedAt: timestamp("status_changed_at", { withTimezone: true }).defaultNow().notNull(),
