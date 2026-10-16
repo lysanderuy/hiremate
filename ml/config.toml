@@ -1,0 +1,82 @@
+[paths]
+data_dir = "ml/data"
+sources_dir = "ml/data/sources"
+resume_csv = "ml/data/Resume.csv"
+skills_file = "ml/data/skills.json"
+skills_review = "ml/data/skills_review.csv"
+dataset_dir = "ml/data/dataset"
+labels_file = "ml/data/dataset/labels_done/labels_filled.csv"
+model_dir = "ml/outputs"
+backup_dir = "ml/backups"
+app_model = "src/lib/matching/model.json"
+app_golden = "src/lib/matching/__fixtures__/golden.json"
+app_skills = "src/db/seeds/skills.json"
+
+[skills]
+dataset = "lukebarousse/data_jobs"
+sample_rows = 100000
+onet_urls = [
+  "https://www.onetcenter.org/dl_files/database/db_31_0_csv/software_skills.csv",
+  "https://www.onetcenter.org/dl_files/database/db_31_0_csv/technology_skills.csv",
+]
+evidence_dataset = "jacob-hugging-face/job-descriptions"
+evidence_title_words = [
+  "software", "developer", "programmer", "web", "frontend", "front-end", "backend", "back-end",
+  "full stack", "full-stack", "fullstack", "devops", "data", "machine learning", "cloud",
+  "cybersecurity", "database", "qa engineer", "mobile",
+]
+resume_categories = ["INFORMATION-TECHNOLOGY"]
+min_resumes = 3
+common_word_zipf = 4.1
+max_words = 5
+min_onet_evidence = 2
+
+[pairs]
+jobs_dataset = "jacob-hugging-face/job-descriptions"
+id_col = "ID"
+text_col = "Resume_str"
+category_col = "Category"
+tech_categories = ["INFORMATION-TECHNOLOGY"]
+pick_tech_by_title = true
+title_chars = 70
+tech_title_words = [
+  "software", "developer", "programmer", "devops", "sysadmin", "system administrator", "systems administrator",
+  "network", "it", "information technology", "technical support", "tech support", "help desk", "helpdesk",
+  "desktop support", "cloud", "cybersecurity", "security engineer", "security analyst", "database", "dba",
+  "data analyst", "data scientist", "data engineer", "data analytics", "business intelligence", "machine learning",
+  "qa engineer", "qa tester", "qa analyst", "test engineer", "web developer", "web engineer", "web designer",
+  "ui developer", "application development", "frontend", "front-end", "backend", "back-end",
+  "full stack", "full-stack", "fullstack", "mobile developer", "ios", "android",
+]
+tech_title_exclude = ["cnc", "machinist", "sales", "recruiter", "marketing"]
+min_tech_jobs = 100
+total_pairs = 600
+grid_edges = [0.50, 0.85]
+max_job_uses = 8
+max_resume_uses = 10
+max_chars = 45000
+seed = 42
+
+[pairs.grid_weights]
+"high/high" = 0.22
+"high/mid" = 0.07
+"high/low" = 0.10
+"mid/high" = 0.07
+"mid/mid" = 0.07
+"mid/low" = 0.07
+"low/high" = 0.10
+"low/mid" = 0.07
+"low/low" = 0.07
+no_skills = 0.06
+random = 0.10
+
+[split]
+seed = 42
+
+[split.shares]
+train = 0.70
+validation = 0.15
+test = 0.15
+
+[train]
+alpha_logspace = [-2, 3, 20]

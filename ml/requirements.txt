@@ -1,0 +1,11 @@
+numpy>=2.0
+pandas>=2.2.3,<3
+scipy>=1.13
+scikit-learn==1.6.1
+joblib==1.6.0
+datasets>=3.0
+wordfreq>=3.1
+openpyxl>=3.1
+matplotlib>=3.9
+sentence-transformers==4.1.0
+tomli>=2.0; python_version < "3.11"

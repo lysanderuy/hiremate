@@ -1,0 +1,36 @@
+{
+ "created": "2026-10-11T15:32:52+00:00",
+ "model": "all-MiniLM-L6-v2",
+ "chunk_words": 150,
+ "features": [
+  "sbert_cosine",
+  "skills_overlap",
+  "matched_count",
+  "job_skill_count",
+  "resume_skill_count"
+ ],
+ "tech_categories": [
+  "INFORMATION-TECHNOLOGY"
+ ],
+ "total_pairs": 600,
+ "grid_weights": {
+  "high/high": 0.22,
+  "high/mid": 0.07,
+  "high/low": 0.1,
+  "mid/high": 0.07,
+  "mid/mid": 0.07,
+  "mid/low": 0.07,
+  "low/high": 0.1,
+  "low/mid": 0.07,
+  "low/low": 0.07,
+  "no_skills": 0.06,
+  "random": 0.1
+ },
+ "raters": [
+  "rater_1",
+  "rater_2",
+  "rater_3",
+  "rater_4"
+ ],
+ "seed": 42
+}

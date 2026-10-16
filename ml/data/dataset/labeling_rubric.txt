@@ -1,0 +1,15 @@
+Rating guide (how well does this resume fit this job?)
+
+0  Not relevant. Different field or role. Nothing in the resume fits the job.
+1  Weak. Same broad area, but the resume misses most of what the job asks for.
+2  Partial. Some of the skills and experience the job asks for, with clear gaps or the wrong level.
+3  Good. Most of what the job asks for is there. Small gaps only.
+4  Strong. Nearly everything the job asks for is there, at the right level.
+
+Rules
+- Judge only what is written in the resume and the job posting. Do not guess at skills that are not written.
+- Rate the fit to this job only. Do not rate how good the resume is.
+- Ignore the name, gender, age, school name and company names.
+- Use the whole scale. If you are between two numbers, pick the lower one.
+- If a text is unreadable, leave the rating empty and write "unreadable" in notes.
+- Write a whole number from 0 to 4 in your own rating column. Do not change the other columns.
