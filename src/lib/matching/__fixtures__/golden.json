@@ -331,7 +331,7 @@
     { "name": "splunk", "aliases": [] },
     { "name": "splunk enterprise", "aliases": [] },
     { "name": "spreadsheet", "aliases": [] },
-    { "name": "spring boot", "aliases": ["spring framework"] },
+    { "name": "spring boot", "aliases": [] },
     { "name": "spring framework", "aliases": [] },
     { "name": "spss", "aliases": [] },
     { "name": "sql", "aliases": [] },
@@ -414,7 +414,7 @@
           "job_skill_count": 0,
           "resume_skill_count": 5
         },
-        "rawRating": -2.9324771370780063,
+        "rawRating": -2.93247713707801,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -488,7 +488,7 @@
           "job_skill_count": 0,
           "resume_skill_count": 45
         },
-        "rawRating": -1.1453200607856548,
+        "rawRating": -1.1453200607856566,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -547,7 +547,7 @@
           "job_skill_count": 1,
           "resume_skill_count": 30
         },
-        "rawRating": -0.43329140530769283,
+        "rawRating": -0.4332914053076933,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -594,7 +594,7 @@
           "job_skill_count": 2,
           "resume_skill_count": 18
         },
-        "rawRating": -0.08889060757263323,
+        "rawRating": -0.08889060757263612,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -641,8 +641,8 @@
           "job_skill_count": 3,
           "resume_skill_count": 18
         },
-        "rawRating": 0.2365161372054264,
-        "rating": 0.2365161372054264,
+        "rawRating": 0.23651613720542497,
+        "rating": 0.23651613720542497,
         "score": 6,
         "band": "weak",
         "matched": ["microsoft team foundation server"],
@@ -675,7 +675,7 @@
           "job_skill_count": 5,
           "resume_skill_count": 0
         },
-        "rawRating": -0.13340452204993158,
+        "rawRating": -0.13340452204993203,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -737,8 +737,8 @@
           "job_skill_count": 8,
           "resume_skill_count": 18
         },
-        "rawRating": 2.317250589895459,
-        "rating": 2.317250589895459,
+        "rawRating": 2.3172505898954583,
+        "rating": 2.3172505898954583,
         "score": 58,
         "band": "fair",
         "matched": ["perl", "pricing", "pyspark", "mariadb", "ibm websphere mq", "mathematical"],
@@ -789,8 +789,8 @@
           "job_skill_count": 12,
           "resume_skill_count": 10
         },
-        "rawRating": 2.5264657825319987,
-        "rating": 2.5264657825319987,
+        "rawRating": 2.5264657825319983,
+        "rating": 2.5264657825319983,
         "score": 63,
         "band": "fair",
         "matched": [
@@ -995,7 +995,7 @@
           "job_skill_count": 35,
           "resume_skill_count": 45
         },
-        "rawRating": 9.629224366644795,
+        "rawRating": 9.6292243666448,
         "rating": 4.0,
         "score": 100,
         "band": "strong",
@@ -1054,8 +1054,8 @@
           "job_skill_count": 0,
           "resume_skill_count": 2
         },
-        "rawRating": 1.807192499694666,
-        "rating": 1.807192499694666,
+        "rawRating": 1.807192499694669,
+        "rating": 1.807192499694669,
         "score": 45,
         "band": "fair",
         "matched": [],
@@ -1101,8 +1101,8 @@
           "job_skill_count": 0,
           "resume_skill_count": 18
         },
-        "rawRating": 2.2368916568475603,
-        "rating": 2.2368916568475603,
+        "rawRating": 2.2368916568475643,
+        "rating": 2.2368916568475643,
         "score": 56,
         "band": "fair",
         "matched": [],
@@ -1135,7 +1135,7 @@
           "job_skill_count": 1,
           "resume_skill_count": 5
         },
-        "rawRating": -2.9760829448106403,
+        "rawRating": -2.9760829448106447,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -1194,7 +1194,7 @@
           "job_skill_count": 2,
           "resume_skill_count": 30
         },
-        "rawRating": -1.160029643645912,
+        "rawRating": -1.160029643645917,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -1253,7 +1253,7 @@
           "job_skill_count": 3,
           "resume_skill_count": 30
         },
-        "rawRating": -0.18652364122229415,
+        "rawRating": -0.18652364122229637,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -1312,7 +1312,7 @@
           "job_skill_count": 5,
           "resume_skill_count": 30
         },
-        "rawRating": -0.030373155290652765,
+        "rawRating": -0.030373155290654097,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -1355,8 +1355,8 @@
           "job_skill_count": 8,
           "resume_skill_count": 5
         },
-        "rawRating": 0.0590345370819958,
-        "rating": 0.0590345370819958,
+        "rawRating": 0.0590345370819938,
+        "rating": 0.0590345370819938,
         "score": 1,
         "band": "weak",
         "matched": ["amazon web services aws cloudformation", "airtable"],
@@ -1415,8 +1415,8 @@
           "job_skill_count": 12,
           "resume_skill_count": 18
         },
-        "rawRating": 0.8115706719555038,
-        "rating": 0.8115706719555038,
+        "rawRating": 0.8115706719555027,
+        "rating": 0.8115706719555027,
         "score": 20,
         "band": "weak",
         "matched": ["natural language processing", "t-sql", "electron"],
@@ -1474,8 +1474,8 @@
           "job_skill_count": 20,
           "resume_skill_count": 2
         },
-        "rawRating": 0.2393567817916138,
-        "rating": 0.2393567817916138,
+        "rawRating": 0.2393567817916118,
+        "rating": 0.2393567817916118,
         "score": 6,
         "band": "weak",
         "matched": ["data entry", "transact-sql"],
@@ -1557,7 +1557,7 @@
           "job_skill_count": 35,
           "resume_skill_count": 2
         },
-        "rawRating": -0.16059414595939092,
+        "rawRating": -0.1605941459593947,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -1619,8 +1619,8 @@
           "job_skill_count": 0,
           "resume_skill_count": 2
         },
-        "rawRating": 1.0294733905199953,
-        "rating": 1.0294733905199953,
+        "rawRating": 1.0294733905199973,
+        "rating": 1.0294733905199973,
         "score": 26,
         "band": "weak",
         "matched": [],
@@ -1647,8 +1647,8 @@
           "job_skill_count": 0,
           "resume_skill_count": 2
         },
-        "rawRating": 1.4183329451073305,
-        "rating": 1.4183329451073305,
+        "rawRating": 1.4183329451073332,
+        "rating": 1.4183329451073332,
         "score": 35,
         "band": "weak",
         "matched": [],
@@ -1675,8 +1675,8 @@
           "job_skill_count": 1,
           "resume_skill_count": 0
         },
-        "rawRating": 1.7260767787590579,
-        "rating": 1.7260767787590579,
+        "rawRating": 1.7260767787590612,
+        "rating": 1.7260767787590612,
         "score": 43,
         "band": "fair",
         "matched": [],
@@ -1722,8 +1722,8 @@
           "job_skill_count": 2,
           "resume_skill_count": 18
         },
-        "rawRating": 2.8573328046369095,
-        "rating": 2.8573328046369095,
+        "rawRating": 2.8573328046369086,
+        "rating": 2.8573328046369086,
         "score": 71,
         "band": "strong",
         "matched": ["dassault systemes solidworks", "kubernetes"],
@@ -1769,7 +1769,7 @@
           "job_skill_count": 3,
           "resume_skill_count": 18
         },
-        "rawRating": -2.151521365355249,
+        "rawRating": -2.151521365355257,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -1828,7 +1828,7 @@
           "job_skill_count": 5,
           "resume_skill_count": 30
         },
-        "rawRating": -1.326571670581769,
+        "rawRating": -1.326571670581772,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -1911,8 +1911,8 @@
           "job_skill_count": 8,
           "resume_skill_count": 45
         },
-        "rawRating": 1.0886454243604988,
-        "rating": 1.0886454243604988,
+        "rawRating": 1.0886454243604962,
+        "rating": 1.0886454243604962,
         "score": 27,
         "band": "weak",
         "matched": ["twilio", "couchdb", "jquery", "ruby on rails", "fedora"],
@@ -1981,7 +1981,7 @@
           "job_skill_count": 12,
           "resume_skill_count": 28
         },
-        "rawRating": -0.6912255005114241,
+        "rawRating": -0.6912255005114263,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -2084,7 +2084,7 @@
           "job_skill_count": 20,
           "resume_skill_count": 40
         },
-        "rawRating": -0.4261529285673291,
+        "rawRating": -0.4261529285673318,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -2188,8 +2188,8 @@
           "job_skill_count": 35,
           "resume_skill_count": 18
         },
-        "rawRating": 0.9798244950714607,
-        "rating": 0.9798244950714607,
+        "rawRating": 0.9798244950714581,
+        "rating": 0.9798244950714581,
         "score": 24,
         "band": "weak",
         "matched": [
@@ -2259,8 +2259,8 @@
           "job_skill_count": 0,
           "resume_skill_count": 5
         },
-        "rawRating": 0.5672588542080086,
-        "rating": 0.5672588542080086,
+        "rawRating": 0.5672588542080097,
+        "rating": 0.5672588542080097,
         "score": 14,
         "band": "weak",
         "matched": [],
@@ -2298,8 +2298,8 @@
           "job_skill_count": 0,
           "resume_skill_count": 10
         },
-        "rawRating": 0.9202733402736638,
-        "rating": 0.9202733402736638,
+        "rawRating": 0.9202733402736656,
+        "rating": 0.9202733402736656,
         "score": 23,
         "band": "weak",
         "matched": [],
@@ -2326,8 +2326,8 @@
           "job_skill_count": 1,
           "resume_skill_count": 2
         },
-        "rawRating": 1.3992349706445921,
-        "rating": 1.3992349706445921,
+        "rawRating": 1.3992349706445886,
+        "rating": 1.3992349706445886,
         "score": 35,
         "band": "weak",
         "matched": ["verification"],
@@ -2354,8 +2354,8 @@
           "job_skill_count": 2,
           "resume_skill_count": 2
         },
-        "rawRating": 1.3311213296420619,
-        "rating": 1.3311213296420619,
+        "rawRating": 1.3311213296420639,
+        "rating": 1.3311213296420639,
         "score": 33,
         "band": "weak",
         "matched": [],
@@ -2388,8 +2388,8 @@
           "job_skill_count": 3,
           "resume_skill_count": 5
         },
-        "rawRating": 2.7345780849532257,
-        "rating": 2.7345780849532257,
+        "rawRating": 2.734578084953225,
+        "rating": 2.734578084953225,
         "score": 68,
         "band": "fair",
         "matched": ["tensorflow", "sap", "bentley microstation"],
@@ -2472,7 +2472,7 @@
           "job_skill_count": 8,
           "resume_skill_count": 5
         },
-        "rawRating": -1.7354704641647476,
+        "rawRating": -1.7354704641647543,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -2532,8 +2532,8 @@
           "job_skill_count": 12,
           "resume_skill_count": 18
         },
-        "rawRating": 0.25869742966825293,
-        "rating": 0.25869742966825293,
+        "rawRating": 0.25869742966824893,
+        "rating": 0.25869742966824893,
         "score": 6,
         "band": "weak",
         "matched": [
@@ -2641,8 +2641,8 @@
           "job_skill_count": 20,
           "resume_skill_count": 45
         },
-        "rawRating": 2.922635785059474,
-        "rating": 2.922635785059474,
+        "rawRating": 2.922635785059473,
+        "rating": 2.922635785059473,
         "score": 73,
         "band": "strong",
         "matched": [
@@ -2727,7 +2727,7 @@
           "job_skill_count": 35,
           "resume_skill_count": 0
         },
-        "rawRating": -2.219297863203643,
+        "rawRating": -2.21929786320365,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -2802,7 +2802,7 @@
           "job_skill_count": 0,
           "resume_skill_count": 10
         },
-        "rawRating": -0.11668547195922896,
+        "rawRating": -0.11668547195922874,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -2849,8 +2849,8 @@
           "job_skill_count": 0,
           "resume_skill_count": 18
         },
-        "rawRating": 0.42221373543999685,
-        "rating": 0.42221373543999685,
+        "rawRating": 0.42221373543999785,
+        "rating": 0.42221373543999785,
         "score": 11,
         "band": "weak",
         "matched": [],
@@ -2888,8 +2888,8 @@
           "job_skill_count": 1,
           "resume_skill_count": 10
         },
-        "rawRating": 1.0307952173400372,
-        "rating": 1.0307952173400372,
+        "rawRating": 1.0307952173400332,
+        "rating": 1.0307952173400332,
         "score": 26,
         "band": "weak",
         "matched": ["bentley microstation"],
@@ -2935,8 +2935,8 @@
           "job_skill_count": 2,
           "resume_skill_count": 18
         },
-        "rawRating": 0.9831013776202858,
-        "rating": 0.9831013776202858,
+        "rawRating": 0.9831013776202875,
+        "rating": 0.9831013776202875,
         "score": 25,
         "band": "weak",
         "matched": [],
@@ -2974,8 +2974,8 @@
           "job_skill_count": 3,
           "resume_skill_count": 10
         },
-        "rawRating": 2.050633758785988,
-        "rating": 2.050633758785988,
+        "rawRating": 2.0506337587859855,
+        "rating": 2.0506337587859855,
         "score": 51,
         "band": "fair",
         "matched": ["databricks", "ringcentral", "elixir"],
@@ -3131,7 +3131,7 @@
           "job_skill_count": 8,
           "resume_skill_count": 45
         },
-        "rawRating": 4.11983293342671,
+        "rawRating": 4.1198329334267125,
         "rating": 4.0,
         "score": 100,
         "band": "strong",
@@ -3198,7 +3198,7 @@
           "job_skill_count": 12,
           "resume_skill_count": 18
         },
-        "rawRating": 4.4515018519773095,
+        "rawRating": 4.451501851977311,
         "rating": 4.0,
         "score": 100,
         "band": "strong",
@@ -3303,8 +3303,8 @@
           "job_skill_count": 20,
           "resume_skill_count": 45
         },
-        "rawRating": 1.1489576366140652,
-        "rating": 1.1489576366140652,
+        "rawRating": 1.148957636614062,
+        "rating": 1.148957636614062,
         "score": 29,
         "band": "weak",
         "matched": [
@@ -3388,7 +3388,7 @@
           "job_skill_count": 35,
           "resume_skill_count": 5
         },
-        "rawRating": -1.9332830024347,
+        "rawRating": -1.9332830024347072,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -3493,7 +3493,7 @@
           "job_skill_count": 0,
           "resume_skill_count": 45
         },
-        "rawRating": -0.10836124855276097,
+        "rawRating": -0.10836124855276075,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -3521,7 +3521,7 @@
           "job_skill_count": 0,
           "resume_skill_count": 2
         },
-        "rawRating": -0.6555846793584557,
+        "rawRating": -0.6555846793584565,
         "rating": 0.0,
         "score": 0,
         "band": "weak",
@@ -3595,8 +3595,8 @@
           "job_skill_count": 1,
           "resume_skill_count": 45
         },
-        "rawRating": 0.4961322013601621,
-        "rating": 0.4961322013601621,
+        "rawRating": 0.4961322013601631,
+        "rating": 0.4961322013601631,
         "score": 12,
         "band": "weak",
         "matched": [],
@@ -3629,8 +3629,8 @@
           "job_skill_count": 2,
           "resume_skill_count": 5
         },
-        "rawRating": 0.09118768415540379,
-        "rating": 0.09118768415540379,
+        "rawRating": 0.0911876841554039,
+        "rating": 0.0911876841554039,
         "score": 2,
         "band": "weak",
         "matched": [],
@@ -3688,8 +3688,8 @@
           "job_skill_count": 3,
           "resume_skill_count": 30
         },
-        "rawRating": 1.239294725597934,
-        "rating": 1.239294725597934,
+        "rawRating": 1.2392947255979343,
+        "rating": 1.2392947255979343,
         "score": 31,
         "band": "weak",
         "matched": ["selenium"],
@@ -3805,8 +3805,8 @@
           "job_skill_count": 8,
           "resume_skill_count": 0
         },
-        "rawRating": 0.6431170154559455,
-        "rating": 0.6431170154559455,
+        "rawRating": 0.643117015455946,
+        "rating": 0.643117015455946,
         "score": 16,
         "band": "weak",
         "matched": [],
@@ -3855,8 +3855,8 @@
           "job_skill_count": 12,
           "resume_skill_count": 5
         },
-        "rawRating": 1.8639547514272956,
-        "rating": 1.8639547514272956,
+        "rawRating": 1.863954751427296,
+        "rating": 1.863954751427296,
         "score": 47,
         "band": "fair",
         "matched": ["codecommit", "google docs", "webex"],
@@ -3933,8 +3933,8 @@
           "job_skill_count": 20,
           "resume_skill_count": 18
         },
-        "rawRating": 2.4361135547472728,
-        "rating": 2.4361135547472728,
+        "rawRating": 2.436113554747273,
+        "rating": 2.436113554747273,
         "score": 61,
         "band": "fair",
         "matched": ["blazor", "google android", "apache airflow", "atlassian jira"],
@@ -4045,7 +4045,7 @@
           "job_skill_count": 35,
           "resume_skill_count": 30
         },
-        "rawRating": 5.103375925970538,
+        "rawRating": 5.103375925970541,
         "rating": 4.0,
         "score": 100,
         "band": "strong",
@@ -4100,7 +4100,7 @@
         "job_skill_count": 0,
         "resume_skill_count": 0
       },
-      "expected": { "rawRating": -0.6930945925614289, "rating": 0.0, "score": 0, "band": "weak" }
+      "expected": { "rawRating": -0.6930945925614298, "rating": 0.0, "score": 0, "band": "weak" }
     },
     {
       "features": {
@@ -4110,7 +4110,7 @@
         "job_skill_count": 10,
         "resume_skill_count": 10
       },
-      "expected": { "rawRating": 4.712729693143035, "rating": 4.0, "score": 100, "band": "strong" }
+      "expected": { "rawRating": 4.712729693143037, "rating": 4.0, "score": 100, "band": "strong" }
     },
     {
       "features": {
@@ -4120,7 +4120,7 @@
         "job_skill_count": 30,
         "resume_skill_count": 0
       },
-      "expected": { "rawRating": -4.593665855122702, "rating": 0.0, "score": 0, "band": "weak" }
+      "expected": { "rawRating": -4.593665855122713, "rating": 0.0, "score": 0, "band": "weak" }
     },
     {
       "features": {
@@ -4130,7 +4130,7 @@
         "job_skill_count": 40,
         "resume_skill_count": 80
       },
-      "expected": { "rawRating": 13.28672398213143, "rating": 4.0, "score": 100, "band": "strong" }
+      "expected": { "rawRating": 13.286723982131447, "rating": 4.0, "score": 100, "band": "strong" }
     },
     {
       "features": {
@@ -4140,7 +4140,7 @@
         "job_skill_count": 50,
         "resume_skill_count": 2
       },
-      "expected": { "rawRating": -2.706255214461078, "rating": 0.0, "score": 0, "band": "weak" }
+      "expected": { "rawRating": -2.7062552144610876, "rating": 0.0, "score": 0, "band": "weak" }
     },
     {
       "features": {
@@ -4151,8 +4151,8 @@
         "resume_skill_count": 11
       },
       "expected": {
-        "rawRating": 0.920104957700428,
-        "rating": 0.920104957700428,
+        "rawRating": 0.9201049577004279,
+        "rating": 0.9201049577004279,
         "score": 23,
         "band": "weak"
       }
@@ -4166,8 +4166,8 @@
         "resume_skill_count": 20
       },
       "expected": {
-        "rawRating": 2.3845185068342554,
-        "rating": 2.3845185068342554,
+        "rawRating": 2.3845185068342563,
+        "rating": 2.3845185068342563,
         "score": 60,
         "band": "fair"
       }
@@ -4181,8 +4181,8 @@
         "resume_skill_count": 25
       },
       "expected": {
-        "rawRating": 0.4236339309674271,
-        "rating": 0.4236339309674271,
+        "rawRating": 0.4236339309674264,
+        "rating": 0.4236339309674264,
         "score": 11,
         "band": "weak"
       }
@@ -4195,7 +4195,7 @@
         "job_skill_count": 100,
         "resume_skill_count": 200
       },
-      "expected": { "rawRating": 30.83733253725317, "rating": 4.0, "score": 100, "band": "strong" }
+      "expected": { "rawRating": 30.837332537253204, "rating": 4.0, "score": 100, "band": "strong" }
     },
     {
       "features": {
@@ -4205,41 +4205,41 @@
         "job_skill_count": 100,
         "resume_skill_count": 0
       },
-      "expected": { "rawRating": -6.349873881116013, "rating": 0.0, "score": 0, "band": "weak" }
+      "expected": { "rawRating": -6.349873881116035, "rating": 0.0, "score": 0, "band": "weak" }
     },
     {
       "features": {
-        "sbert_cosine": 0.1027588139031084,
+        "sbert_cosine": 0.1027588139031092,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 0.3799990000000001,
-        "rating": 0.3799990000000001,
+        "rawRating": 0.3799990000000002,
+        "rating": 0.3799990000000002,
         "score": 9,
         "band": "weak"
       }
     },
     {
       "features": {
-        "sbert_cosine": 0.10275958538987387,
+        "sbert_cosine": 0.10275958538987467,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 0.38000100000000014,
-        "rating": 0.38000100000000014,
+        "rawRating": 0.38000100000000003,
+        "rating": 0.38000100000000003,
         "score": 10,
         "band": "weak"
       }
     },
     {
       "features": {
-        "sbert_cosine": 0.4576427260303241,
+        "sbert_cosine": 0.4576427260303243,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
@@ -4254,7 +4254,7 @@
     },
     {
       "features": {
-        "sbert_cosine": 0.4576434975170895,
+        "sbert_cosine": 0.45764349751708977,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
@@ -4271,8 +4271,8 @@
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 1.5399990000000003,
-        "rating": 1.5399990000000003,
+        "rawRating": 1.5399990000000001,
+        "rating": 1.5399990000000001,
         "score": 38,
         "band": "weak"
       }
@@ -4286,26 +4286,21 @@
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 1.5400010000000004,
-        "rating": 1.5400010000000004,
+        "rawRating": 1.5400010000000002,
+        "rating": 1.5400010000000002,
         "score": 39,
         "band": "weak"
       }
     },
     {
       "features": {
-        "sbert_cosine": 0.5656508731994768,
+        "sbert_cosine": 0.5656508731994767,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
-      "expected": {
-        "rawRating": 1.5799990000000006,
-        "rating": 1.5799990000000006,
-        "score": 39,
-        "band": "weak"
-      }
+      "expected": { "rawRating": 1.579999, "rating": 1.579999, "score": 39, "band": "weak" }
     },
     {
       "features": {
@@ -4315,12 +4310,7 @@
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
-      "expected": {
-        "rawRating": 1.5800010000000002,
-        "rating": 1.5800010000000002,
-        "score": 40,
-        "band": "fair"
-      }
+      "expected": { "rawRating": 1.580001, "rating": 1.580001, "score": 40, "band": "fair" }
     },
     {
       "features": {
@@ -4339,47 +4329,47 @@
     },
     {
       "features": {
-        "sbert_cosine": 0.5810813799961212,
+        "sbert_cosine": 0.5810813799961211,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 1.6200010000000005,
-        "rating": 1.6200010000000005,
+        "rawRating": 1.6200009999999998,
+        "rating": 1.6200009999999998,
         "score": 41,
         "band": "fair"
       }
     },
     {
       "features": {
-        "sbert_cosine": 0.7970969028476608,
+        "sbert_cosine": 0.7970969028476604,
+        "skills_overlap": 0.4,
+        "matched_count": 3,
+        "job_skill_count": 8,
+        "resume_skill_count": 12
+      },
+      "expected": { "rawRating": 2.179999, "rating": 2.179999, "score": 54, "band": "fair" }
+    },
+    {
+      "features": {
+        "sbert_cosine": 0.797097674334426,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 2.1799989999999996,
-        "rating": 2.1799989999999996,
-        "score": 54,
+        "rawRating": 2.1800010000000003,
+        "rating": 2.1800010000000003,
+        "score": 55,
         "band": "fair"
       }
     },
     {
       "features": {
-        "sbert_cosine": 0.7970976743344264,
-        "skills_overlap": 0.4,
-        "matched_count": 3,
-        "job_skill_count": 8,
-        "resume_skill_count": 12
-      },
-      "expected": { "rawRating": 2.180001, "rating": 2.180001, "score": 55, "band": "fair" }
-    },
-    {
-      "features": {
-        "sbert_cosine": 1.013113197185966,
+        "sbert_cosine": 1.0131131971859653,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
@@ -4389,7 +4379,7 @@
     },
     {
       "features": {
-        "sbert_cosine": 1.0131139686727315,
+        "sbert_cosine": 1.0131139686727308,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
@@ -4404,83 +4394,83 @@
     },
     {
       "features": {
-        "sbert_cosine": 1.0285429324958448,
+        "sbert_cosine": 1.0285429324958442,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 2.779998999999999,
-        "rating": 2.779998999999999,
+        "rawRating": 2.7799989999999997,
+        "rating": 2.7799989999999997,
         "score": 69,
         "band": "fair"
       }
     },
     {
       "features": {
-        "sbert_cosine": 1.0285437039826104,
+        "sbert_cosine": 1.0285437039826097,
+        "skills_overlap": 0.4,
+        "matched_count": 3,
+        "job_skill_count": 8,
+        "resume_skill_count": 12
+      },
+      "expected": { "rawRating": 2.780001, "rating": 2.780001, "score": 70, "band": "strong" }
+    },
+    {
+      "features": {
+        "sbert_cosine": 1.043972667805723,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 2.7800009999999995,
-        "rating": 2.7800009999999995,
+        "rawRating": 2.8199989999999997,
+        "rating": 2.8199989999999997,
         "score": 70,
         "band": "strong"
       }
     },
     {
       "features": {
-        "sbert_cosine": 1.0439726678057237,
+        "sbert_cosine": 1.0439734392924886,
+        "skills_overlap": 0.4,
+        "matched_count": 3,
+        "job_skill_count": 8,
+        "resume_skill_count": 12
+      },
+      "expected": { "rawRating": 2.820001, "rating": 2.820001, "score": 71, "band": "strong" }
+    },
+    {
+      "features": {
+        "sbert_cosine": 1.3371376386934224,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 2.8199989999999993,
-        "rating": 2.8199989999999993,
-        "score": 70,
+        "rawRating": 3.579998999999999,
+        "rating": 3.579998999999999,
+        "score": 89,
         "band": "strong"
       }
     },
     {
       "features": {
-        "sbert_cosine": 1.0439734392924893,
+        "sbert_cosine": 1.3371384101801882,
         "skills_overlap": 0.4,
         "matched_count": 3,
         "job_skill_count": 8,
         "resume_skill_count": 12
       },
       "expected": {
-        "rawRating": 2.8200009999999995,
-        "rating": 2.8200009999999995,
-        "score": 71,
+        "rawRating": 3.5800009999999993,
+        "rating": 3.5800009999999993,
+        "score": 90,
         "band": "strong"
       }
-    },
-    {
-      "features": {
-        "sbert_cosine": 1.3371376386934237,
-        "skills_overlap": 0.4,
-        "matched_count": 3,
-        "job_skill_count": 8,
-        "resume_skill_count": 12
-      },
-      "expected": { "rawRating": 3.579999, "rating": 3.579999, "score": 89, "band": "strong" }
-    },
-    {
-      "features": {
-        "sbert_cosine": 1.3371384101801893,
-        "skills_overlap": 0.4,
-        "matched_count": 3,
-        "job_skill_count": 8,
-        "resume_skill_count": 12
-      },
-      "expected": { "rawRating": 3.580001, "rating": 3.580001, "score": 90, "band": "strong" }
     }
   ],
   "extraction": {
