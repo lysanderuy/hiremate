@@ -37,14 +37,4 @@ Text prep happens inside the service. Resumes use `clean_text` only. Listings ar
 
 ## Retrain and export
 
-After retraining, copy the new `relevance_model.joblib`, `skills.json`, `pairs_text.csv` and `talentflow_features.py` from the training folder (the last one into `matcher/`), then regenerate the TypeScript model and golden fixtures (needs `pip install -r matcher/requirements-tools.txt`):
-
-```bash
-python matcher/tools/export_model.py \
-  --joblib <ML>/relevance_model.joblib --skills <ML>/skills.json \
-  --pairs-csv <ML>/pairs_text.csv --out-dir src/lib/matching
-npx prettier --write src/lib/matching/model.json src/lib/matching/__fixtures__/golden.json
-npm test
-```
-
-This rewrites `src/lib/matching/model.json` and `src/lib/matching/__fixtures__/golden.json`. Stored embeddings must be recomputed if the embedding model or text prep changes.
+Training and export live in `ml/`. See `ml/README.md`. This service only needs `talentflow_features.py`, which `ml/` imports from here.
