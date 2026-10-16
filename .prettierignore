@@ -2,3 +2,7 @@
 node_modules
 package-lock.json
 src/db/migrations
+ml/.venv
+ml/data
+ml/outputs
+ml/backups

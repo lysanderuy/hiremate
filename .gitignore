@@ -45,3 +45,15 @@ next-env.d.ts
 matcher/.venv
 __pycache__/
 matcher/.env
+
+# ml pipeline
+ml/.venv/
+ml/outputs/
+ml/backups/
+ml/data/Resume.csv
+ml/data/sources/
+ml/data/skills_all.csv
+ml/data/skills_report.json
+ml/data/skills_gold_sample.csv
+ml/data/dataset/label_sheet.csv
+ml/data/dataset/pairs_text.csv
