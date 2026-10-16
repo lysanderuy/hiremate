@@ -104,6 +104,24 @@ Before overwriting, export copies the old files to `ml/backups/<timestamp>/`, un
 
 ## In git
 
-Committed: config, code, `skills.json`, `skills_review.csv`, the ratings, `pairs_features.csv`, `training_dataset.csv`. Ignored: `Resume.csv`, the large text files (`label_sheet.csv`, `pairs_text.csv`), generated skills reports, `outputs/`, `backups/`, `.venv/`.
+Committed: config, code, `skills.json`, `skills_review.csv`, the ratings, `pairs_features.csv`, `training_dataset.csv`.
 
-`pairs_text.csv` is needed by export to build the golden examples. Keep a copy outside git. Without it you can only regenerate it with `pairs --force`, which draws new pairs.
+Not committed, so a `git pull` does not bring them:
+
+| Item                                           | What to do                                                                                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ml/.venv/`                                    | Create it with the setup steps above.                                                                                                       |
+| `ml/data/Resume.csv` (54 MB)                   | Only the `skills` and `pairs` stages need it. Download it from Kaggle and put it in `ml/data/`.                                             |
+| `ml/data/dataset/pairs_text.csv` (6 MB)        | Export needs it to build the golden examples. Get a copy from whoever has it. Without it, `split` and `train` still run and `export` stops. |
+| `ml/data/dataset/label_sheet.csv` (6 MB)       | Only needed to hand out a blank rating sheet. The ratings are already committed.                                                            |
+| `ml/data/sources/`                             | The O*NET file. The `skills` stage downloads it again.                                                                                      |
+| `ml/data/skills_all.csv`, `skills_report.json` | Rewritten by the `skills` stage.                                                                                                            |
+| `ml/outputs/`, `ml/backups/`                   | Created by the first run.                                                                                                                   |
+
+If `pairs_text.csv` is lost, the only way to rebuild it is `pairs --force`, which draws new pairs and does not match the committed ratings.
+
+## After you pull
+
+1. Make the venv and install the requirements.
+2. Run `python ml/run.py split` and `python ml/run.py train`. They need only committed files.
+3. Add `pairs_text.csv` before running `export` or the full `python ml/run.py`.
