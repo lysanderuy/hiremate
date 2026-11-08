@@ -76,13 +76,20 @@ describe("updateApplicationStatusSchema", () => {
 
 describe("listMyApplicationsQuerySchema", () => {
   it("accepts applicant-facing statuses", () => {
-    for (const status of ["submitted", "viewed", "shortlisted", "rejected", "withdrawn"]) {
+    for (const status of [
+      "submitted",
+      "viewed",
+      "shortlisted",
+      "interview",
+      "rejected",
+      "withdrawn",
+    ]) {
       expect(listMyApplicationsQuerySchema.safeParse({ status }).success).toBe(true);
     }
   });
 
-  it("rejects interview, which is internal", () => {
-    expect(listMyApplicationsQuerySchema.safeParse({ status: "interview" }).success).toBe(false);
+  it("rejects unknown statuses", () => {
+    expect(listMyApplicationsQuerySchema.safeParse({ status: "hired" }).success).toBe(false);
   });
 
   it("allows no status", () => {

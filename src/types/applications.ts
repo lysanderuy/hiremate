@@ -33,12 +33,9 @@ export const APPLICANT_APPLICATION_STATUSES = [
   "submitted",
   "viewed",
   "shortlisted",
+  "interview",
   "rejected",
   "withdrawn",
 ] as const;
 
 export type ApplicantApplicationStatus = (typeof APPLICANT_APPLICATION_STATUSES)[number];
-
-export function toApplicantStatus(status: ApplicationStatus): ApplicantApplicationStatus {
-  return status === "interview" ? "shortlisted" : status;
-}

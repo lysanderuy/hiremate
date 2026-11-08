@@ -1,21 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  APPLICANT_APPLICATION_STATUSES,
   APPLICATION_STATUSES,
   WITHDRAWABLE_STATUSES,
   canWithdraw,
-  toApplicantStatus,
 } from "./applications";
 
-describe("toApplicantStatus", () => {
-  it("maps interview to shortlisted", () => {
-    expect(toApplicantStatus("interview")).toBe("shortlisted");
-  });
-
-  it("leaves every other status unchanged", () => {
-    for (const status of APPLICATION_STATUSES.filter((value) => value !== "interview")) {
-      expect(toApplicantStatus(status)).toBe(status);
-    }
+describe("APPLICANT_APPLICATION_STATUSES", () => {
+  it("contains every application status", () => {
+    for (const status of APPLICATION_STATUSES)
+      expect(APPLICANT_APPLICATION_STATUSES).toContain(status);
   });
 });
 

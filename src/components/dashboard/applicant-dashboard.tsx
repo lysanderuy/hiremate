@@ -140,7 +140,15 @@ function StatCards({ data }: { data: ApplicantDashboardResponse | undefined }) {
         value={data?.applications.total}
         hint={
           data
-            ? `${data.applications.shortlisted} shortlisted, ${data.applications.waiting} waiting`
+            ? [
+                `${data.applications.shortlisted} shortlisted`,
+                data.applications.interviews > 0
+                  ? `${data.applications.interviews} interview`
+                  : null,
+                `${data.applications.waiting} waiting`,
+              ]
+                .filter(Boolean)
+                .join(", ")
             : ""
         }
       />

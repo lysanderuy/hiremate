@@ -19,11 +19,7 @@ import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
 import { matchPair } from "@/lib/matching/match-pair";
 import { MODEL_VERSION } from "@/lib/matching/predict";
-import {
-  canWithdraw,
-  toApplicantStatus,
-  type ApplicantApplicationStatus,
-} from "@/types/applications";
+import { canWithdraw } from "@/types/applications";
 import type { EmploymentType, JobStatus } from "@/types/jobs";
 import type {
   ApplicationDetailResponse,
@@ -163,7 +159,7 @@ function toMineSummary(row: MineSummaryRow): MyApplicationSummaryResponse {
     location: row.location,
     employmentType: row.employmentType,
     jobStatus: row.jobStatus,
-    status: toApplicantStatus(row.status),
+    status: row.status,
     matchScore: row.matchScore,
     band: row.band,
     createdAt: row.createdAt.toISOString(),
@@ -309,12 +305,7 @@ export const applicationService = {
     userId: string,
     { status }: ListMyApplicationsQuery,
   ): Promise<MyApplicationListResponse> {
-    const statusCondition: SQL | undefined =
-      status === "shortlisted"
-        ? inArray(applications.status, ["shortlisted", "interview"])
-        : status
-          ? eq(applications.status, status)
-          : undefined;
+    const statusCondition: SQL | undefined = status ? eq(applications.status, status) : undefined;
 
     const [rows, countRows] = await Promise.all([
       db
@@ -337,12 +328,12 @@ export const applicationService = {
       submitted: 0,
       viewed: 0,
       shortlisted: 0,
+      interview: 0,
       rejected: 0,
       withdrawn: 0,
     };
     for (const row of countRows) {
-      const mapped: ApplicantApplicationStatus = toApplicantStatus(row.status);
-      counts[mapped] += row.total;
+      counts[row.status] += row.total;
       counts.all += row.total;
     }
 

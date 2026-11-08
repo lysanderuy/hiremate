@@ -78,7 +78,8 @@ export const applicantDashboardResponseSchema = z
     }),
     applications: z.object({
       total: statField("All of the applicant's applications.", 9),
-      shortlisted: statField("Applications shortlisted, including interviews.", 2),
+      shortlisted: statField("Applications with status shortlisted.", 2),
+      interviews: statField("Applications with status interview.", 1),
       waiting: statField("Applications submitted and not yet viewed.", 3),
     }),
     recent: z
@@ -91,7 +92,7 @@ export const applicantDashboardResponseSchema = z
           }),
           companyName: z.string().meta({ description: "Company name.", example: "Acme Corp" }),
           status: z.enum(APPLICANT_APPLICATION_STATUSES).meta({
-            description: "Application status. Interviews are reported as shortlisted.",
+            description: "Application status.",
             example: "submitted",
           }),
           matchScore: z.number().int().nullable().meta({

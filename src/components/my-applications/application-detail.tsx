@@ -31,6 +31,7 @@ const STATUS_MEANING: Record<ApplicantApplicationStatus, string> = {
   submitted: "The recruiter has not opened your application yet.",
   viewed: "The recruiter opened your application.",
   shortlisted: "The recruiter shortlisted you. They decide the next step.",
+  interview: "The recruiter moved you to the interview stage. They decide the next step.",
   rejected: "The recruiter did not move forward with this application.",
   withdrawn: "You withdrew this application. You can apply again while the listing is open.",
 };
@@ -54,6 +55,9 @@ function buildTimeline(application: MyApplicationDetailResponse): TimelineStep[]
   switch (application.status) {
     case "shortlisted":
       decision = { label: "Shortlisted", detail: decided, tone: "done" };
+      break;
+    case "interview":
+      decision = { label: "Interview", detail: decided, tone: "done" };
       break;
     case "rejected":
       decision = { label: "Rejected", detail: decided, tone: "bad" };

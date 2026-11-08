@@ -6,7 +6,6 @@ import { db } from "@/db";
 import { latestApplicationOnly } from "@/db/predicates";
 import { applications, companies, jobs, profiles, resumes } from "@/db/schema";
 import { openListingService } from "@/services/open-listing.service";
-import { toApplicantStatus } from "@/types/applications";
 import type {
   ApplicantDashboardResponse,
   DashboardResponse,
@@ -85,7 +84,8 @@ export const dashboardService = {
       db
         .select({
           total: count(),
-          shortlisted: countWhere(sql`${applications.status} in ('shortlisted', 'interview')`),
+          shortlisted: countWhere(sql`${applications.status} = 'shortlisted'`),
+          interviews: countWhere(sql`${applications.status} = 'interview'`),
           waiting: countWhere(sql`${applications.status} = 'submitted'`),
         })
         .from(applications)
@@ -119,7 +119,7 @@ export const dashboardService = {
       applications: stats,
       recent: recent.map((row) => ({
         ...row,
-        status: toApplicantStatus(row.status),
+        status: row.status,
         createdAt: row.createdAt.toISOString(),
       })),
       bestMatches: bestMatches.flatMap(({ id, title, companyName, location, match }) =>

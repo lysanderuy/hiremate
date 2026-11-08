@@ -171,7 +171,7 @@ export type ApplicationDetailResponse = z.infer<typeof applicationDetailResponse
 
 export const listMyApplicationsQuerySchema = z.object({
   status: z.enum(APPLICANT_APPLICATION_STATUSES).optional().meta({
-    description: "Only return applications with this status. Shortlisted includes interviews.",
+    description: "Only return applications with this status.",
     example: "shortlisted",
   }),
 });
@@ -205,7 +205,7 @@ const myApplicationSummaryShape = {
     example: "open",
   }),
   status: z.enum(APPLICANT_APPLICATION_STATUSES).meta({
-    description: "Application status. Interviews are reported as shortlisted.",
+    description: "Application status.",
     example: "submitted",
   }),
   matchScore: summaryShape.matchScore,
@@ -231,7 +231,8 @@ export const myApplicationListResponseSchema = z
         all: countField("Total across all statuses.", 12),
         submitted: countField("Applications with status submitted.", 5),
         viewed: countField("Applications with status viewed.", 3),
-        shortlisted: countField("Applications shortlisted, including interviews.", 2),
+        shortlisted: countField("Applications with status shortlisted.", 2),
+        interview: countField("Applications with status interview.", 1),
         rejected: countField("Applications with status rejected.", 1),
         withdrawn: countField("Applications with status withdrawn.", 1),
       })

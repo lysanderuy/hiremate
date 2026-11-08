@@ -8,7 +8,6 @@ import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
 import { matchPair, type MatchPairResult } from "@/lib/matching/match-pair";
 import { listingService } from "@/services/listing.service";
-import { toApplicantStatus } from "@/types/applications";
 import type { EmploymentType } from "@/types/jobs";
 import type { ResumeState } from "@/types/resumes";
 import {
@@ -112,7 +111,7 @@ async function loadApplications(
 
   for (const row of rows) {
     if (row.status === "withdrawn") continue;
-    byJob.set(row.jobId, { id: row.id, status: toApplicantStatus(row.status) });
+    byJob.set(row.jobId, { id: row.id, status: row.status });
   }
   return byJob;
 }
