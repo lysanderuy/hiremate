@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, ilike, inArray, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, ne, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/db";
 import { latestApplicationOnly } from "@/db/predicates";
@@ -108,7 +108,7 @@ function selectDetail(executor: Pick<typeof db, "select">, userId: string, id: s
     .from(applications)
     .innerJoin(jobs, eq(jobs.id, applications.jobId))
     .innerJoin(profiles, eq(profiles.id, applications.applicantId))
-    .where(and(eq(applications.id, id), eq(jobs.recruiterId, userId)));
+    .where(and(eq(applications.id, id), eq(jobs.recruiterId, userId), ne(jobs.status, "removed")));
 }
 
 function orderBy(sort: ListApplicationsQuery["sort"]) {
@@ -206,7 +206,7 @@ export const applicationService = {
     const [job] = await db
       .select({ id: jobs.id })
       .from(jobs)
-      .where(and(eq(jobs.id, listingId), eq(jobs.recruiterId, userId)));
+      .where(and(eq(jobs.id, listingId), eq(jobs.recruiterId, userId), ne(jobs.status, "removed")));
     if (!job) throw new HttpError("Listing not found", 404);
 
     const pattern = search ? `%${escapeLike(search)}%` : undefined;
@@ -451,7 +451,13 @@ export const applicationService = {
       .from(applications)
       .innerJoin(jobs, eq(jobs.id, applications.jobId))
       .innerJoin(resumeFiles, eq(resumeFiles.id, applications.resumeFileId))
-      .where(and(eq(applications.id, applicationId), eq(jobs.recruiterId, recruiterId)));
+      .where(
+        and(
+          eq(applications.id, applicationId),
+          eq(jobs.recruiterId, recruiterId),
+          ne(jobs.status, "removed"),
+        ),
+      );
     if (!row) throw new HttpError(NO_FILE_MESSAGE, 404);
     return row;
   },
