@@ -198,7 +198,18 @@ def validate_seed(seed: list[dict]) -> list[str]:
     return errors
 
 
-def build_files(joblib_file: Path, skills_file: Path, pairs_csv: Path) -> tuple[dict, dict, list[dict], list[str]]:
+MODEL_LABELS = {"ridge": "Ridge regression"}
+
+
+def rated_pairs(card_file: Path) -> int:
+    if not card_file.exists():
+        raise SystemExit(f"{card_file} not found. Run the train stage first.")
+    return sum(int(n) for n in json.loads(card_file.read_text(encoding="utf-8"))["pairs"].values())
+
+
+def build_files(
+    joblib_file: Path, skills_file: Path, pairs_csv: Path, card_file: Path
+) -> tuple[dict, dict, list[dict], list[str]]:
     bundle = joblib.load(joblib_file)
     pipeline = bundle["model"]
     scaler, ridge = pipeline[0], pipeline[-1]
@@ -210,8 +221,13 @@ def build_files(joblib_file: Path, skills_file: Path, pairs_csv: Path) -> tuple[
     scale = np.asarray(scaler.scale_, dtype=float)
     intercept = float(np.ravel(ridge.intercept_)[0])
 
+    trained_at = str(bundle["trained_at"])
     model = {
-        "trainedAt": str(bundle["trained_at"]),
+        "model": MODEL_LABELS.get(str(bundle["model_name"]), str(bundle["model_name"])),
+        "version": "v" + datetime.fromisoformat(trained_at).strftime("%Y%m%d"),
+        "pairs": rated_pairs(card_file),
+        "skillCount": 0,
+        "trainedAt": trained_at,
         "embeddingModel": str(bundle["embedding_model"]),
         "chunkWords": int(bundle["chunk_words"]),
         "relevanceMax": float(bundle["relevance_max"]),
@@ -228,6 +244,7 @@ def build_files(joblib_file: Path, skills_file: Path, pairs_csv: Path) -> tuple[
     pattern = tf.compile_skill_pattern(mapping)
     lexicon = [{"name": name, "aliases": list(aliases)} for name, aliases in raw_skills.items()]
     names = [entry["name"] for entry in lexicon]
+    model["skillCount"] = len(lexicon)
 
     golden = {
         "lexicon": lexicon,
@@ -297,7 +314,9 @@ def run(cfg: dict, run_tests: bool = False) -> None:
     model_file, golden_file, seed_file = path(cfg, "app_model"), path(cfg, "app_golden"), path(cfg, "app_skills")
     old_seed = json.loads(seed_file.read_text(encoding="utf-8")) if seed_file.exists() else None
 
-    model, golden, seed, dropped = build_files(joblib_file, skills_file, pairs_csv)
+    model, golden, seed, dropped = build_files(
+        joblib_file, skills_file, pairs_csv, model_dir / "model_card.json"
+    )
     if dropped:
         print(f"Dropped {len(dropped)} alias(es) that collide with another skill: {', '.join(dropped)}")
     saved = backup([model_file, golden_file, seed_file], path(cfg, "backup_dir"))
