@@ -1,5 +1,27 @@
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
+import { adminDashboardResponseSchema } from "@/validators/admin-dashboard.validator";
+import {
+  adminListingDetailResponseSchema,
+  adminListingIdSchema,
+  adminListingListResponseSchema,
+  adminListingResultResponseSchema,
+  listAdminListingsQuerySchema,
+  removeListingSchema,
+} from "@/validators/admin-listing.validator";
+import {
+  adminUserDetailResponseSchema,
+  adminUserIdSchema,
+  adminUserListResponseSchema,
+  adminUserResultResponseSchema,
+  listAdminUsersQuerySchema,
+} from "@/validators/admin-user.validator";
+import {
+  approvalIdSchema,
+  approvalResultResponseSchema,
+  pendingRecruiterResponseSchema,
+  rejectRecruiterSchema,
+} from "@/validators/approval.validator";
 import {
   applicationDetailResponseSchema,
   applicationIdSchema,
@@ -58,6 +80,15 @@ function errorResponse(description: string) {
   };
 }
 
+function csvResponseSpec(description: string) {
+  return {
+    description,
+    content: {
+      "text/csv": { schema: z.string() },
+    },
+  };
+}
+
 function successResponse<T extends z.ZodType>(description: string, dataSchema: T) {
   return {
     description,
@@ -71,6 +102,27 @@ const listingIdParams = z.object({
   id: listingIdSchema.meta({
     description: "Listing ID.",
     example: "7c1f2b0a-5d4e-4a63-9b8c-1e2d3f4a5b6c",
+  }),
+});
+
+const approvalIdParams = z.object({
+  id: approvalIdSchema.meta({
+    description: "Recruiter profile ID.",
+    example: "9d2c4f6a-1b3e-4a85-8c07-6e5d4c3b2a19",
+  }),
+});
+
+const adminListingIdParams = z.object({
+  id: adminListingIdSchema.meta({
+    description: "Listing ID.",
+    example: "7c1f2b0a-5d4e-4a63-9b8c-1e2d3f4a5b6c",
+  }),
+});
+
+const adminUserIdParams = z.object({
+  id: adminUserIdSchema.meta({
+    description: "User profile ID.",
+    example: "9d2c4f6a-1b3e-4a85-8c07-6e5d4c3b2a19",
   }),
 });
 
@@ -150,6 +202,224 @@ export const openApiDocument = createDocument({
               "application/json": { schema: errorEnvelope },
             },
           },
+        },
+      },
+    },
+    "/api/admin/approvals": {
+      get: {
+        summary: "List recruiters waiting for approval, oldest first",
+        responses: {
+          "200": successResponse(
+            "Pending recruiters retrieved successfully.",
+            z.array(pendingRecruiterResponseSchema),
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+        },
+      },
+    },
+    "/api/admin/approvals/{id}/approve": {
+      post: {
+        summary: "Approve a pending recruiter",
+        requestParams: { path: approvalIdParams },
+        responses: {
+          "200": successResponse("Recruiter approved successfully.", approvalResultResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "404": errorResponse("Recruiter not found."),
+          "409": errorResponse("The account is not awaiting approval."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/approvals/{id}/reject": {
+      post: {
+        summary: "Reject a pending recruiter, with an optional reason",
+        requestParams: { path: approvalIdParams },
+        requestBody: {
+          content: {
+            "application/json": { schema: rejectRecruiterSchema },
+          },
+        },
+        responses: {
+          "200": successResponse("Recruiter rejected successfully.", approvalResultResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "404": errorResponse("Recruiter not found."),
+          "409": errorResponse("The account is not awaiting approval."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/dashboard": {
+      get: {
+        summary: "Get platform-wide statistics",
+        responses: {
+          "200": successResponse("Dashboard retrieved successfully.", adminDashboardResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+        },
+      },
+    },
+    "/api/admin/export/users": {
+      get: {
+        summary: "Download all user accounts as CSV, newest first",
+        responses: {
+          "200": csvResponseSpec("CSV file download."),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+        },
+      },
+    },
+    "/api/admin/export/listings": {
+      get: {
+        summary: "Download all listings as CSV, newest first",
+        responses: {
+          "200": csvResponseSpec("CSV file download."),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+        },
+      },
+    },
+    "/api/admin/export/applications": {
+      get: {
+        summary:
+          "Download all applications as CSV, newest first (no resume data or applicant email)",
+        responses: {
+          "200": csvResponseSpec("CSV file download."),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+        },
+      },
+    },
+    "/api/admin/users": {
+      get: {
+        summary: "List user accounts, newest first, with search and filters",
+        requestParams: { query: listAdminUsersQuerySchema },
+        responses: {
+          "200": successResponse("Users retrieved successfully.", adminUserListResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/users/{id}": {
+      get: {
+        summary: "Get one user for the admin drawer: counts and states only",
+        requestParams: { path: adminUserIdParams },
+        responses: {
+          "200": successResponse("User retrieved successfully.", adminUserDetailResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "404": errorResponse("User not found."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/users/{id}/suspend": {
+      post: {
+        summary: "Suspend a user account and block sign-in",
+        requestParams: { path: adminUserIdParams },
+        responses: {
+          "200": successResponse("User suspended successfully.", adminUserResultResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Not an administrator, own account, or target is an administrator."),
+          "404": errorResponse("User not found."),
+          "409": errorResponse("The account is already suspended."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/users/{id}/reactivate": {
+      post: {
+        summary: "Reactivate a suspended account",
+        requestParams: { path: adminUserIdParams },
+        responses: {
+          "200": successResponse("User reactivated successfully.", adminUserResultResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "404": errorResponse("User not found."),
+          "409": errorResponse("The account is not suspended."),
+          "422": errorResponse("Validation error."),
+          "502": errorResponse("The sign-in block could not be lifted."),
+        },
+      },
+    },
+    "/api/admin/listings": {
+      get: {
+        summary: "List listings in every status, newest first, with search and filters",
+        requestParams: { query: listAdminListingsQuerySchema },
+        responses: {
+          "200": successResponse(
+            "Listings retrieved successfully.",
+            adminListingListResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/listings/{id}": {
+      get: {
+        summary: "Get one listing for the admin drawer, with application count only",
+        requestParams: { path: adminListingIdParams },
+        responses: {
+          "200": successResponse(
+            "Listing retrieved successfully.",
+            adminListingDetailResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "404": errorResponse("Listing not found."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/listings/{id}/remove": {
+      post: {
+        summary: "Remove an open or closed listing, with an optional reason",
+        requestParams: { path: adminListingIdParams },
+        requestBody: {
+          content: {
+            "application/json": { schema: removeListingSchema },
+          },
+        },
+        responses: {
+          "200": successResponse("Listing removed successfully.", adminListingResultResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "404": errorResponse("Listing not found."),
+          "409": errorResponse("The listing is already removed."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/admin/listings/{id}/restore": {
+      post: {
+        summary: "Restore a removed listing as closed",
+        requestParams: { path: adminListingIdParams },
+        responses: {
+          "200": successResponse(
+            "Listing restored successfully.",
+            adminListingResultResponseSchema,
+          ),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an administrator."),
+          "404": errorResponse("Listing not found."),
+          "409": errorResponse("The listing is not removed."),
+          "422": errorResponse("Validation error."),
+        },
+      },
+    },
+    "/api/profile/review-request": {
+      post: {
+        summary: "Ask for another review after a rejected recruiter account",
+        responses: {
+          "200": successResponse("Review requested successfully.", approvalResultResponseSchema),
+          "401": errorResponse("Unauthorized."),
+          "409": errorResponse("The account is not awaiting a new review."),
         },
       },
     },

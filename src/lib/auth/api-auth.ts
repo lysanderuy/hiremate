@@ -38,3 +38,7 @@ export function authenticateActiveRecruiter(): Promise<ActiveAuth> {
 export function authenticateApplicant(): Promise<ActiveAuth> {
   return authenticateActive("applicant");
 }
+
+export function authenticateAdmin(): Promise<ActiveAuth> {
+  return authenticateActive("administrator");
+}
