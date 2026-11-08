@@ -9,9 +9,13 @@ import { cn } from "@/lib/utils";
 import { SparkleIcon } from "./logo";
 import { MatchBar, MissingSkills, SkillChip } from "./match-bar";
 
+// Model v1 figures; update when the model is retrained.
+const MODEL_SKILL_COUNT = "389";
+const MODEL_TRAINING_PAIRS = "600";
+
 const proof = [
-  { value: "853", label: "Job postings tested" },
-  { value: "24", label: "Resume categories" },
+  { value: MODEL_SKILL_COUNT, label: "Skills recognized" },
+  { value: MODEL_TRAINING_PAIRS, label: "Rated resume-job pairs" },
   { value: "0 to 100", label: "Score with reasons" },
 ];
 
