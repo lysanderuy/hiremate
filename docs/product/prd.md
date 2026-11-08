@@ -1,7 +1,7 @@
-# TalentFlow AI: PRD (MVP)
+# TalentFlow AI: PRD
 
-Version: MVP v1.3. Date: 2026-10-15.
-Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms here match that file.
+Version: v1.4. Date: 2026-11-08. Describes the live product. Unbuilt items are in section 10, Future.
+Companion file: `brief.md` (brand, positioning, audience). Terms here match that file.
 
 ## 0. Glossary
 
@@ -10,8 +10,8 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 | TalentFlow AI     | The product. A job board that scores how well a resume fits a listing, before you apply.                                                                                          |
 | Applicant         | A user who saves a resume and applies to listings.                                                                                                                                |
 | Recruiter         | A user who posts listings and reviews applicants. Needs administrator approval before posting.                                                                                    |
-| Administrator     | A platform owner. Approves recruiters, manages users, moderates listings, manages the skills list, reads platform reports.                                                        |
-| Company           | The employer a recruiter posts for. One company per recruiter in the MVP. Name only.                                                                                              |
+| Administrator     | A platform owner. Approves recruiters, manages users, moderates listings, reads platform reports and exports data.                                                                |
+| Company           | The employer a recruiter posts for. One company per recruiter. Name only.                                                                                                         |
 | Listing           | A job posting made by a recruiter.                                                                                                                                                |
 | Resume            | The applicant's PDF resume, kept as the original file. One per applicant. Text read from the PDF is used inside the product to find skills and is never shown.                    |
 | Application       | An applicant's submission to one listing. Carries a snapshot of the resume.                                                                                                       |
@@ -21,7 +21,7 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 | Band              | The label of a match score: Strong (70 to 100), Fair (40 to 69), Weak (0 to 39).                                                                                                  |
 | Fit               | Plain word for how well a resume matches a listing. Shown to users as the match score and its band.                                                                               |
 | Skill             | A named skill or tool, such as Python or SQL, kept in the skills list.                                                                                                            |
-| Skills list       | The curated list of skills the system looks for in resumes and listings. Managed by administrators.                                                                               |
+| Skills list       | The fixed list of skills the system looks for in resumes and listings. It changes only when the model is retrained and the list is reseeded.                                      |
 | Skills comparison | The skills the listing asks for, split into matched and missing. Shown beside the match score. It is not part of the AI result.                                                   |
 | Skills matched    | Skills the listing asks for that the resume has.                                                                                                                                  |
 | Skills missing    | Skills the listing asks for that the resume does not have.                                                                                                                        |
@@ -30,6 +30,7 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 | Ranked applicants | The applicants of one listing, sorted by match score, highest first.                                                                                                              |
 | Salary range      | Optional monthly pay range on a listing, in PHP, as a minimum and a maximum.                                                                                                      |
 | Employment type   | One of Full-time, Part-time, Contract, Internship.                                                                                                                                |
+| Review request    | A Rejected Recruiter's request for another look. Sets the account back to Pending. Allowed once every 24 hours.                                                                   |
 | Preparing         | The short step after a resume or listing is saved, while skills are found and the text is turned into an embedding (a list of 384 numbers) for scoring.                           |
 
 ## 1. What the product is, and is not
@@ -70,23 +71,25 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 
 **Secondary**
 
-- **Administrator.** Keeps the platform clean. Approves recruiters, suspends users, removes bad listings, keeps the skills list accurate, reads platform reports.
+- **Administrator.** Keeps the platform clean. Approves recruiters, suspends users, removes bad listings, reads platform reports and exports data.
 
 ## 4. Core entities
 
 **User**
 
-| Field            | Rules                                                                                                                            |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| id               | unique                                                                                                                           |
-| email            | unique, valid email                                                                                                              |
-| display_name     | required, 2 to 80 characters                                                                                                     |
-| job_title        | Recruiters only. Required at sign up, up to 100 characters.                                                                      |
-| role             | Applicant, Recruiter, Administrator. Set at sign up. Administrators are created directly in the database, never through sign up. |
-| account_status   | Active, Pending, Rejected, Suspended                                                                                             |
-| rejection_reason | optional text, up to 300 characters, set when a recruiter is rejected                                                            |
-| approved_at      | timestamp, set when an administrator first approves a Recruiter. Empty if never approved.                                        |
-| created_at       | timestamp                                                                                                                        |
+| Field               | Rules                                                                                                                            |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| id                  | unique                                                                                                                           |
+| email               | unique, valid email                                                                                                              |
+| display_name        | required, 2 to 80 characters                                                                                                     |
+| job_title           | Recruiters only. Required at sign up, up to 100 characters.                                                                      |
+| role                | Applicant, Recruiter, Administrator. Set at sign up. Administrators are created directly in the database, never through sign up. |
+| account_status      | Active, Pending, Rejected, Suspended                                                                                             |
+| rejection_reason    | optional text, up to 300 characters, set when a recruiter is rejected                                                            |
+| approved_at         | timestamp, set when an administrator first approves a Recruiter. Empty if never approved.                                        |
+| suspended_from      | the account status held before a suspension. Set on suspend, cleared on reactivate.                                              |
+| review_requested_at | timestamp of the last review request. Empty if none.                                                                             |
+| created_at          | timestamp                                                                                                                        |
 
 **Company** (one per recruiter)
 
@@ -115,17 +118,17 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 
 **Resume** (one per applicant)
 
-| Field      | Rules                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------ |
-| id         | unique                                                                                           |
-| applicant  | the Applicant user, one resume per applicant                                                     |
-| text       | required, 200 to 200,000 characters, read from the PDF. Internal only. Never shown.              |
-| source     | PDF. Information only.                                                                           |
-| file       | the original PDF, up to 4 MB, kept so the applicant and the recruiters they apply to can open it |
-| state      | Ready, Failed. Ready only when skills and the embedding were both stored.                        |
-| embedding  | 384 numbers made from the text. Internal. Never returned by the API.                             |
-| skills     | derived from the text. Not editable in the MVP.                                                  |
-| updated_at | timestamp                                                                                        |
+| Field      | Rules                                                                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id         | unique                                                                                                                                                                                            |
+| applicant  | the Applicant user, one resume per applicant                                                                                                                                                      |
+| text       | required, 200 to 200,000 characters, read from the PDF. Internal only. Never shown.                                                                                                               |
+| source     | PDF. Information only.                                                                                                                                                                            |
+| file       | the original PDF, up to 4 MB and 30 pages, stored as bytea in the `resume_files` table and served through the app's `/file` routes, so the applicant and the recruiters they apply to can open it |
+| state      | Ready, Failed. Ready only when skills and the embedding were both stored.                                                                                                                         |
+| embedding  | 384 numbers made from the text. Internal. Never returned by the API.                                                                                                                              |
+| skills     | derived from the text. Not editable.                                                                                                                                                              |
+| updated_at | timestamp                                                                                                                                                                                         |
 
 **Application**
 
@@ -142,12 +145,12 @@ Companion file: `talentflow-ai_brief.md` (brand, positioning, audience). Terms h
 
 **Skill**
 
-| Field     | Rules                                                           |
-| --------- | --------------------------------------------------------------- |
-| id        | unique                                                          |
-| name      | unique, stored lowercase, 2 to 40 characters                    |
-| aliases   | list of other spellings, such as "js" for javascript            |
-| is_active | true or false. Inactive skills are ignored when finding skills. |
+| Field     | Rules                                                                                 |
+| --------- | ------------------------------------------------------------------------------------- |
+| id        | unique                                                                                |
+| name      | unique, stored lowercase, 2 to 40 characters                                          |
+| aliases   | list of other spellings, such as "js" for javascript                                  |
+| is_active | true or false. Inactive skills are ignored when finding skills. Set by the seed only. |
 
 **Match score** (calculated, shown live; stored only inside an application)
 
@@ -214,7 +217,8 @@ Acceptance criteria:
 - [ ] The Approvals queue lists Pending Recruiters oldest first with display name, email, company name and sign up date.
 - [ ] Approve sets Active in one click. Reject asks for an optional reason up to 300 characters.
 - [ ] After approval the Recruiter can open Post a listing on the next page load.
-- [ ] "Ask for another review" returns the account to Pending and the Recruiter reappears in the Approvals queue.
+- [ ] "Ask for another review" returns the account to Pending, clears the rejection reason, sets review_requested_at, and the Recruiter reappears in the Approvals queue.
+- [ ] A second review request within 24 hours of the last one is refused with "You can request another review 24 hours after your last request."
 
 ### FL-04 Add or replace a resume
 
@@ -226,15 +230,16 @@ Acceptance criteria:
 
 Acceptance criteria:
 
-- [ ] The file must be a PDF of at most 4 MB with selectable text. Other file types are rejected with "Upload a PDF file."
+- [ ] The file must be a PDF of at most 4 MB and 30 pages with selectable text. Other file types are rejected with "Upload a PDF file."
 - [ ] A larger PDF shows "PDF files can be up to 4 MB."
+- [ ] A PDF over 30 pages is treated as unreadable and shows "We could not read text from this file. Upload a text-based PDF."
 - [ ] A scanned PDF, or one with fewer than 200 readable characters, shows "We could not read text from this file. Upload a text-based PDF."
 - [ ] The text read from the PDF must be 200 to 200,000 characters. Otherwise the upload is rejected with "A resume needs at least 200 characters." or "This resume is too long."
-- [ ] The original PDF is stored. The extracted text is never shown to the applicant or to recruiters.
+- [ ] The original PDF is stored in the database (`resume_files`). The extracted text is never shown to the applicant or to recruiters.
 - [ ] The resume is saved as soon as the PDF is read. There is no text box to edit.
 - [ ] Uploading a new PDF replaces the old resume. The Applicant never has more than one. The old file is deleted unless an existing application uses it.
 - [ ] My resume shows an "Open resume (PDF)" button that opens the stored PDF in a new tab.
-- [ ] After saving, the resume is Ready within 10 seconds for a typical resume. It is Ready only when skills were found and the embedding was stored.
+- [ ] After saving, the resume is Ready only when skills were found and the embedding was stored. The design target is within 10 seconds for a typical resume (see 6.14).
 - [ ] Otherwise the state is Failed and the page shows "We could not process your resume. Try saving again." with a Retry button.
 - [ ] Retry prepares the stored resume again without a new upload. It can be used once every 30 seconds.
 - [ ] Saving never fails because preparing failed. The resume is kept as Failed.
@@ -276,7 +281,6 @@ Acceptance criteria:
 - [ ] When an Applicant opens an Open listing that is not match_ready, the server tries to prepare it again, at most once every 30 seconds.
 - [ ] A logged-out visitor sees "Log in as an applicant to see your match score."
 - [ ] Recruiters and Administrators do not see the match score card on listings.
-- [ ] The card shows in under 2 seconds for at least 95 percent of views.
 - [ ] The score never blocks or hides anything. It is a ranking aid (principle 3).
 
 ### FL-07 Apply to a listing
@@ -310,7 +314,7 @@ Acceptance criteria:
 Acceptance criteria:
 
 - [ ] The list shows only the logged-in Applicant's applications, newest first.
-- [ ] Status changes made by the recruiter show here on the next page load.
+- [ ] Status changes made by the recruiter show here on the next page load. The Applicant sees the real status, including Interview. The status filter and counts list Interview separately from Shortlisted.
 - [ ] Withdraw is available for Submitted, Viewed, Shortlisted and Interview. It is not available for Rejected or Withdrawn.
 - [ ] Withdraw asks for confirmation. After it, status is Withdrawn and cannot be undone.
 - [ ] After Withdrawn, the Applicant can apply to the same listing again while it is Open. The withdrawn application stays as it was.
@@ -332,7 +336,7 @@ Acceptance criteria:
 - [ ] Suggested skills come from active skills in the skills list, found in the title and description. The Recruiter can add skills from the skills list and remove suggested ones. At least 3 and up to 30.
 - [ ] The Recruiter cannot add a skill that is not in the skills list.
 - [ ] After Publish, status is Open and the listing appears in Jobs.
-- [ ] The listing's match_ready becomes true within 10 seconds for a typical listing. If preparing fails, the listing still saves and stays not ready.
+- [ ] The listing's match_ready becomes true once the description embedding is stored. If preparing fails or the matcher is not configured, the listing still saves and stays not ready.
 - [ ] While a listing is not ready, the Recruiter sees "Preparing" with a Retry button. Retry can be used once every 30 seconds.
 - [ ] The listing is linked to the Recruiter's Company.
 
@@ -368,28 +372,21 @@ Acceptance criteria:
 - [ ] Opening an application shows an "Open resume (PDF)" button and the same Match analysis card the applicant saw, built from the saved score and breakdown: score, band, skills comparison and insight. The extracted text is not shown.
 - [ ] Opening a Submitted application sets status Viewed and viewed_at, once.
 - [ ] The Recruiter can set status to Viewed, Shortlisted, Interview or Rejected, in any order among those four.
-- [ ] Setting Interview records no date, sends no invite and sends no message. It only changes the status.
+- [ ] Setting Interview records no date, sends no invite and sends no message. It only changes the status. The Applicant sees Interview as the status.
 - [ ] The Recruiter cannot set Submitted or Withdrawn.
 - [ ] A Withdrawn application stays in the list, marked Withdrawn, and its status cannot be changed.
-- [ ] The Applicants page shows an Export CSV button (see FL-12).
 - [ ] Applicant email is visible to the Recruiter only for that listing's applications.
 
-### FL-12 Recruiter analytics and CSV export
+### FL-12 Recruiter dashboard
 
-1. Recruiter opens a listing's Analytics tab, or the Recruiter dashboard for all listings.
-2. Presses Export CSV on the Applicants page.
+1. An Active Recruiter opens the Recruiter dashboard.
 
 Acceptance criteria:
 
-- [ ] Per listing, the Analytics tab shows: total applications, applications per day for the last 30 days, count by band, count by status, and the 5 most common skills missing among its applicants.
-- [ ] The Recruiter dashboard shows: listings by status, total applications across own listings, and applications received in the last 7 days.
+- [ ] The dashboard shows: open listings, total applications across own listings, applications with status Shortlisted, applications with status Interview, applications awaiting review (Submitted), and applications received in the last 7 days.
+- [ ] The dashboard lists the most recent applications across own listings, with applicant name, listing title, match score, band and status.
 - [ ] A Recruiter sees only their own data.
-- [ ] Export CSV downloads a file with one row per application and columns: applicant name, applicant email, match score, band, skills matched, skills missing, status, applied at.
-- [ ] The file is UTF-8 with a byte order mark and opens correctly in Excel and Google Sheets.
-- [ ] Any cell that starts with =, +, - or @ is prefixed with a single quote so it cannot run as a formula.
-- [ ] Commas, quotes and line breaks inside cells are escaped correctly.
-- [ ] The file name is `<listing-title>_applicants_<YYYY-MM-DD>.csv` with unsafe characters removed.
-- [ ] A listing with no applications gives a file with the header row only.
+- [ ] A Pending or Rejected Recruiter sees the status page (`/dashboard/recruiter/status`) instead: "Awaiting approval." or "Your account was not approved." with the reason and the "Ask for another review" button (FL-03).
 
 ### FL-13 Administrator: manage users
 
@@ -401,9 +398,10 @@ Acceptance criteria:
 
 - [ ] Only an Administrator can open Users.
 - [ ] The list shows display name, email, role, account status, sign up date, 20 per page.
-- [ ] Suspend asks for confirmation. A Suspended user is logged out on their next request and cannot log in.
+- [ ] Opening a row shows a user drawer with the account details and the actions that apply to it.
+- [ ] Suspend asks for confirmation and saves the prior account status in suspended_from. A Suspended user is logged out on their next request and cannot log in.
 - [ ] While a Recruiter is Suspended, their Open listings are hidden from Jobs. Their status stays Open and they return when the Recruiter is reactivated. Applications on those listings show "Listing closed" to the Applicant.
-- [ ] Reactivate sets account status Active for an Applicant. For a Recruiter, it sets Active if approved_at is set, or Pending if it is empty.
+- [ ] Reactivate restores the status saved in suspended_from and clears it. If none is saved, it sets Active for an Applicant, and for a Recruiter Active if approved_at is set or Pending if it is empty.
 - [ ] An Administrator cannot suspend their own account.
 - [ ] Administrators cannot read resumes or application contents from Users.
 - [ ] Approve and reject actions for Pending recruiters are the ones in FL-03.
@@ -416,38 +414,41 @@ Acceptance criteria:
 
 Acceptance criteria:
 
-- [ ] The Administrator sees listings in all statuses.
+- [ ] The Administrator sees listings in all statuses, 20 per page.
+- [ ] Opening a row shows a listing drawer with the listing details and the remove or restore action.
 - [ ] Remove sets status Removed, with an optional reason up to 300 characters. The listing leaves Jobs and Apply is blocked.
 - [ ] A Removed listing cannot be reopened by its Recruiter. The Recruiter sees "Removed by an administrator." with the reason.
 - [ ] Restore sets a Removed listing to Closed. The Recruiter can then reopen it.
 - [ ] Applications on a Removed listing stay visible to the Applicant and the Recruiter.
 
-### FL-15 Administrator: manage the skills list
-
-1. Administrator opens Skills.
-2. Searches the list, adds a skill, edits a skill or its aliases, switches a skill active or inactive.
-
-Acceptance criteria:
-
-- [ ] Skill names are unique, lowercase, 2 to 40 characters. A duplicate shows "This skill already exists."
-- [ ] Aliases are unique across the whole list. An alias that already belongs to another skill is rejected.
-- [ ] An inactive skill is no longer found in new resumes and listings. It stays on existing records.
-- [ ] Changes apply to resumes and listings saved after the change. Existing stored results are not recalculated.
-- [ ] The list shows name, aliases, active state, and the number of Open listings that use the skill.
-- [ ] Skills are never deleted in the MVP, only made inactive.
-
-### FL-16 Administrator: platform dashboard and export
+### FL-15 Administrator: platform dashboard and export
 
 1. Administrator opens the dashboard.
-2. Presses Export CSV and picks Users, Listings or Applications.
+2. Opens the export menu and picks Users, Listings or Applications.
 
 Acceptance criteria:
 
-- [ ] The dashboard shows: users by role and account status, listings by status, applications per day for the last 30 days, average match score across all applications, the 10 most requested skills across Open listings, and the number of Open listings with zero applications.
+- [ ] The dashboard shows: users by role and account status, listings by status, applications per day for the last 30 days, average match score and match bands across all applications, the 10 most requested skills across Open listings, the number of Open listings hidden because their Recruiter is not Active, and the model in use (name, version, skill count, training pairs).
+- [ ] A "Needs attention" block shows the count of Pending Recruiters, the count of Open listings with zero applications, and the count of listings not match_ready.
 - [ ] Export Users columns: display name, email, role, account status, sign up date.
 - [ ] Export Listings columns: title, company, recruiter, location, employment type, salary min, salary max, status, created date, application count.
 - [ ] Export Applications columns: listing title, applicant name, match score, band, status, applied date. It does not include resume text or applicant email.
-- [ ] CSV rules from FL-12 apply (UTF-8 with byte order mark, formula protection, escaping).
+- [ ] Each file is UTF-8 with a byte order mark and opens correctly in Excel and Google Sheets.
+- [ ] Any cell that starts with =, +, - or @ is prefixed with a single quote so it cannot run as a formula.
+- [ ] Commas, quotes and line breaks inside cells are escaped correctly.
+- [ ] The app downloads the file. If the download fails, a toast shows the error.
+
+### FL-16 Edit profile
+
+1. A logged-in user opens Profile from the menu.
+2. Changes the display name. A Recruiter can also change the company name.
+3. Saves.
+
+Acceptance criteria:
+
+- [ ] Display name follows the 2 to 80 character rule. Company name follows the 2 to 120 character rule.
+- [ ] Email and role are shown and cannot be changed.
+- [ ] A user can edit only their own profile and company.
 
 ## 6. Feature specifications
 
@@ -457,13 +458,16 @@ Acceptance criteria:
 - Account status controls access: Active can use the product. Pending and Rejected Recruiters see only the status page and public listings. Suspended users cannot log in.
 - Pages are protected by role. Every API route checks login, role, and ownership before it returns data.
 - Confirmation and password reset emails come from the auth provider. The product sends no other email.
+- Roles live in the profile record, are set at sign up and are read-only afterwards.
+- Suspending an account saves the prior status in suspended_from. Reactivating restores it.
+- A Rejected Recruiter can request another review once every 24 hours.
 
 ### 6.2 Resume handling
 
-- Input: PDF only (up to 4 MB, text-based).
-- The text read from the PDF is used inside the product to find skills and make the embedding. It keeps reading order as best it can. Columns and tables can come out jumbled. The text is never shown to applicants or recruiters. The PDF reader library is chosen by the PDF check notebook (notebook 3).
+- Input: PDF only (up to 4 MB and 30 pages, text-based).
+- The text read from the PDF is used inside the product to find skills and make the embedding. It keeps reading order as best it can. Columns and tables can come out jumbled. The text is never shown to applicants or recruiters. The PDF reader is unpdf.
 - A PDF with fewer than 200 readable characters is treated as scanned and rejected.
-- The original PDF is stored privately, with the extracted text. It opens only for the applicant, and for the recruiter of a listing the applicant applied to, through the app. It is never public. Administrators cannot open it.
+- The original PDF is stored as bytea in the `resume_files` table, with the extracted text kept on the resume. It opens only for the applicant, and for the recruiter of a listing the applicant applied to, through the app's `/file` routes (`/api/resumes/me/file`, `/api/applications/me/[id]/file`, `/api/applications/[id]/file`), which return the raw PDF. It is never public. Administrators cannot open it.
 - One resume per applicant. A new save replaces the old one.
 - After saving, the system finds skills in the text and makes an embedding for scoring. This is Preparing. It runs once per save, not once per view.
 - The resume is Ready only when skills and the embedding were both stored. Otherwise it is Failed, and the applicant can retry (once every 30 seconds).
@@ -475,8 +479,9 @@ Acceptance criteria:
 - Names with symbols, such as "c++" and "c#", match correctly.
 - One extractor finds skills in resumes and listings.
 - Only active skills are used.
-- The list is seeded from the model's own list of 389 skills (`src/db/seeds/skills.json`). It was built once from three sources: the skills that appear in the `data_jobs` job postings dataset (Hugging Face), the O*NET software skills file, and skills the team adds by hand. It is reviewed by hand in the skills notebook (notebook 0). Ambiguous everyday words (such as go, flow, spring) start as inactive.
-- The match model counts skills, so the model and the skills list change together. Changing the list needs a retrain (see 6.4).
+- The list is seeded from the model's own list of 389 skills (`src/db/seeds/skills.json`). It is built by the `skills` stage of the `ml/` pipeline from three sources: the skills that appear in the `data_jobs` job postings dataset (Hugging Face), the O*NET software skills file, and skills the team adds by hand. It is reviewed by hand in `ml/data/skills_review.csv`. Ambiguous everyday words (such as go, flow, spring) start as inactive.
+- The list changes only by retraining with `python ml/run.py` and reseeding. There is no admin editing. `/api/skills` lists active skills and suggests skills from text, nothing more.
+- The match model counts skills, so the model and the skills list change together (see 6.4).
 
 ### 6.4 Match score
 
@@ -500,13 +505,12 @@ Calculation:
 Training:
 
 - Data: 600 resume and listing pairs, tech roles only, rated 0 to 4 by four raters using one written rubric. The label is the average of the four ratings.
-- Split by resume: about 70 percent train, 15 percent validation, 15 percent test. Validation sets the Ridge penalty. The final model is refit on train and validation. The test set is used once.
-- The model is compared against two others on the test set: the earlier hand-made formula (0.4 skills overlap + 0.6 meaning) and an untrained pretrained cross-encoder.
-- The cross-encoder is not used live.
+- Split by resume: 420 train, 91 validation and 89 test pairs (about 70, 15 and 15 percent). Validation sets the Ridge penalty. The final model is refit on train and validation. The test set is used once.
+- The pipeline is in `ml/pipeline/*` and runs with `python ml/run.py` (stages: skills, pairs, split, train, export). Export writes `src/lib/matching/model.json`, `src/lib/matching/__fixtures__/golden.json` and `src/db/seeds/skills.json`. These files are regenerated, never edited by hand.
 
 Rules:
 
-- The score formula (rating times 25) and the band cutoffs are in one config file. They can change without retraining. They cannot be changed from inside the product in the MVP.
+- The score formula (rating times 25) and the band cutoffs are in one config file (`src/lib/matching/model.json`). They can change without retraining. They cannot be changed from inside the product.
 - Years of experience is not an input. Job text in the training data often has its numbers removed, resume dates are hard to read reliably, and 600 labeled pairs are too few to add more inputs without adding noise.
 - Skills matched and skills missing come from the same skills used for the features.
 - Skills missing shows up to 8 names, then "and N more."
@@ -521,8 +525,8 @@ Where it runs:
 
 - A separate Python service in `matcher/` (FastAPI) only makes embeddings. `POST /embed` takes a kind (resume or listing) and texts and returns 384 numbers per text. It does its own text prep: resumes are cleaned; listings use the description only, lowercased, with digits and punctuation deleted, to match the training listings.
 - The app calls it when a resume or listing is saved. If the service is not set up or fails, the save still works, and the resume is Failed or the listing is not ready until a retry works.
-- Scoring and skill finding run in the app (TypeScript). The model weights and the 389-skill list come from the trained model through an export script. Tests check that the TypeScript code gives the same features as the Python training code.
-- Hosting of the matcher is not decided. It needs an always-on host, separate from the web app.
+- Scoring and skill finding run in the app (TypeScript). The model weights and the 389-skill list come from the trained model through the `ml/` export stage. Tests check that the TypeScript code gives the same features as the Python training code (golden fixtures).
+- The matcher client is built on first use, not at startup. The matcher needs an always-on host, separate from the web app, and its URL and API key are optional settings. A matcher failure never fails a save.
 
 Limits:
 
@@ -544,7 +548,7 @@ Limits:
 
 - Keyword, location, employment type, minimum salary. Sort: Newest (default) and Best match (for Applicants with a Ready resume).
 - Best match: the filters apply in the database. Up to 500 of the newest matching listings are scored in memory and sorted by score, with unscored ones last.
-- The Applicant dashboard shows Best matches: only listings in the Fair and Strong bands.
+- The Applicant dashboard shows Best matches: up to 3 listings, only in the Fair and Strong bands.
 - 10 listings per page.
 - Only Open listings of Active Recruiters are shown.
 
@@ -564,26 +568,40 @@ Limits:
 - The resume opens as the original PDF. Extracted text is not shown.
 - A Recruiter decides. No status is ever set by the system except Viewed on first open.
 
-### 6.9 Analytics
+### 6.9 Dashboards
 
-- Recruiter: per listing and overall, own data only (FL-12).
-- Administrator: platform-wide (FL-16).
-- All figures are counts, daily series or the averages listed. No cohorts, no funnels beyond status counts, no date range picker in the MVP (fixed 30 days or 7 days as stated).
+- Applicant: resume state, application counts and recent applications, and Best matches (6.6).
+- Recruiter: own data only (FL-12).
+- Administrator: platform-wide, with a Needs attention block (FL-15).
+- All figures are counts, daily series or the averages listed. No cohorts, no funnels beyond status counts, no date range picker (fixed 30 days or 7 days as stated).
 
 ### 6.10 CSV export
 
-- Recruiter: applicants of one listing. Administrator: users, listings, applications.
+- Administrator: users, listings, applications (FL-15).
 - UTF-8 with byte order mark. Formula protection on cells starting with =, +, - or @. Standard escaping.
-- Generated on the server and downloaded as a file. No outside service.
+- Generated on the server and downloaded as a file through `useExportCsv`. A failed download shows a toast. No outside service.
+- The `/api/admin/export/*` routes return raw CSV, not the `ApiResponse` envelope.
 
 ### 6.11 Administration
 
-- Approvals queue, Users, Listings, Skills, dashboard (FL-03, FL-13 to FL-16).
+- Approvals queue, Users, Listings, dashboard (FL-03, FL-13 to FL-15). Users and Listings open in detail drawers.
 - Administrators cannot read resumes or applications.
+- The skills list is not administered in the product (6.3).
 
-### 6.12 Quality targets
+### 6.12 Profile
 
-- Match analysis card in under 2 seconds, 95 percent of views.
+- Every role has a Profile page for its display name. Recruiters also edit the company name (FL-16).
+
+### 6.13 API documentation
+
+- `/api/docs` (Scalar UI) and `/api/openapi.json` are public and unauthenticated by design.
+- The spec is maintained by hand in `src/lib/api/openapi.ts`.
+
+### 6.14 Design targets
+
+These are targets the design aims for. They are not measured in the product.
+
+- Match analysis card in under 2 seconds for 95 percent of views.
 - Resume or listing Preparing done within 10 seconds for a typical text.
 - Pages for each role respond in under 1 second for lists of up to 10 rows, after the first load.
 - Works on current desktop and mobile browsers. Layout adapts down to a 360 pixel width.
@@ -609,25 +627,25 @@ Recruiter (Active) is a Recruiter with account status Active. Recruiter (not act
 | View applicants of own listings                    | No    | No        | Yes                | No                     | No            |
 | Read resume snapshot of own listing's applications | No    | No        | Yes                | No                     | No            |
 | Change application status (own listings)           | No    | No        | Yes                | No                     | No            |
-| Recruiter analytics and export (own data)          | No    | No        | Yes                | No                     | No            |
+| View recruiter dashboard (own data)                | No    | No        | Yes                | No                     | No            |
 | Ask for another review (when Rejected)             | No    | No        | No                 | Yes                    | No            |
 | View Approvals queue, approve, reject              | No    | No        | No                 | No                     | Yes           |
 | View users, suspend, reactivate                    | No    | No        | No                 | No                     | Yes           |
 | View all listings, remove, restore                 | No    | No        | No                 | No                     | Yes           |
-| Manage the skills list                             | No    | No        | No                 | No                     | Yes           |
 | Platform dashboard and export                      | No    | No        | No                 | No                     | Yes           |
+| Edit own profile                                   | No    | Yes       | Yes                | Yes                    | Yes           |
 | Read any resume or application contents            | No    | Own only  | Own listings only  | No                     | No            |
 
 ## 8. System states
 
 **Account status** (User)
 
-| State     | Meaning                                                                    | Moves to                                                                         |
-| --------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Pending   | New Recruiter, or a Rejected Recruiter who asked again. Awaiting approval. | Active (administrator approves), Rejected (administrator rejects)                |
-| Active    | Normal access. Every new Applicant starts here.                            | Suspended (administrator)                                                        |
-| Rejected  | Recruiter not approved.                                                    | Pending (the Recruiter asks for another review)                                  |
-| Suspended | Cannot log in.                                                             | Active, or Pending if a Recruiter was never approved (administrator reactivates) |
+| State     | Meaning                                                                    | Moves to                                                          |
+| --------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Pending   | New Recruiter, or a Rejected Recruiter who asked again. Awaiting approval. | Active (administrator approves), Rejected (administrator rejects) |
+| Active    | Normal access. Every new Applicant starts here.                            | Suspended (administrator)                                         |
+| Rejected  | Recruiter not approved.                                                    | Pending (the Recruiter asks for another review)                   |
+| Suspended | Cannot log in. The prior status is kept in suspended_from.                 | The prior status (administrator reactivates)                      |
 
 **Listing status**
 
@@ -661,19 +679,19 @@ Only a changed description clears it. Title and skills edits do not. The Recruit
 
 **Application status**
 
-| State       | Meaning                                                                          | Moves to                         | Who                                 |
-| ----------- | -------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------- |
-| Submitted   | Applied. Not opened yet.                                                         | Viewed                           | System, when the Recruiter opens it |
-| Submitted   |                                                                                  | Shortlisted, Interview, Rejected | Recruiter                           |
-| Submitted   |                                                                                  | Withdrawn                        | Applicant                           |
-| Viewed      | Opened by the Recruiter.                                                         | Shortlisted, Interview, Rejected | Recruiter                           |
-| Viewed      |                                                                                  | Withdrawn                        | Applicant                           |
-| Shortlisted | Recruiter marked as a good fit.                                                  | Viewed, Interview, Rejected      | Recruiter                           |
-| Shortlisted |                                                                                  | Withdrawn                        | Applicant                           |
-| Interview   | Recruiter is interviewing this applicant. A label only. No date, no scheduling.  | Viewed, Shortlisted, Rejected    | Recruiter                           |
-| Interview   |                                                                                  | Withdrawn                        | Applicant                           |
-| Rejected    | Recruiter declined.                                                              | Viewed, Shortlisted, Interview   | Recruiter                           |
-| Withdrawn   | Applicant pulled out. Final for that application. The applicant can apply again. | None                             |                                     |
+| State       | Meaning                                                                                                              | Moves to                         | Who                                 |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------- |
+| Submitted   | Applied. Not opened yet.                                                                                             | Viewed                           | System, when the Recruiter opens it |
+| Submitted   |                                                                                                                      | Shortlisted, Interview, Rejected | Recruiter                           |
+| Submitted   |                                                                                                                      | Withdrawn                        | Applicant                           |
+| Viewed      | Opened by the Recruiter.                                                                                             | Shortlisted, Interview, Rejected | Recruiter                           |
+| Viewed      |                                                                                                                      | Withdrawn                        | Applicant                           |
+| Shortlisted | Recruiter marked as a good fit.                                                                                      | Viewed, Interview, Rejected      | Recruiter                           |
+| Shortlisted |                                                                                                                      | Withdrawn                        | Applicant                           |
+| Interview   | Recruiter is interviewing this applicant. A label only. No date, no scheduling. Shown to the Applicant as Interview. | Viewed, Shortlisted, Rejected    | Recruiter                           |
+| Interview   |                                                                                                                      | Withdrawn                        | Applicant                           |
+| Rejected    | Recruiter declined.                                                                                                  | Viewed, Shortlisted, Interview   | Recruiter                           |
+| Withdrawn   | Applicant pulled out. Final for that application. The applicant can apply again.                                     | None                             |                                     |
 
 **Skill**
 
@@ -692,47 +710,48 @@ Only a changed description clears it. Title and skills edits do not. The Recruit
 | Listing not match_ready | "Match score is being prepared. Try again in a moment."          |
 | Logged out              | "Log in as an applicant to see your match score."                |
 
-## 9. Deferred to after the MVP
+## 9. Success metrics
 
-Out of scope for this version:
+Matcher figures come from the latest training run (`ml/outputs/model_card.json`, model v20261016).
 
-- Email or push notifications of any kind (other than the auth provider's confirmation and reset emails)
-- Scanned PDFs, images and OCR
-- Word (.docx) resumes
-- More than one resume per applicant
-- Several recruiters per company, company pages, and company logos
-- Messaging between applicants and recruiters
-- Saved jobs, job alerts and recommendations by email
-- Draft listings, listing expiry dates and reposting
-- Salary in currencies other than PHP, or in periods other than monthly
-- Editing the skills found in a resume
-- Explaining a score with highlighted text
-- Settings to change the score formula or bands inside the product
-- Years of experience as a score input (see 6.4 for the reason)
-- Match scoring for fields outside tech (the model is trained on tech only)
-- Social login
-- Account deletion and data export tools
-- Administrator audit log
-- Rate limiting
-- Interview scheduling, interview dates, offers and any other applicant tracking workflow (the Interview status label stays)
-- Native mobile apps
-- Languages other than English
+| Metric               | Definition                                                                                                       | Target             | Latest | How it is measured            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------ | ------ | ----------------------------- |
+| Matcher error        | Mean absolute error between the model's rating and the average of the four raters' ratings, on the 89 test pairs | Report only        | 0.64   | `ml/outputs/test_results.csv` |
+| Matcher ranking      | Spearman correlation between the model's rating and the raters' average, on the test set                         | Report only        | 0.67   | `ml/outputs/model_card.json`  |
+| Matcher band match   | Share of test pairs where the model's band (Strong, Fair, Weak) equals the band of the raters' average           | 75 percent or more | 75.3%  | `ml/outputs/model_card.json`  |
+| Matcher within 1     | Share of test pairs where the model's rating is within 1 of the raters' average                                  | Report only        | 79.8%  | `ml/outputs/model_card.json`  |
+| Application fit rate | Share of applications whose band is Strong or Fair                                                               | 60 percent or more |        | Admin dashboard match bands   |
+| Listing activity     | Open listings with at least 1 application, as a share of Open listings                                           | Report only        |        | Admin dashboard               |
 
-## 10. Success metrics
+## 10. Future
 
-Targets are first goals. Adjust them after the first real data.
+Not built. None of these are live.
 
-| Metric               | Definition                                                                                                                                           | Target                                                                           | How it is measured    |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------- |
-| Matcher error        | Mean absolute error between the model's rating and the average of the four raters' ratings, on the test set (about 90 pairs, never used in training) | Lower than the hand-made formula and the untrained cross-encoder on the same set | Notebook 2 test table |
-| Matcher ranking      | Spearman correlation between the model's rating and the raters' average, on the test set                                                             | Higher than the hand-made formula and the untrained cross-encoder                | Notebook 2 test table |
-| Matcher band match   | Share of test pairs where the model's band (Strong, Fair, Weak) equals the band of the raters' average                                               | 75 percent or more                                                               | Notebook 2 test table |
-| Matcher within 1     | Share of test pairs where the model's rating is within 1 of the raters' average                                                                      | Report only, no target yet                                                       | Notebook 2 test table |
-| Rater agreement      | Agreement among the four raters on the 600 pairs: exact match, within 1, and weighted kappa for each pair of raters                                  | Report only. Pairs where the ratings differ by 2 or more are listed for review.  | Notebook 1 Part B     |
-| Application fit rate | Share of applications whose band is Strong or Fair                                                                                                   | 60 percent or more                                                               | Application records   |
-| Resume read rate     | Share of text-based PDFs in a test set of 30 that give at least 200 readable characters                                                              | 95 percent or more                                                               | Notebook 3            |
-| Score speed          | 95th percentile time to show the match score card                                                                                                    | Under 2 seconds                                                                  | Server timing         |
-| Preparing speed      | 95th percentile time from save to Ready                                                                                                              | Under 10 seconds                                                                 | Server timing         |
-| Task success         | Share of test users who finish each core flow without help, in a usability test with 5 applicants, 3 recruiters and 1 administrator                  | 90 percent or more                                                               | Moderated test        |
-| Screening effort     | Time for a recruiter to shortlist 3 applicants from 20 using ranked applicants                                                                       | Under 5 minutes                                                                  | Usability test        |
-| Listing activity     | Open listings with at least 1 application, as a share of Open listings                                                                               | Report only, no target yet                                                       | Dashboard             |
+- Recruiter Analytics tab per listing: total applications, applications per day for the last 30 days, count by band, count by status, top 5 missing skills.
+- Recruiter CSV export of a listing's applicants on the Applicants page.
+- Measured performance: instrumentation for the 2 second card, 10 second Preparing and 1 second page targets (6.14), and a 360 pixel layout check.
+- Model comparison on the test set against the hand-made formula (0.4 skills overlap + 0.6 meaning) and an untrained cross-encoder.
+- Rater agreement report on the 600 pairs: exact match, within 1, weighted kappa.
+- Resume read rate check on 30 text-based PDFs (target 95 percent).
+- Usability tests: task success (90 percent) and screening effort (shortlist 3 of 20 in under 5 minutes).
+- Email or push notifications of any kind, other than the auth provider's confirmation and reset emails.
+- Scanned PDFs, images and OCR.
+- Word (.docx) resumes.
+- More than one resume per applicant.
+- Editing the skills found in a resume.
+- Several recruiters per company, company pages and company logos.
+- Messaging between applicants and recruiters.
+- Saved jobs, job alerts and recommendations by email.
+- Draft listings, listing expiry dates and reposting.
+- Salary in currencies other than PHP, or in periods other than monthly.
+- Explaining a score with highlighted text.
+- Settings to change the score formula or bands inside the product.
+- Years of experience as a score input.
+- Match scoring for fields outside tech.
+- Social login.
+- Account deletion and data export tools.
+- Administrator audit log.
+- Rate limiting.
+- Interview scheduling, interview dates, offers and other applicant tracking workflow.
+- Native mobile apps.
+- Languages other than English.

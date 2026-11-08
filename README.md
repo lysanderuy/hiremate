@@ -6,12 +6,17 @@ PDF resume. Built on Next.js 16 + Supabase + Drizzle + Zod.
 
 - **Recruiters**: approval-gated console (dashboard, listings, applicants with
   band filter and match sort, company profile).
-- **Applicants**: signup/login and role-based dashboard.
+- **Applicants**: signup/login, resume upload, browse open listings, apply,
+  track and withdraw applications.
+- **Administrators**: console for users (suspend/reactivate), recruiter
+  approvals, listing moderation (remove/restore), platform stats and CSV
+  export. Suspended recruiters can send a review request from their status
+  screen.
 - **Matcher**: a trained model scores each resume and listing pair (0-100, with
   a band). Scoring runs in the app; a small Python service in `matcher/` only
   makes the text embeddings. See [ML matching](#ml-matching).
 
-Product, brand and design references (PRD, brief, tokens, HTML mockups) are in
+Product, brand and design references (PRD, brief, tokens) are in
 [`docs/`](docs/).
 
 | Layer        | Tech                                                              |
@@ -55,14 +60,16 @@ Product, brand and design references (PRD, brief, tokens, HTML mockups) are in
      `http://localhost:3000/api/auth/callback` (+ production URL later).
      Confirmation and recovery emails bounce without this.
 
-4. Apply the bundled example schema — or remove it first (see
-   [Removing the example](#removing-the-profiles-example)):
+4. Apply the schema and seed the skills list:
 
    ```bash
-   npm run db:migrate   # applies migrations + runs the RLS guardrail
+   npm run db:migrate       # applies migrations + runs the RLS guardrail
+   npm run db:seed-skills   # skills table (required for listings and matching)
    ```
 
-5. `npm run dev` — sign up at `/signup`, confirm via email, land on `/dashboard`.
+5. Optional matcher: copy `matcher/.env.example` to `matcher/.env`, see
+   [ML matching](#ml-matching).
+6. `npm run dev` — sign up at `/signup`, confirm via email, land on `/dashboard`.
 
 ## ML matching
 
@@ -125,7 +132,7 @@ db (src/db, Drizzle)  /  Supabase
 - **Frontend never imports services or `db`.** It calls `/api/**` through the `api` wrapper only.
 - **Route handlers stay thin**: authenticate (Supabase), validate input (Zod), delegate to a service, wrap the result with `apiSuccess` / `apiError`.
 - **Services own business logic and DB access.** They never touch `Request` / `Response` / cookies.
-- **All API routes return the `ApiResponse<T>` envelope** (`src/types/api.ts`) — except `/api/openapi.json`, which returns the raw spec for external tooling.
+- **All API routes return the `ApiResponse<T>` envelope** (`src/types/api.ts`) — except: `/api/openapi.json` (raw spec for external tooling), `/api/auth/callback` and `/api/auth/logout` (browser redirects), the three `/file` routes (`/api/resumes/me/file`, `/api/applications/me/[id]/file`, `/api/applications/[id]/file`, raw PDF bytes opened as plain links), the three `/api/admin/export/*` routes (raw CSV, downloaded through `useExportCsv`), and `/api/docs` (Scalar UI).
 - **Server state vs client state**: API data lives in TanStack Query (via `src/hooks`); UI-only state in Zustand stores (`src/stores`). Never mirror API data into a store.
 
 ## API docs
@@ -145,7 +152,7 @@ npm test         # run once
 npm run test:watch
 ```
 
-- Covers only pure logic — Zod validators (`src/validators`) and framework-free helpers (`src/lib/api/response.ts`).
+- Covers only pure logic — Zod validators (`src/validators`), the matching maths (`src/lib/matching`), skill extraction (`src/lib/skills`), CSV (`src/lib/csv`), resume/PDF helpers (`src/lib/resume`), view-state helpers (`src/lib/applicants`, `src/lib/jobs`), API response helpers (`src/lib/api`), and type-level tests (`src/types/applications.test.ts`).
 - Services/routes touch Drizzle/Supabase and are untested on purpose: no dedicated test database, and mocking Drizzle would give false confidence. Prefer a local Supabase CLI instance over mocks if that changes.
 
 ## Code quality
@@ -178,20 +185,24 @@ src/
 ├── app/                  # Routes, layouts — frontend only
 │   ├── (auth)/           # Login, signup, forgot/reset password (route group)
 │   ├── (auth-split)/     # Login, signup (split-layout route group)
-│   ├── dashboard/        # Role-based redirect + applicant/ and recruiter/
+│   ├── dashboard/        # Role-based redirect + one folder per role
+│   │   ├── administrator/  # (console)/ approvals, listings, users
+│   │   ├── applicant/    # (console)/ applications, jobs, profile, resume
 │   │   └── recruiter/    # status/ (approval screens) + (console)/ applicants, listings, profile
 │   ├── error.tsx         # Error boundary (wire Sentry etc. here)
 │   ├── global-error.tsx  # Root-layout error fallback (self-contained)
 │   ├── not-found.tsx     # 404
 │   └── api/              # Route handlers only — no UI under api/
-│       ├── applications/ # review + status updates
+│       ├── admin/        # users, approvals, listings, dashboard stats, export (CSV)
+│       ├── applications/ # recruiter review + status, me/ (applicant's own: list, withdraw, file)
 │       ├── auth/         # callback (code exchange) + logout
 │       ├── company/      # recruiter company profile
-│       ├── dashboard/    # recruiter dashboard stats
+│       ├── dashboard/    # recruiter dashboard stats + applicant/
 │       ├── docs/         # Scalar interactive API reference UI
-│       ├── listings/     # CRUD + [id]/applications
+│       ├── listings/     # CRUD, [id]/applications, [id]/prepare, open/ (applicant browse)
 │       ├── openapi.json/ # generated OpenAPI 3.1 spec (raw JSON, no envelope)
-│       ├── profile/      # GET/PATCH /api/profile
+│       ├── profile/      # GET/PATCH /api/profile + review-request
+│       ├── resumes/      # me/ (upload, file, pdf, reprocess)
 │       └── skills/       # list + suggest
 ├── components/
 │   ├── ui/               # Generic primitives (buttons, inputs, ...)
@@ -201,10 +212,14 @@ src/
 ├── lib/
 │   ├── api/              # client.ts (fetch wrapper) + response.ts (envelope helpers) + openapi.ts (spec builder)
 │   ├── auth/             # require-role.ts (getSessionProfile, requireRole)
+│   ├── applicants/       # Applicant view-state helpers
+│   ├── csv/              # CSV serialisation + download response
+│   ├── jobs/             # Listing view-state helpers
+│   ├── resume/           # PDF text extraction and resume file helpers
 │   ├── matching/         # Scoring maths, model.json, insight copy (framework-free)
 │   ├── skills/           # extract-skills.ts, the single skill extractor
 │   ├── query/            # QueryClient provider (wired in app/layout.tsx)
-│   ├── supabase/         # client.ts (browser), server.ts (RSC/routes), proxy.ts (session refresh)
+│   ├── supabase/         # client.ts (browser), server.ts (RSC/routes), proxy.ts (session refresh), admin.ts (service-role client)
 │   └── env.ts            # Zod-validated env vars (server only, lazy)
 ├── services/             # Business logic (*.service.ts)
 ├── validators/           # Zod schemas (*.validator.ts) — input source of truth
@@ -217,25 +232,25 @@ src/
 ```
 
 Outside `src/`: `docs/` (product and design references), `matcher/` (Python
-embedding service), `scripts/` (RLS guardrail, auth debug, seeding), `drizzle.config.ts` (schema path, migration
-dir, `DIRECT_URL`).
+embedding service), `ml/` (training pipeline that generates `model.json`),
+`scripts/` (RLS guardrail, auth debug, seeding), `.husky/` (pre-commit),
+`.github/` (CI workflows), `drizzle.config.ts` (schema path, migration dir,
+`DIRECT_URL`).
 
-Tables: `profiles`, `companies`, `jobs`, `applications`, `resumes`, `skills`.
-The `profiles` slice (validator + service + route + hook) is the smallest
-reference implementation of the layering.
+Tables (8): `profiles`, `companies`, `jobs`, `applications`, `resumes`,
+`skills`, `job_skills`, `resume_files`.
 
 ## Docs
 
 `docs/` holds the TalentFlow AI design inputs, not generated output:
 
-| File                                       | Purpose                                          |
-| ------------------------------------------ | ------------------------------------------------ |
-| `talentflow-ai_prd.md`                     | Product requirements                             |
-| `talentflow-ai_brief.md`                   | Short project brief                              |
-| `talentflow-ai_brand-guidelines.md`        | Brand voice, color, type                         |
-| `talentflow-ai_design.yaml`                | Design system spec                               |
-| `talentflow-ai_tokens.css`                 | Design tokens (mirrored in app styles)           |
-| `talentflow-ai_*_final.html`, `_auth.html` | Static mockups: landing, recruiter console, auth |
+| File                              | Purpose                                |
+| --------------------------------- | -------------------------------------- |
+| `docs/product/prd.md`             | Product requirements                   |
+| `docs/product/brief.md`           | Short project brief                    |
+| `docs/design/brand-guidelines.md` | Brand voice, color, type               |
+| `docs/design/design-system.yaml`  | Design system spec                     |
+| `docs/design/tokens.css`          | Design tokens (mirrored in app styles) |
 
 ## Auth
 
@@ -291,26 +306,6 @@ ALTER TABLE "things" ENABLE ROW LEVEL SECURITY;
 
 For SQL that can't be derived from the TS schema (triggers, RLS, functions),
 create a custom migration: `npx drizzle-kit generate --custom --name=...`.
-
-### Removing the profiles example
-
-Auth does not depend on `profiles` — identity lives in `auth.users` + cookies.
-To start a project with a clean schema, delete the example slice:
-
-```
-src/db/schema/profiles.ts            # + remove its export from schema/index.ts
-src/db/migrations/0000_*.sql, 0001_*.sql, meta/   # keep the migrations dir
-src/validators/profile.validator.ts
-src/services/profile.service.ts
-src/app/api/profile/
-src/hooks/use-profile.ts
-```
-
-Then:
-
-- Remove the `/api/profile` path entry and `profileResponseSchema` from `src/lib/api/openapi.ts` — otherwise the generated spec references a deleted endpoint.
-- Only delete migrations never applied to a live database; otherwise drop the objects first (`DROP TABLE profiles; DROP FUNCTION public.handle_new_user CASCADE;`) or reset the database.
-- To bring a companion table back later, reuse the pattern in `0001_auth-trigger-and-rls.sql`: FK to `auth.users(id) ON DELETE CASCADE`, RLS enabled, `AFTER INSERT ON auth.users` trigger.
 
 ## Adding a new resource
 

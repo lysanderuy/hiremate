@@ -1,6 +1,6 @@
 # TalentFlow AI: Brand Guidelines
 
-Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentflow-ai_design.yaml` and `talentflow-ai_tokens.css`. If they disagree, the tokens file wins.
+Identity and tone come from `brief.md`. The source of truth for token values is `src/app/globals.css`. `tokens.css` and `design-system.yaml` in this folder are reference docs; if they disagree with `globals.css`, `globals.css` wins.
 
 **Personality:** clear, calm, fair, quick. Professional, not stiff. A sharp friend who knows the job market and tells you straight.
 
@@ -48,10 +48,28 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 | Primary soft | `#eeebff` | Chips, hero panel, soft highlights, hover tints                                             |
 | Ink          | `#101828` | Headings and key numbers                                                                    |
 | Text         | `#475467` | Body copy                                                                                   |
-| Muted        | `#667085` | Meta text, helper text, placeholders                                                        |
+| Muted        | `#667085` | Meta text, helper text                                                                      |
+| Placeholder  | `#98a2b3` | Input placeholder text only                                                                 |
 | Line         | `#e4e7ec` | Borders and dividers                                                                        |
 | Page         | `#f7f8fa` | Alternate section background                                                                |
 | Night        | `#0f172a` | Recruiter card and footer only                                                              |
+
+**Supporting tokens**
+
+All defined in `src/app/globals.css`.
+
+| Token                      | Value                                                 | Use                                                   |
+| -------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| Primary hover / active     | `#3f2bd6` / `#3322b8`                                 | Hover and pressed states of primary buttons and links |
+| Primary soft line          | `#cfc8ff`                                             | Border on primary-soft surfaces                       |
+| Line dashed                | `#c0c5cf`                                             | Dashed borders (missing skills, pending-style pills)  |
+| On primary muted / eyebrow | `#e6e2ff` / `#e0dbff`                                 | Secondary text and eyebrows on solid primary sections |
+| On night / on night muted  | `#d0d5e2` / `#98a2b3`                                 | Text on Night surfaces                                |
+| Error / soft / strong      | `#d92d20` / `#fef3f2` / `#b42318`                     | Red text and fills, see rules below                   |
+| Chart 1 to 5               | `#4f39f6`, `#0f6b4c`, `#8b5cf6`, `#3b82f6`, `#0f172a` | shadcn scaffolding, not used in product UI            |
+| Sidebar set                | white, ink, primary, `#f7f8fa`, `#e4e7ec`             | shadcn scaffolding, mirrors the core roles            |
+
+The app is light only. `color-scheme` is `light` and there is no dark mode.
 
 **Score colors (reserved)**
 
@@ -65,7 +83,7 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 
 - Green, amber and gray mean a score band and nothing else. Do not use them as general decoration, status colors for other things, or button colors.
 - Weak is gray, not red. A low score is information, not a failure.
-- Errors in forms use red (`#d92d20`) and appear only on form fields and failed actions.
+- Red (`#d92d20`, soft `#fef3f2`, strong `#b42318`) is used for form errors and failed actions, for rejected and removed status pills, and for destructive buttons and menu items. It is never used for a score.
 - One solid primary section per page. The rest is white or light gray. Use Night for the footer and the recruiter card only.
 - No gradients on UI surfaces. The only gradient allowed is the faint primary-soft fade behind a hero.
 - Never carry meaning by color alone. A score always has its number and band name. Missing skills have a dashed border as well as lighter color.
@@ -100,6 +118,7 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 
 **Rules**
 
+- Headings h1 to h3 carry -0.025em letter spacing globally.
 - Headlines are sentence case, except the hero line "Where AI Meets Career Potential".
 - Second line of the hero headline takes the primary color. Do this once per page.
 - Use tabular numerals for scores and counts so they line up.
@@ -117,7 +136,7 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 - Plain words, short sentences. Speaks to "you".
 - Numbers over adjectives.
 - Shows the reason: "You have 6 of 8 skills this job asks for."
-- Says what a score means and does not mean. A score is a ranking, not a verdict.
+- Says what a score means and does not mean. A score is a measure of fit, not a verdict.
 - No hype, no buzzwords, no exclamation marks.
 
 **Sounds like / does not**
@@ -134,7 +153,7 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 
 | Use                                         | Avoid                                              |
 | ------------------------------------------- | -------------------------------------------------- |
-| score, match, fit                           | rating, grade, rank (for people), verdict          |
+| score, match, fit                           | rating, grade, verdict                             |
 | skills you have, skills missing             | gaps in your profile, deficiencies                 |
 | applicant, recruiter                        | candidate pool, talent, human capital              |
 | listing, job                                | opportunity (as filler), role-based solution       |
@@ -142,8 +161,10 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 
 **Rules**
 
+- Ranking is core for recruiters. Recruiter-facing copy may say "ranked by fit" and "candidates" (e.g. "See applicants ranked by fit", "Find the best candidates, faster"). Prefer "applicants" for the people on a listing.
+- Applicant-facing copy never calls applicants "candidates" and never implies they are ranked against other people. Their score is about their resume and one listing.
 - Say "missing", never "you lack" or "you failed". Missing skills are shown as facts.
-- Never claim accuracy, user counts or results we have not measured. The only true numbers today are 853 job postings tested and 24 resume categories.
+- Never claim accuracy, user counts or results we have not measured. The only true numbers today are 389 recognized skills and 600 rated resume-job pairs.
 - Do not mention price or plans. There is no paid tier.
 - Errors say what happened and what to do next, in one or two short sentences.
 - Buttons are verbs: Get Started, Explore Jobs, Create Applicant Account, Apply.
@@ -156,7 +177,7 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 
 ## 5. Imagery and illustration
 
-**Principle:** the product is the picture. Show real interface pieces: a match card, a skills list, a ranked applicants list. They carry the proof and match the tone.
+**Principle:** the product is the picture. Show real interface pieces: a match card, a skills list, an applicants list ranked by fit. They carry the proof and match the tone.
 
 **Use**
 
@@ -228,3 +249,12 @@ Identity and tone come from `talentflow-ai_brief.md`. Values come from `talentfl
 - [ ] Matched and missing skills shown next to the score.
 - [ ] No invented numbers, no "free" or pricing, no hype words, no exclamation marks, no em dashes.
 - [ ] Contrast meets 4.5:1 for normal text.
+
+---
+
+## 8. Future: brand assets and error copy to align
+
+The rules above are the brand standard. These parts of the code still differ and should be brought in line:
+
+- Favicon and app icon: the mark-alone asset from section 1 is not yet the shipped favicon or app icon.
+- Error copy: `src/app/error.tsx` and `src/app/global-error.tsx` use "Something went wrong", which the tone table in section 4 rules out. Replace with a sentence that says what happened and what to do next.

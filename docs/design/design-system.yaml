@@ -1,48 +1,85 @@
 # TalentFlow AI: design system
-# Matches talentflow-ai_tokens.css and talentflow-ai_brand-guidelines.md.
-# Personality (from talentflow-ai_brief.md): clear, calm, fair, quick.
+# Matches tokens.css, src/app/globals.css and brand-guidelines.md.
+# Personality (from brief.md): clear, calm, fair, quick.
+# Everything above the "future" section describes what is live in the UI.
 
 name: TalentFlow AI
-version: 1.1.0
+version: 1.2.0
 personality: [clear, calm, fair, quick]
 
 # Why this palette:
-# - Indigo (#4f39f6) is the brand color. It reads as calm and trustworthy, and it
-#   was already the color of the existing site, so nothing needs to be redone.
+# - Indigo (#4f39f6) is the brand color. It reads as calm and trustworthy.
 # - Everything else is neutral gray. The only other colors are green, amber and
 #   gray, and they are reserved for score bands so that color always means a score.
-# - Near-black navy appears in two places only (recruiter card, footer) to give
-#   the page a heavy base without feeling loud.
+# - Near-black navy appears in the footer, the recruiter CTA card, the console
+#   sidebars and the toast to give the page a heavy base without feeling loud.
 # - No gradients on UI, no neon. Calm means flat surfaces and plenty of space.
+
+stack:
+  framework: "Next.js App Router, Tailwind CSS v4 (tokens in @theme blocks of globals.css)"
+  primitives: "shadcn/ui, style base-nova, built on Base UI (@base-ui/react)"
+  icons: "lucide-react"
+  variants: "class-variance-authority"
+  light_only: "color-scheme is light; the dark custom variant exists but no dark theme is defined"
+
+shadcn:
+  config: components.json
+  style: base-nova
+  base_color: neutral
+  css_variables: true
+  icon_library: lucide
+  aliases: { components: "@/components", ui: "@/components/ui", lib: "@/lib", hooks: "@/hooks" }
+  primitives_in_ui: [button, badge, card, alert-dialog, dropdown-menu, sheet]
+  token_layer:
+    note: >
+      The shadcn variables are set to brand values in :root and exposed through @theme inline,
+      so shadcn primitives pick up brand colors. The brand-named tokens (ink, text, line, page,
+      surface, night, strong/fair/weak, error) sit beside them and are used directly in app code.
+    mapping:
+      background: "#ffffff"
+      foreground: "#101828"
+      card / popover: "#ffffff"
+      primary: "#4f39f6"
+      primary-foreground: "#ffffff"
+      secondary / muted: "#eef0f3"
+      muted-foreground: "#667085"
+      accent: "#f7f8fa"
+      destructive: "#d92d20"
+      border / input: "#e4e7ec"
+      ring: "#4f39f6"
+    sidebar_tokens: "sidebar, sidebar-foreground, sidebar-primary(-foreground), sidebar-accent(-foreground), sidebar-border, sidebar-ring (shadcn defaults, light values)"
+    chart_tokens: "chart-1 #4f39f6, chart-2 #0f6b4c, chart-3 #8b5cf6, chart-4 #3b82f6, chart-5 #0f172a"
 
 colors:
   brand:
     primary: "#4f39f6"
     primary-hover: "#3f2bd6"
     primary-active: "#3322b8"
-    primary-soft: "#eeebff"
-    primary-soft-line: "#cfc8ff"
-    on-primary: "#ffffff"
+    primary-soft: "#eeebff"          # alias: tint
+    primary-soft-line: "#cfc8ff"     # alias: tint-border
+    primary-foreground: "#ffffff"
     on-primary-muted: "#e6e2ff"
-    night: "#0f172a"
+    on-primary-eyebrow: "#e0dbff"
+    night: "#0f172a"                 # alias: navy
     on-night: "#d0d5e2"
     on-night-muted: "#98a2b3"
   neutral:
-    ink: "#101828"
-    text: "#475467"
-    muted: "#667085"
-    line: "#e4e7ec"
-    page: "#f7f8fa"
+    ink: "#101828"                   # headings, strong text
+    text: "#475467"                  # body text
+    muted-foreground: "#667085"      # secondary text, placeholders in labels, helper text
+    line: "#e4e7ec"                  # borders, dividers (also shadcn border, input)
+    line-dashed: "#c0c5cf"           # dashed borders (missing chip, pending pill, dropzone)
+    page: "#f7f8fa"                  # app background, table header, read-only fields
     surface: "#ffffff"
   score:                       # only for scores, bands and matched skills
     strong: { text: "#0f6b4c", bg: "#e3f5ee", range: "70 to 100" }
     fair:   { text: "#975004", bg: "#fdf1df", range: "40 to 69" }
     weak:   { text: "#566074", bg: "#eef0f3", range: "0 to 39" }
   feedback:
-    error: "#d92d20"
+    error: "#d92d20"                 # also destructive
     error-soft: "#fef3f2"
     error-strong: "#b42318"
-    focus: "#4f39f6"
+    ring: "#4f39f6"                  # focus ring, same as primary
 
 contrast_checked:              # WCAG ratios, normal text needs 4.5 or more
   white_on_primary: 6.46
@@ -51,7 +88,7 @@ contrast_checked:              # WCAG ratios, normal text needs 4.5 or more
   fair_on_fair-soft: 5.43
   weak_on_weak-soft: 5.54
   text_on_white: 7.69
-  muted_on_white: 4.97
+  muted-foreground_on_white: 4.97
   on-primary-muted_on_primary: 5.14
   on-night_on_night: 12.15
   on-night-muted_on_night: 6.93
@@ -61,134 +98,219 @@ typography:
     family: "Space Grotesk"
     fallback: "system-ui, sans-serif"
     weights: [500, 600, 700]
-    use: headings, wordmark, score numerals, step numbers
+    use: headings (h1 to h3 default to it), wordmark, score numerals, step numbers, avatar initials
   body:
     family: "Inter"
     fallback: "system-ui, sans-serif"
     weights: [400, 500, 600]
     use: paragraphs, buttons, forms, tables, labels
   mono:
-    family: "system monospace"
+    family: "ui-monospace, SF Mono, Menlo, Consolas"
     use: resume text preview only
-  scale:
+  scale:               # Tailwind text-* tokens; each carries its own line height
     xs:       { size: "12px", use: "badges, pills, helper and error text, table headers, eyebrow" }
-    chip:     { size: "13px", use: "skill chips" }
+    chip:     { size: "13px", use: "skill chips, drawer section titles" }
     sm:       { size: "14px", use: "app body, inputs, buttons, table cells, menu items, nav links" }
-    md:       { size: "15px", use: "landing body, landing large buttons" }
-    base:     { size: "16px", weight: 600, use: "card titles, h2, brand text, FAQ questions, step titles" }
+    md:       { size: "15px", use: "landing body, large buttons" }
+    base:     { size: "16px", weight: 600, use: "card titles, h2, brand text" }
     lead:     { size: "17px", use: "landing lead and hero sub" }
     lg:       { size: "18px", use: "modal title, table score numeral, /100 on detail" }
-    h1_app:   { size: "24px (20px on phones)", weight: 600, use: "page h1, Welcome back" }
-    h1_auth:  { size: "26px", weight: 600 }
-    stat:     { size: "28px", weight: 600, use: "stat card numerals" }
-    numeral:  { size: "36px", weight: 700, use: "hero preview score numeral" }
-    h2:       { size: "clamp(24px, 2.8vw, 32px)", weight: 600, use: "landing section heading" }
-    h1:       { size: "clamp(34px, 4.4vw, 48px)", weight: 700, use: "landing hero headline" }
-    score:    { size: "56px (44px on phones)", weight: 700, features: "tabular numerals", use: "score hero numeral, /100 at 18px" }
-    landing_small: { size: "24px", use: "step numerals, proof numbers, CTA card h3" }
-    app_labels: { size: "14px", weight: 500, use: "field labels" }
-    app_subsection: { size: "14px", weight: 600 }
-    table_header: { size: "12px", transform: uppercase, tracking: "0.06em" }
-    toast: { size: "14px" }
-  line_height: { display: 1.1, ui: 1.5, body: 1.6 }
-  letter_spacing: { display: "-0.025em", eyebrow: "0.08em" }
+    xl:       { size: "20px", weight: 600, use: "page title on phones" }
+    2xl:      { size: "24px", weight: 600, use: "page title, CTA card h3" }
+    3xl:      { size: "28px", weight: 600, use: "stat card numerals" }
+    auth-h1:  { size: "26px", weight: 600, use: "auth page title" }
+    numeral:  { size: "36px", weight: 700, use: "auth aside sample score" }
+    score-sm: { size: "44px", weight: 700, use: "match analysis numeral on phones" }
+    score:    { size: "56px", weight: 700, use: "match analysis numeral", features: "tabular numerals" }
+    section:  { size: "clamp(24px, 2.8vw, 32px)", weight: 600, use: "landing section heading" }
+    hero:     { size: "clamp(34px, 4.4vw, 48px)", weight: 700, use: "landing hero headline, auth aside headline" }
+  letter_spacing:
+    headings: "-0.025em (h1 to h3 base style)"
+    score_numeral: "-0.04em on detail, -0.02em in tables"
+    eyebrow: "0.08em (uppercase, 12px, semibold, display font, primary color)"
+    table_header: "0.06em (uppercase, 12px, semibold, muted-foreground)"
   rules:
     - Numerals in scores use tabular figures so columns line up.
-    - Eyebrows are 12px, uppercase, semibold, display font.
     - Body copy line length stays under 70 characters.
+    - Spacing, weights, z-index and tracking beyond the above use Tailwind defaults.
 
-spacing:
-  base: 4px
-  scale: [4, 8, 12, 16, 24, 32, 48, 56, 104]
-  section_padding: { desktop: 56px, mobile: 56px, short_screens: 24px }
-  card_padding: { default: 24px, large: 32px, cta: 40px }
-
-radius:
+radius:                 # Tailwind tokens from globals.css
   sm: 6px
-  md: 10px        # buttons, inputs, list rows
-  lg: 16px        # cards
-  xl: 24px        # feature panels, CTA cards
-  pill: 999px     # badges, chips
+  md: 10px              # buttons, inputs, menu popups, toasts, alerts
+  lg: 10px
+  xl: 16px              # cards, dropzone, auth status icon
+  2xl: 24px             # CTA cards, hero preview panel, dialogs
+  pill: "Tailwind rounded-full, no token (badges, chips, pills, avatars, bars)"
 
 shadows:
   sm: "0 1px 2px rgba(16, 24, 40, 0.06)"
   md: "0 8px 24px rgba(16, 24, 40, 0.08)"
   focus: "0 0 0 3px rgba(79, 57, 246, 0.35)"
-  rule: Cards use sm. Only the main score card and floating panels use md. No colored shadows.
+  overlay: "0 16px 40px rgba(16, 24, 40, 0.18) (dialogs, sheets, toast, written inline)"
+  rule: Cards use sm. Floating panels and the auth aside samples use md. No colored shadows.
 
-breakpoints:
-  sm: 640px
-  md: 960px
-  lg: 1280px
-container: { max_width: 1120px, gutter: 24px, gutter_mobile: 16px }
+breakpoints:             # arbitrary values, not the Tailwind defaults
+  phone_max: "max-[640px]"
+  tablet_up: "min-[641px]"        # gutter 16px to 24px, card padding 24px to 40px
+  desktop_up: "min-[961px]"       # sidebar shows, grids go two column, auth split shows
+  note: "Tailwind max-sm / sm (640px) is also used for control height and field text size."
+container: { max_width: 1120px, narrow: 760px, gutter: 24px, gutter_mobile: 16px }
 nav_height: 64px
+control_height: { default: 40px, lg: 44px, sm: 36px, xs: 32px, phone_default: 44px }
 
 layout:
-  desktop_sections: "Each landing section is at least one screen tall (100svh minus nav), content centered."
-  stack_at: 960px
-  min_touch_target: 40px   # desktop; 44px under 640px for primary tap targets and inputs
+  landing_sections: "Each landing section (section-screen) is at least one screen tall (100svh minus nav) from 961px up on screens 640px or taller, content centered. Padding 56px, 24px on short screens."
+  site_container: "max 1120px, 16px gutter, 24px from 641px"
+  min_touch_target: 40px   # desktop; 44px under 640px for buttons and fields
 
 components:
   button:
-    height: { default: 40px, large: 44px, small: 36px, xs: 32px, icon: 40px }
-    text: "14px semibold (15px on landing large)"
+    file: ui/button.tsx
+    height: { default: 40px, lg: 44px, sm: 36px, xs: 32px, icon: 40px, icon-lg: 44px, icon-sm: 36px, icon-xs: 32px }
+    phone: "default and icon grow to 44px under 640px"
+    text: "14px semibold (15px on lg)"
     radius: md
-    weight: 600
+    icons: "lucide icons allowed inline, 16px (14px on xs); padding tightens on the icon side"
     variants:
-      primary:   { bg: primary, text: on-primary, hover: primary-hover }
-      secondary: { bg: surface, text: ink, border: line, hover-border: muted }
-      light:     { bg: white, text: primary, use: "on primary background only" }
-    rules: One primary button per section. Labels are verbs. No icons inside buttons unless it is an arrow.
+      default:     { bg: primary, text: primary-foreground, hover: primary-hover, active: primary-active }
+      outline:     { bg: surface, text: ink, border: line, hover-border: muted-foreground }
+      light:       { bg: white, text: primary, hover: primary-soft, use: "on primary background only" }
+      soft:        { bg: primary-soft, text: primary, border: primary-soft-line }
+      secondary:   { bg: secondary, text: secondary-foreground }
+      ghost:       { bg: none, hover: muted }
+      destructive: { bg: "destructive at 10%", text: destructive, hover: "destructive at 20%" }
+      link:        { text: primary, hover: underline }
+    states: "disabled 50% opacity, pressed shifts 1px down, focus is a 3px primary outline with 2px offset"
+    rules: One default button per section. Labels are verbs.
   badge:
+    file: ui/badge.tsx
     height: 24px
     radius: pill
     text: 12px semibold
-    variants: [strong, fair, weak]
-    rule: Badge text is the band name (Strong, Fair, Weak), never a percentage.
+    variants:
+      strong: { bg: strong-soft, text: strong }
+      fair: { bg: fair-soft, text: fair }
+      weak: { bg: weak-soft, text: weak }
+      default: { bg: primary, text: primary-foreground }
+      secondary: { bg: secondary }
+      destructive: { bg: "destructive at 10%", text: destructive }
+      outline: { border: border }
+      ghost: { hover: muted }
+      link: { text: primary, hover: underline }
+    rule: Band badge text is the band name (Strong, Fair, Weak), never a percentage.
   chip:
+    files: [applicants/skill-chip.tsx, jobs/skill-chips.tsx]
     height: 28px
     radius: pill
     text: 13px medium
     variants:
       matched: { bg: primary-soft, text: primary }
-      missing: { bg: surface, text: muted, border: "1px dashed #c0c5cf" }
+      missing: { bg: white, text: muted-foreground, border: "1px dashed line-dashed" }
+      neutral: { bg: weak-soft, text: weak, component: NeutralChip, use: "a listing's skills with no comparison" }
+      more: { bg: weak-soft, text: weak, component: MoreChip, content: "+N, reads 'and N more' to screen readers" }
+    list: "ChipList renders an aria-labelled ul, with an optional max that collapses the rest into MoreChip"
   card:
-    bg: surface
+    file: ui/card.tsx
+    bg: card
     border: "1px solid line"
-    radius: lg
+    radius: xl
     shadow: sm
-  score_card:
-    parts: [numeral, band badge, reason sentence, skills bar, description match bar, missing chips]
-    numeral: "display font 700, band color, with '/100' in muted"
-    reason_format: "You have {n} of {m} skills this job asks for."
-  bar:
-    height: 8px
-    radius: pill
-    track: weak-soft
-    fill: primary (neutral detail) or strong (hero preview)
-    value_label: "right-aligned, words or fractions, never %"
-  band_row:
-    columns: "range (96px) | badge (80px) | description (1fr)"
-    rule: Description wraps inside its own column, never under the badge.
+    parts: [CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter]
+    sizes: { default: "16px inner spacing", sm: "12px" }
   input:
+    primitive: none
+    note: "There is no ui/input. Fields use the FIELD_CLASS string exported from shared/field-label.tsx, and FieldLabel for the label (supports required asterisk and Optional hint)."
+    auth: "auth/auth-input.tsx wraps FieldLabel and FIELD_CLASS with a 44px field, hint, role=alert error line and a show/hide password toggle; also exports toFieldErrors, clearFieldError, focusFirstError."
     height: 40px          # 44px on auth and under 640px
     text: 14px            # 16px under 640px to prevent iOS zoom
     radius: md
-    border: "1px solid line"
+    border: "1px solid line, bg white"
     focus: "border primary + focus shadow"
-    error: "border error, message below in error color, 12px"
-  nav:
-    height: 64px
-    bg: "white at 94%, blur"
-    border_bottom: line
-  footer:
-    bg: night
-    columns: [brand, product, applicants, recruiters]
-    bottom_bar: "copyright only"
+    error: "aria-invalid sets border error; message below in error color, 13px"
+    read_only_disabled: "bg page, text muted-foreground"
+  bar:
+    files: [landing/match-bar.tsx, shared/match-analysis.tsx]
+    height: 8px
+    radius: pill
+    track: weak-soft
+    fill: primary (default) or strong (landing hero preview)
+    value_label: "right-aligned, words or fractions, never %"
+    a11y: "match analysis bar is role=meter with aria-valuetext 'N of M'"
+  score_card:
+    component: shared/match-analysis.tsx (MatchAnalysis)
+    audience: "applicant or recruiter; changes the sentence from describeBreakdown"
+    parts:
+      - "title: Match analysis"
+      - "AI match score: numeral, /100, band badge, or a fallback node"
+      - "Skills comparison: N of M, skills bar, matched and missing chip groups"
+      - "breakdown sentence"
+    numeral: "display font 700, band color, tabular, '/100' in muted-foreground"
+    note: "Description match is not shown as a bar or label; it appears only in the breakdown sentence."
   cta_card:
-    radius: xl
-    padding: 40px
-    variants: { applicant: primary, recruiter: night }
+    file: landing/cta.tsx
+    radius: 2xl
+    padding: "24px, 40px from 641px"
+    parts: [audience badge (white at 16%), h3, description, check-circle list, button size lg]
+    variants:
+      applicant: { bg: primary, text: on-primary-muted, button: light }
+      recruiter: { bg: night, text: on-night, button: default }
+  nav:
+    file: landing/navbar.tsx
+    height: 64px
+    links: "inline from 961px, mobile-nav below"
+  footer:
+    file: landing/footer.tsx
+    bg: night
+
+app_console:
+  layout:
+    console: "Each role has dashboard/<role>/(console)/layout.tsx: requireRole, flex row on bg page, sidebar, then a column with the mobile top bar and main (max 1240px, 16px padding, 32px from 961px)."
+    auth_split: "auth/auth-split.tsx: from 961px a 5fr/7fr grid with a sticky primary AuthAside (logo, role headline, sample card, copyright) beside a centered 420px form column; below 961px a logo bar over the form. Also AuthHeader (eyebrow, auth-h1 title, sub), AuthAlert (error or info), AuthStatusIcon."
+  sidebars:
+    shared: "shared/app-sidebar.tsx (AppSidebar, AppTopBar); role files pass nav items, role label and display name"
+    desktop: "sticky night column, 264px, collapses to a 76px icon rail (state in the ui store); below 961px it becomes a left Sheet opened from AppTopBar (64px white bar with menu button and logo)"
+    items: "40px high, on-night text, active item is primary fill with white text, optional count badge, lucide 18px icons; footer holds Avatar, name, subtitle and Log out"
+    roles:
+      applicant: [Dashboard, Browse jobs, My resume, My applications, Profile]
+      recruiter: [Dashboard, Listings, Applicants, Profile]
+      administrator: [Dashboard, Approvals (pending count badge), Users, Listings]
+  page_header: "shared/page-header.tsx: title (xl on phones, 2xl up), optional description, optional action slot; CRUMB_CLASS styles back links"
+  data_table:
+    file: shared/data-table.tsx
+    parts: "DataTable (labelled table, scrolls horizontally under 640px min width), Th (page bg, 12px uppercase muted-foreground header), Td (56px rows, line dividers)"
+    pager: "TablePager: 'Showing X to Y of Z' with Previous and Next outline sm buttons"
+  status_pill:
+    file: shared/status-pill.tsx
+    shape: "24px pill, 12px medium, leading dot"
+    rule: "Status tones never reuse score colors (green, amber, gray bands). ApplicationStatusPill maps an application status to a tone and label."
+    tones:
+      submitted / pending: "white, dashed border, text"
+      viewed: "weak-soft"
+      shortlisted: "primary-soft"
+      interview: "primary-soft, primary border, semibold"
+      rejected / removed: "error-soft, error-strong"
+      withdrawn: "white, dashed border, muted-foreground"
+      open: "primary-soft"
+      closed: "weak-soft"
+  score_cells:
+    file: shared/match-score.tsx
+    ScoreCell: "score (display lg bold, band color) + /100 + band Badge; 'Not scored' when null"
+    TopScore: "same layout for a listing's best score; 'None' when null"
+    exports: "MATCH_BAND_LABELS, BAND_TEXT"
+  avatar: "shared/avatar.tsx: 36px circle, primary-soft with primary initials (display font); size via className; decorative"
+  toaster: "shared/toaster.tsx: one fixed night pill at bottom center, white text, shadow overlay, shown 3 seconds, driven by the toast store, role=status"
+  overlays:
+    confirm_dialog: "shared/confirm-dialog.tsx: ConfirmDialog (title, description, confirm and cancel; danger switches the confirm button to error red) built on alert-dialog"
+    alert_dialog: "ui/alert-dialog.tsx: centered 2xl white panel, max 440px, night 55% backdrop"
+    dropdown_menu: "ui/dropdown-menu.tsx: md radius white popup with line border and shadow md, min 232px; used for row menus and the export menu"
+    sheet: "ui/sheet.tsx: side panel (default right) with night 50% backdrop and overlay shadow"
+    admin_drawers: "admin/user-drawer.tsx and listing-drawer.tsx: right Sheet, full width on phones and 480px from 640px, header with Avatar and close; body uses admin/drawer-parts.tsx (DrawerSection, KeyValueList, DrawerNote). Confirm dialogs (suspend, reject, remove) open above the drawer."
+  feature_components:
+    ApplicationsChart: "admin/applications-chart.tsx: inline SVG bar chart of applications per day, primary bars, line gridlines, muted-foreground labels, role=img with a text label"
+    SkillPicker: "listings/skill-picker.tsx: debounced skill search plus suggestions from the title and description; selected skills as removable pills, min and max enforced, uses FIELD_CLASS"
+    ListingForm: "listings/listing-form.tsx: create and edit form for recruiters (title, description, location, employment type, salary, SkillPicker) with a live preview, zod errors via FIELD_MESSAGES, and a discard guard"
+    ResumeDropzone: "resume/resume-dropzone.tsx: dashed 2px xl label, upload icon in a primary-soft circle, highlights on drag, disabled while uploading; accepts text-based PDFs up to 4 MB"
+    MatchAnalysis: "shared/match-analysis.tsx, see score_card"
 
 score:
   scale: "0 to 100, integer"
@@ -196,29 +318,42 @@ score:
     strong: "70 to 100"
     fair: "40 to 69"
     weak: "0 to 39"
+  cutoffs_source: "model.json; never hard-coded"
   display_rules:
     - Show the number with "/100" and the band name. Never show "%".
     - Always show matched and missing skills next to the score.
     - The word "match" follows the band in labels: Strong match.
-    - 'Description match is shown as Low, Medium or High. Cutoffs to be set after calibration.'
 
 iconography:
-  style: "outline, 1.8px stroke, rounded caps and joins, 24px grid"
-  logo_mark: "four-point sparkle pair, white on primary"
-  used: [sparkle, check-circle, info, document]
-  rule: Icons support text. They are never the only label.
+  library: lucide-react
+  size: "16px in buttons and badges, 18px in sidebar items, 20px in list and callout icons"
+  logo_mark: "four-point sparkle pair (SparkleIcon), white on primary"
+  rule: Icons support text. They are never the only label; icon-only buttons carry an aria-label.
 
 motion:
   duration: { fast: 150ms, base: 200ms }
   easing: "cubic-bezier(0.2, 0, 0, 1)"
   rules:
-    - Motion is for state changes only (hover, open, focus).
+    - Motion is for state changes only (hover, open, focus, sidebar collapse, dialog and sheet entry).
     - No looping or decorative animation.
-    - Respect prefers-reduced-motion.
+    - Durations drop to 0 under prefers-reduced-motion; smooth scroll only when motion is allowed.
 
 accessibility:
   - Normal text meets 4.5:1. Large text meets 3:1.
-  - Visible focus ring on every interactive element (3px, primary).
-  - Touch targets 40px or larger on desktop, 44px or larger under 640px for primary tap targets.
+  - Visible focus ring on every interactive element (3px primary outline, 2px offset; fields use the focus shadow).
+  - Touch targets 40px or larger on desktop, 44px under 640px for buttons and fields.
   - Score and band are never shown by color alone. The number and band name are always text.
   - Missing skills use a dashed border as well as color.
+
+future:                          # in the spec but not built; do not treat as live
+  design_tokens:
+    - "Spacing scale (4px base: 4, 8, 12, 16, 24, 32, 48, 56, 104), section and card padding tokens; code uses Tailwind spacing."
+    - "Z-index, font-weight, line-height and letter-spacing token scales; code uses Tailwind defaults."
+    - "A dedicated pill radius token (999px); code uses rounded-full."
+    - "Dark theme."
+  components:
+    - "band_row: a score band legend row (range 96px, badge 80px, description 1fr) with the description wrapping in its own column."
+    - "Description match shown as Low, Medium or High, with cutoffs set after calibration."
+    - "A ui/input primitive replacing FIELD_CLASS."
+  iconography:
+    - "Custom 1.8px outline icon set on a 24px grid (sparkle, check-circle, info, document); lucide is used instead."

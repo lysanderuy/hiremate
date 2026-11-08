@@ -40,7 +40,12 @@ External services with an API key:
 2. Lazily construct the client on first use, never at module top level — breaks `next build` on a fresh clone with no env vars set.
 3. No-op or throw a clear "not configured" error if unset — never crash silently or block the app from booting.
 
-Current optional integration: the embedding matcher (`MATCHER_URL`, `MATCHER_API_KEY` min 16 chars; `src/services/matcher.service.ts`). A failure there must never fail a save.
+Current optional integrations:
+
+- Embedding matcher (`MATCHER_URL`, `MATCHER_API_KEY` min 16 chars; `src/services/matcher.service.ts`). A failure there must never fail a save.
+- Supabase service role (`SUPABASE_SERVICE_ROLE_KEY`; `src/lib/supabase/admin.ts`). Lets suspending a user also block sign-in; without it, suspension still applies in-app.
+
+`DIRECT_URL` is not in `src/lib/env.ts`: only drizzle-kit and `scripts/` read it.
 
 ## ML matching
 
@@ -80,8 +85,8 @@ Current optional integration: the embedding matcher (`MATCHER_URL`, `MATCHER_API
 ## Testing
 
 Vitest, unit-only, node environment (no jsdom yet). Only pure logic is
-covered — validators (`src/validators`) and framework-free `src/lib`
-helpers. Services and routes touch Drizzle/Supabase and are untested: this
+covered — validators (`src/validators`), framework-free `src/lib`
+helpers, and type-level tests such as `src/types/applications.test.ts`. Services and routes touch Drizzle/Supabase and are untested: this
 project has no dedicated test database, and mocking the Drizzle client
 would give false confidence rather than real coverage. Check with the user
 before adding jsdom, Testing Library, or DB mocking.
