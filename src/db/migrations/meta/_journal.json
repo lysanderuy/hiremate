@@ -120,6 +120,13 @@
       "when": 1792076634468,
       "tag": "0016_skinny_yellow_claw",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794120226443,
+      "tag": "0017_demonic_silvermane",
+      "breakpoints": true
     }
   ]
 }

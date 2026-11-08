@@ -16,6 +16,8 @@ export const profiles = pgTable("profiles", {
   accountStatus: accountStatus("account_status").notNull().default("active"),
   rejectionReason: text("rejection_reason"),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
+  suspendedFrom: accountStatus("suspended_from"),
+  reviewRequestedAt: timestamp("review_requested_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
