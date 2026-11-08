@@ -4,6 +4,7 @@ import { APPLICATION_STATUS_LABELS, type ApplicationStatus } from "@/types/appli
 // Green, amber and gray are reserved for score bands, so no status uses them.
 const TONES = {
   submitted: "border border-line-dashed bg-white text-text",
+  pending: "border border-line-dashed bg-white text-text",
   viewed: "bg-weak-soft text-weak",
   shortlisted: "bg-primary-soft text-primary",
   interview: "border border-primary bg-primary-soft font-semibold text-primary-active",

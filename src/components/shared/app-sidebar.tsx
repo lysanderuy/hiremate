@@ -18,6 +18,7 @@ export type NavItem = {
   label: string;
   icon: LucideIcon;
   exact?: boolean;
+  badge?: number;
 };
 
 type AppSidebarProps = {
@@ -30,7 +31,7 @@ type AppSidebarProps = {
 };
 
 const ITEM_CLASS =
-  "flex w-full items-center gap-3 rounded-md font-medium whitespace-nowrap text-on-night transition-colors hover:bg-white/7 hover:text-white focus-visible:outline-white";
+  "relative flex w-full items-center gap-3 rounded-md font-medium whitespace-nowrap text-on-night transition-colors hover:bg-white/7 hover:text-white focus-visible:outline-white";
 
 function isActive(pathname: string, item: NavItem) {
   return item.exact
@@ -126,6 +127,19 @@ function SidebarContent({
             >
               <item.icon className="size-[18px] shrink-0" />
               {!collapsed && <span className="truncate">{item.label}</span>}
+              {item.badge ? (
+                <span
+                  className={cn(
+                    "flex items-center justify-center rounded-full leading-none font-semibold tabular-nums",
+                    collapsed
+                      ? "absolute top-2 right-3 size-2.5 text-[0px]"
+                      : "ml-auto h-6 min-w-6 px-2 text-chip",
+                    active ? "bg-white text-primary" : "bg-primary text-white",
+                  )}
+                >
+                  {item.badge}
+                </span>
+              ) : null}
             </DiscardGuardLink>
           );
         })}

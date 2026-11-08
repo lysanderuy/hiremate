@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AuthHeader, AuthSplit, AuthStatusIcon } from "@/components/auth/auth-split";
 import { LogoutButton } from "@/components/shared/logout-button";
+import { RequestReviewButton } from "@/components/shared/request-review-button";
 import { buttonVariants } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth/require-role";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ export default async function RecruiterStatusPage() {
             Browse jobs
           </Link>
         )}
+        {profile.accountStatus === "rejected" && <RequestReviewButton />}
         <LogoutButton
           className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full text-sm")}
         >
