@@ -44,6 +44,7 @@ Product, brand and design references (PRD, brief, tokens, HTML mockups) are in
    | `DATABASE_URL`                               | **Transaction pooler** URL (port 6543) — app runtime                              |
    | `DIRECT_URL`                                 | **Session pooler** URL (port 5432) — drizzle-kit only                             |
    | `MATCHER_URL` / `MATCHER_API_KEY` (optional) | Embedding service URL and shared key (16+ chars), see [ML matching](#ml-matching) |
+   | `SUPABASE_SERVICE_ROLE_KEY` (optional)       | Dashboard → Project Settings → API; lets suspending a user also block sign-in     |
 
    Don't swap the pooler ports: migrations fail through the transaction
    pooler (no prepared statements — the app client runs `prepare: false`
@@ -335,7 +336,10 @@ Then:
 | `db:verify`               | RLS guardrail — fails if any public table has RLS disabled |
 | `db:auth-users`           | Debug: list recent signups + email confirmation status     |
 | `db:seed-skills`          | Seed the skills table                                      |
+| `db:seed-admin`           | Promote a signed-up user to administrator (`-- <email>`)   |
 | `db:seed-applicants`      | Seed placeholder applicants (dev data)                     |
 | `db:cleanup-applicants`   | Remove seeded applicants                                   |
 | `db:push`                 | Push schema directly (prototyping only)                    |
 | `db:studio`               | Drizzle Studio data browser                                |
+
+The first administrator signs up like anyone else, then run `npm run db:seed-admin -- <email>` to promote that account. Admin CSV exports are capped at the 10,000 most recent rows.
