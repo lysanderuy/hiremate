@@ -292,6 +292,16 @@ export const openApiDocument = createDocument({
         },
       },
     },
+    "/api/recruiter/export/applications": {
+      get: {
+        summary: "Download applications to the authenticated recruiter's listings as CSV",
+        responses: {
+          "200": csvResponseSpec("CSV file download."),
+          "401": errorResponse("Unauthorized."),
+          "403": errorResponse("Account is not an active recruiter."),
+        },
+      },
+    },
     "/api/admin/users": {
       get: {
         summary: "List user accounts, newest first, with search and filters",

@@ -1,5 +1,4 @@
 import { CircleAlert, Clock } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AuthHeader, AuthSplit, AuthStatusIcon } from "@/components/auth/auth-split";
@@ -19,13 +18,13 @@ export default async function RecruiterStatusPage() {
       icon: Clock,
       tone: "default",
       title: "Awaiting approval",
-      body: "An administrator reviews every new recruiter account. You can browse jobs while you wait, and post listings once you are approved.",
+      body: "An administrator reviews every new recruiter account. You can post listings once you are approved.",
     },
     rejected: {
       icon: CircleAlert,
       tone: "warn",
       title: "Your account was not approved",
-      body: "You can still browse jobs.",
+      body: "You can ask an administrator to review your account again.",
     },
   } as const;
   const { icon, tone, title, body } =
@@ -44,11 +43,6 @@ export default async function RecruiterStatusPage() {
       )}
 
       <div className="grid gap-3">
-        {profile.accountStatus === "pending" && (
-          <Link href="/jobs" className={cn(buttonVariants({ size: "lg" }), "w-full text-sm")}>
-            Browse jobs
-          </Link>
-        )}
         {profile.accountStatus === "rejected" && <RequestReviewButton />}
         <LogoutButton
           className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full text-sm")}

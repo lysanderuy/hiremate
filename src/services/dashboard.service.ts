@@ -1,22 +1,156 @@
 import "server-only";
 
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { latestApplicationOnly } from "@/db/predicates";
-import { applications, companies, jobs, profiles, resumes } from "@/db/schema";
-import { openListingService } from "@/services/open-listing.service";
+import { applications, companies, jobSkills, jobs, profiles, resumes, skills } from "@/db/schema";
+import { matchPair, type MatchPairResult } from "@/lib/matching/match-pair";
+import type { EmploymentType } from "@/types/jobs";
+import type { ResumeState } from "@/types/resumes";
 import type {
   ApplicantDashboardResponse,
   DashboardResponse,
 } from "@/validators/dashboard.validator";
+import type { OpenListingSummaryResponse } from "@/validators/open-listing.validator";
 
 const RECENT_LIMIT = 5;
 const APPLICANT_RECENT_LIMIT = 4;
 const BEST_MATCH_LIMIT = 3;
+const BEST_MATCH_CANDIDATE_LIMIT = 500;
 
 const countWhere = (condition: ReturnType<typeof sql>) =>
   sql<number>`count(*) filter (where ${condition})`.mapWith(Number);
+
+type ResumeMatchContext = {
+  state: ResumeState;
+  skills: string[];
+  embedding: number[] | null;
+} | null;
+
+type MatchListingRow = {
+  id: string;
+  title: string;
+  companyName: string;
+  location: string;
+  employmentType: EmploymentType;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  createdAt: Date;
+  embedding: number[] | null;
+  matchReady: boolean;
+};
+
+type ScoredListing = {
+  row: MatchListingRow;
+  skills: string[];
+  result: MatchPairResult;
+};
+
+const matchListingColumns = {
+  id: jobs.id,
+  title: jobs.title,
+  companyName: companies.name,
+  location: jobs.location,
+  employmentType: jobs.employmentType,
+  salaryMin: jobs.salaryMin,
+  salaryMax: jobs.salaryMax,
+  createdAt: jobs.createdAt,
+  embedding: jobs.embedding,
+  matchReady: jobs.matchReady,
+};
+
+async function loadJobSkillNames(jobIds: string[]): Promise<Map<string, string[]>> {
+  const byJob = new Map<string, string[]>();
+  if (jobIds.length === 0) return byJob;
+
+  const rows = await db
+    .select({ jobId: jobSkills.jobId, name: skills.name })
+    .from(jobSkills)
+    .innerJoin(skills, eq(skills.id, jobSkills.skillId))
+    .where(inArray(jobSkills.jobId, jobIds))
+    .orderBy(skills.name);
+
+  for (const { jobId, name } of rows) {
+    const list = byJob.get(jobId) ?? [];
+    list.push(name);
+    byJob.set(jobId, list);
+  }
+  return byJob;
+}
+
+function compareByMatchScore(a: ScoredListing, b: ScoredListing): number {
+  const scoreA = a.result.match?.score ?? -1;
+  const scoreB = b.result.match?.score ?? -1;
+  if (scoreA !== scoreB) return scoreB - scoreA;
+  const byDate = b.row.createdAt.getTime() - a.row.createdAt.getTime();
+  if (byDate !== 0) return byDate;
+  if (a.row.id === b.row.id) return 0;
+  return a.row.id < b.row.id ? 1 : -1;
+}
+
+async function listBestMatches(
+  userId: string,
+  resume: ResumeMatchContext,
+  limit: number,
+): Promise<OpenListingSummaryResponse[]> {
+  if (resume?.state !== "ready") return [];
+
+  const candidates = await db
+    .select(matchListingColumns)
+    .from(jobs)
+    .innerJoin(companies, eq(companies.id, jobs.companyId))
+    .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
+    .where(
+      and(
+        eq(jobs.status, "open"),
+        eq(profiles.accountStatus, "active"),
+        sql`not exists (
+          select 1 from ${applications}
+          where ${applications.jobId} = ${jobs.id} and ${applications.applicantId} = ${userId}
+            and ${applications.status} <> 'withdrawn'
+        )`,
+      ),
+    )
+    .orderBy(desc(jobs.createdAt), desc(jobs.id))
+    .limit(BEST_MATCH_CANDIDATE_LIMIT);
+  const skillsByJob = await loadJobSkillNames(candidates.map((candidate) => candidate.id));
+
+  return candidates
+    .map((row) => {
+      const jobSkillNames = skillsByJob.get(row.id) ?? [];
+      return {
+        row,
+        skills: jobSkillNames,
+        result: matchPair(
+          { skills: resume.skills, embedding: resume.embedding },
+          {
+            skills: jobSkillNames,
+            embedding: row.embedding,
+            matchReady: row.matchReady,
+          },
+        ),
+      };
+    })
+    .filter(({ result }) => result.match !== null && result.match.band !== "weak")
+    .sort(compareByMatchScore)
+    .slice(0, limit)
+    .map(({ row, skills: jobSkillNames, result }) => ({
+      id: row.id,
+      title: row.title,
+      companyName: row.companyName,
+      location: row.location,
+      employmentType: row.employmentType,
+      salaryMin: row.salaryMin,
+      salaryMax: row.salaryMax,
+      createdAt: row.createdAt.toISOString(),
+      skills: jobSkillNames,
+      match: result.match,
+      skillsMatch: result.skillsMatch,
+      matchStatus: result.status,
+      application: null,
+    }));
+}
 
 export const dashboardService = {
   async get(userId: string): Promise<DashboardResponse> {
@@ -106,7 +240,7 @@ export const dashboardService = {
         .where(eq(applications.applicantId, userId))
         .orderBy(desc(applications.createdAt), desc(applications.id))
         .limit(APPLICANT_RECENT_LIMIT),
-      openListingService.listBestMatches(userId, resume ?? null, BEST_MATCH_LIMIT),
+      listBestMatches(userId, resume ?? null, BEST_MATCH_LIMIT),
     ]);
 
     return {

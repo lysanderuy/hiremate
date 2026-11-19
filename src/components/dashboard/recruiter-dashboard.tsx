@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
+import { ExportApplicationsButton } from "@/components/recruiter/export-applications-button";
 import { Avatar } from "@/components/shared/avatar";
 import { DataTable, Td, Th } from "@/components/shared/data-table";
 import { ScoreCell } from "@/components/shared/match-score";
@@ -220,10 +221,13 @@ export function RecruiterDashboard({ name }: { name: string }) {
         title={`Welcome back, ${firstName}`}
         description="Here is what is happening with your listings."
         action={
-          <Link href={`${LISTINGS_PATH}/new`} className={buttonVariants({ size: "sm" })}>
-            <Plus aria-hidden="true" />
-            Create job listing
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <ExportApplicationsButton />
+            <Link href={`${LISTINGS_PATH}/new`} className={buttonVariants({ size: "sm" })}>
+              <Plus aria-hidden="true" />
+              Create job listing
+            </Link>
+          </div>
         }
       />
       {waiting > 0 && (

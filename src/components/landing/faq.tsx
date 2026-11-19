@@ -9,7 +9,7 @@ const questions = [
   {
     question: "What resume formats work?",
     answer:
-      "A text-based PDF. Scanned or image PDFs cannot be read. We keep the text we read from your PDF, not the file itself.",
+      "A text-based PDF. Scanned or image PDFs cannot be read. We securely retain your PDF and the text we extract so you can view it and use matching features.",
   },
   {
     question: "Can a recruiter see my resume before I apply?",

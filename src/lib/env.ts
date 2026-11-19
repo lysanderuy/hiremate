@@ -1,3 +1,5 @@
+import "server-only";
+
 import { z } from "zod";
 
 // Lazy validation — next build imports routes before env vars exist. Server-only;

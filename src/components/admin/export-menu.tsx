@@ -20,7 +20,7 @@ const EXPORTS = [
 
 export function ExportMenu() {
   const showToast = useToastStore((state) => state.show);
-  const exportCsv = useExportCsv();
+  const exportCsv = useExportCsv("/api/admin/export");
 
   return (
     <DropdownMenu>

@@ -41,13 +41,13 @@ export function Hero() {
               Get Started
             </Link>
             <Link
-              href="/jobs"
+              href="/signup?role=applicant"
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "max-[640px]:flex-[1_1_100%]",
               )}
             >
-              Explore Jobs
+              Find your matches
             </Link>
           </div>
           <dl className="mt-12 flex flex-wrap gap-x-6 gap-y-4 border-t border-line pt-6 min-[641px]:gap-x-12">

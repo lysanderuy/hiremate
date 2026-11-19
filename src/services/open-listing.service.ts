@@ -1,13 +1,12 @@
 import "server-only";
 
-import { and, count, desc, eq, gte, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/db";
 import { applications, companies, jobSkills, jobs, profiles, resumes, skills } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
 import { escapeLike } from "@/lib/escape-like";
 import { matchPair, type MatchPairResult } from "@/lib/matching/match-pair";
-import { listingService } from "@/services/listing.service";
 import type { EmploymentType } from "@/types/jobs";
 import type { ResumeState } from "@/types/resumes";
 import {
@@ -295,42 +294,7 @@ export const openListingService = {
       .where(and(eq(jobs.id, id), ...visibleListing));
     if (!row) throw new HttpError("Listing not found", 404);
 
-    const jobData = (await loadJobMatchData([id])).get(id);
-    if (!jobData?.matchReady || !jobData.embedding) await listingService.prepareForViewer(id);
-
     const [item] = await decorate(userId, [row], await loadResume(userId));
     return { ...item, description: row.description };
-  },
-
-  async listBestMatches(
-    userId: string,
-    resume: ResumeContext,
-    limit: number,
-  ): Promise<OpenListingSummaryResponse[]> {
-    if (resume?.state !== "ready") return [];
-
-    const candidates = await db
-      .select(candidateColumns)
-      .from(jobs)
-      .innerJoin(companies, eq(companies.id, jobs.companyId))
-      .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
-      .where(
-        and(
-          ...visibleListing,
-          sql`not exists (
-            select 1 from ${applications}
-            where ${applications.jobId} = ${jobs.id} and ${applications.applicantId} = ${userId}
-              and ${applications.status} <> 'withdrawn'
-          )`,
-        ),
-      )
-      .orderBy(desc(jobs.createdAt), desc(jobs.id))
-      .limit(BEST_MATCH_CANDIDATE_LIMIT);
-
-    return (await scoreCandidates(candidates, resume))
-      .filter(({ result }) => result.match !== null && result.match.band !== "weak")
-      .sort(compareByScore)
-      .slice(0, limit)
-      .map(({ row, skills: jobSkillNames, result }) => toSummary(row, jobSkillNames, result, null));
   },
 };

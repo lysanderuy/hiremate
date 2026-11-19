@@ -123,17 +123,6 @@ async function storeEmbedding(
   return stored.length > 0;
 }
 
-async function storeEmbeddingForViewer(
-  id: string,
-  description: string,
-  embedding: number[],
-): Promise<void> {
-  await db
-    .update(jobs)
-    .set({ embedding, matchReady: true })
-    .where(and(eq(jobs.id, id), eq(jobs.description, description)));
-}
-
 export const listingService = {
   async create(userId: string, input: CreateListingInput): Promise<ListingView> {
     const company = await db.query.companies.findFirst({
@@ -306,26 +295,6 @@ export const listingService = {
 
     await storeEmbedding(userId, id, claimed.description, embedding);
     return listingService.getById(userId, id);
-  },
-
-  async prepareForViewer(id: string): Promise<void> {
-    const [claimed] = await db
-      .update(jobs)
-      .set({ prepareAttemptedAt: sql`now()` })
-      .where(
-        and(
-          eq(jobs.id, id),
-          eq(jobs.status, "open"),
-          sql`(${jobs.embedding} is null or ${jobs.matchReady} = false)`,
-          prepareCooldownElapsed(jobs.prepareAttemptedAt),
-        ),
-      )
-      .returning({ description: jobs.description });
-    if (!claimed) return;
-
-    const embedding = await matcherService.tryEmbedOne("listing", claimed.description);
-    if (!embedding) return;
-    await storeEmbeddingForViewer(id, claimed.description, embedding);
   },
 
   async remove(userId: string, id: string): Promise<{ id: string }> {

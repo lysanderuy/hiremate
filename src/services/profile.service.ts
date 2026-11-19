@@ -4,7 +4,22 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { profiles, type Profile } from "@/db/schema";
-import type { UpdateProfileInput } from "@/validators/profile.validator";
+import type { ProfileResponse, UpdateProfileInput } from "@/validators/profile.validator";
+
+export function toProfileResponse(profile: Profile): ProfileResponse {
+  return {
+    id: profile.id,
+    email: profile.email,
+    displayName: profile.displayName,
+    jobTitle: profile.jobTitle,
+    role: profile.role,
+    accountStatus: profile.accountStatus,
+    rejectionReason: profile.rejectionReason,
+    approvedAt: profile.approvedAt?.toISOString() ?? null,
+    createdAt: profile.createdAt.toISOString(),
+    updatedAt: profile.updatedAt.toISOString(),
+  };
+}
 
 // Example service — replace/extend per project.
 export const profileService = {

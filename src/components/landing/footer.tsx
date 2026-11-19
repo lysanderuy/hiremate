@@ -14,7 +14,7 @@ const columns = [
   {
     title: "Applicants",
     links: [
-      { label: "Browse jobs", href: "/jobs" },
+      { label: "Find your matches", href: "/signup?role=applicant" },
       { label: "Create account", href: "/signup?role=applicant" },
       { label: "Sign in", href: "/login" },
     ],

@@ -9,6 +9,7 @@ import {
 import { UserDrawer } from "@/components/admin/user-drawer";
 import { Avatar } from "@/components/shared/avatar";
 import { ClickableRow } from "@/components/shared/clickable-row";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { DataTable, Td, Th } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,6 +22,7 @@ export function ApprovalsView() {
   const { data, isPending, error } = useApprovals();
   const approve = useApproveRecruiter();
   const showToast = useToastStore((state) => state.show);
+  const [approving, setApproving] = useState<RejectTarget | null>(null);
   const [rejecting, setRejecting] = useState<RejectTarget | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -40,9 +42,13 @@ export function ApprovalsView() {
     );
   }
 
-  function handleApprove(id: string, name: string) {
-    approve.mutate(id, {
-      onSuccess: () => showToast(`${name} approved. They can post listings now.`),
+  function handleApprove() {
+    if (!approving) return;
+    approve.mutate(approving.id, {
+      onSuccess: () => {
+        showToast(`${approving.name} approved. They can post listings now.`);
+        setApproving(null);
+      },
       onError: (mutationError) => showToast(mutationError.message),
     });
   }
@@ -104,7 +110,7 @@ export function ApprovalsView() {
                           type="button"
                           size="sm"
                           disabled={busy}
-                          onClick={() => handleApprove(recruiter.id, name)}
+                          onClick={() => setApproving({ id: recruiter.id, name })}
                         >
                           Approve
                         </Button>
@@ -127,6 +133,15 @@ export function ApprovalsView() {
         )}
       </Card>
 
+      <ConfirmDialog
+        open={approving !== null}
+        onOpenChange={(open) => !open && setApproving(null)}
+        title={`Approve ${approving?.name ?? ""}?`}
+        description="They will be able to post listings immediately. You can suspend the account later if needed."
+        confirmLabel="Approve recruiter"
+        pending={approve.isPending}
+        onConfirm={handleApprove}
+      />
       <RejectRecruiterDialog target={rejecting} onClose={() => setRejecting(null)} />
       <UserDrawer userId={selectedId} onClose={() => setSelectedId(null)} />
     </>

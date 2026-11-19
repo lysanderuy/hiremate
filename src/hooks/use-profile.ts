@@ -2,9 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { Profile } from "@/db/schema";
 import { api } from "@/lib/api/client";
-import type { UpdateProfileInput } from "@/validators/profile.validator";
+import type { ProfileResponse, UpdateProfileInput } from "@/validators/profile.validator";
 
 // Example server-state hooks — replace/extend per project.
 
@@ -15,7 +14,7 @@ export const profileKeys = {
 export function useProfile() {
   return useQuery({
     queryKey: profileKeys.me,
-    queryFn: () => api.get<Profile>("/api/profile"),
+    queryFn: () => api.get<ProfileResponse>("/api/profile"),
   });
 }
 
@@ -23,7 +22,7 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: UpdateProfileInput) => api.patch<Profile>("/api/profile", input),
+    mutationFn: (input: UpdateProfileInput) => api.patch<ProfileResponse>("/api/profile", input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: profileKeys.me });
     },

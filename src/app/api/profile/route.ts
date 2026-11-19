@@ -1,6 +1,6 @@
 import { apiError, apiSuccess, handleApiError } from "@/lib/api/response";
 import { createClient } from "@/lib/supabase/server";
-import { profileService } from "@/services/profile.service";
+import { profileService, toProfileResponse } from "@/services/profile.service";
 import { updateProfileSchema } from "@/validators/profile.validator";
 
 // Example route handler — replace/extend per project.
@@ -18,7 +18,7 @@ export async function GET() {
     if (!profile) return apiError("Profile not found", 404);
     if (profile.accountStatus === "suspended") return apiError("This account is suspended.", 403);
 
-    return apiSuccess(profile);
+    return apiSuccess(toProfileResponse(profile));
   } catch (error) {
     return handleApiError(error);
   }
@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
     const profile = await profileService.update(user.id, input);
     if (!profile) return apiError("Profile not found", 404);
 
-    return apiSuccess(profile);
+    return apiSuccess(toProfileResponse(profile));
   } catch (error) {
     return handleApiError(error);
   }

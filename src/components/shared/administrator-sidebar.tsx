@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, LayoutDashboard, UserCheck, Users } from "lucide-react";
+import { Briefcase, LayoutDashboard, User, UserCheck, Users } from "lucide-react";
 
 import { AppSidebar, AppTopBar, type NavItem } from "@/components/shared/app-sidebar";
 import { useApprovals } from "@/hooks/use-approvals";
@@ -15,6 +15,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: APPROVALS_HREF, label: "Approvals", icon: UserCheck },
   { href: `${BASE}/users`, label: "Users", icon: Users },
   { href: `${BASE}/listings`, label: "Listings", icon: Briefcase },
+  { href: `${BASE}/profile`, label: "Profile", icon: User },
 ];
 
 export function AdministratorSidebar() {
