@@ -55,33 +55,33 @@ colors:
     primary: "#4f39f6"
     primary-hover: "#3f2bd6"
     primary-active: "#3322b8"
-    primary-soft: "#eeebff"          # alias: tint
-    primary-soft-line: "#cfc8ff"     # alias: tint-border
+    primary-soft: "#eeebff" # alias: tint
+    primary-soft-line: "#cfc8ff" # alias: tint-border
     primary-foreground: "#ffffff"
     on-primary-muted: "#e6e2ff"
     on-primary-eyebrow: "#e0dbff"
-    night: "#0f172a"                 # alias: navy
+    night: "#0f172a" # alias: navy
     on-night: "#d0d5e2"
     on-night-muted: "#98a2b3"
   neutral:
-    ink: "#101828"                   # headings, strong text
-    text: "#475467"                  # body text
-    muted-foreground: "#667085"      # secondary text, placeholders in labels, helper text
-    line: "#e4e7ec"                  # borders, dividers (also shadcn border, input)
-    line-dashed: "#c0c5cf"           # dashed borders (missing chip, pending pill, dropzone)
-    page: "#f7f8fa"                  # app background, table header, read-only fields
+    ink: "#101828" # headings, strong text
+    text: "#475467" # body text
+    muted-foreground: "#667085" # secondary text, placeholders in labels, helper text
+    line: "#e4e7ec" # borders, dividers (also shadcn border, input)
+    line-dashed: "#c0c5cf" # dashed borders (missing chip, pending pill, dropzone)
+    page: "#f7f8fa" # app background, table header, read-only fields
     surface: "#ffffff"
-  score:                       # only for scores, bands and matched skills
+  score: # only for scores, bands and matched skills
     strong: { text: "#0f6b4c", bg: "#e3f5ee", range: "70 to 100" }
-    fair:   { text: "#975004", bg: "#fdf1df", range: "40 to 69" }
-    weak:   { text: "#566074", bg: "#eef0f3", range: "0 to 39" }
+    fair: { text: "#975004", bg: "#fdf1df", range: "40 to 69" }
+    weak: { text: "#566074", bg: "#eef0f3", range: "0 to 39" }
   feedback:
-    error: "#d92d20"                 # also destructive
+    error: "#d92d20" # also destructive
     error-soft: "#fef3f2"
     error-strong: "#b42318"
-    ring: "#4f39f6"                  # focus ring, same as primary
+    ring: "#4f39f6" # focus ring, same as primary
 
-contrast_checked:              # WCAG ratios, normal text needs 4.5 or more
+contrast_checked: # WCAG ratios, normal text needs 4.5 or more
   white_on_primary: 6.46
   primary_on_primary-soft: 5.53
   strong_on_strong-soft: 5.75
@@ -107,23 +107,29 @@ typography:
   mono:
     family: "ui-monospace, SF Mono, Menlo, Consolas"
     use: resume text preview only
-  scale:               # Tailwind text-* tokens; each carries its own line height
-    xs:       { size: "12px", use: "badges, pills, helper and error text, table headers, eyebrow" }
-    chip:     { size: "13px", use: "skill chips, drawer section titles" }
-    sm:       { size: "14px", use: "app body, inputs, buttons, table cells, menu items, nav links" }
-    md:       { size: "15px", use: "landing body, large buttons" }
-    base:     { size: "16px", weight: 600, use: "card titles, h2, brand text" }
-    lead:     { size: "17px", use: "landing lead and hero sub" }
-    lg:       { size: "18px", use: "modal title, table score numeral, /100 on detail" }
-    xl:       { size: "20px", weight: 600, use: "page title on phones" }
-    2xl:      { size: "24px", weight: 600, use: "page title, CTA card h3" }
-    3xl:      { size: "28px", weight: 600, use: "stat card numerals" }
-    auth-h1:  { size: "26px", weight: 600, use: "auth page title" }
-    numeral:  { size: "36px", weight: 700, use: "auth aside sample score" }
+  scale: # Tailwind text-* tokens; each carries its own line height
+    xs: { size: "12px", use: "badges, pills, helper and error text, table headers, eyebrow" }
+    chip: { size: "13px", use: "skill chips, drawer section titles" }
+    sm: { size: "14px", use: "app body, inputs, buttons, table cells, menu items, nav links" }
+    md: { size: "15px", use: "landing body, large buttons" }
+    base: { size: "16px", weight: 600, use: "card titles, h2, brand text" }
+    lead: { size: "17px", use: "landing lead and hero sub" }
+    lg: { size: "18px", use: "modal title, table score numeral, /100 on detail" }
+    xl: { size: "20px", weight: 600, use: "page title on phones" }
+    2xl: { size: "24px", weight: 600, use: "page title, CTA card h3" }
+    3xl: { size: "28px", weight: 600, use: "stat card numerals" }
+    auth-h1: { size: "26px", weight: 600, use: "auth page title" }
+    numeral: { size: "36px", weight: 700, use: "auth aside sample score" }
     score-sm: { size: "44px", weight: 700, use: "match analysis numeral on phones" }
-    score:    { size: "56px", weight: 700, use: "match analysis numeral", features: "tabular numerals" }
-    section:  { size: "clamp(24px, 2.8vw, 32px)", weight: 600, use: "landing section heading" }
-    hero:     { size: "clamp(34px, 4.4vw, 48px)", weight: 700, use: "landing hero headline, auth aside headline" }
+    score:
+      { size: "56px", weight: 700, use: "match analysis numeral", features: "tabular numerals" }
+    section: { size: "clamp(24px, 2.8vw, 32px)", weight: 600, use: "landing section heading" }
+    hero:
+      {
+        size: "clamp(34px, 4.4vw, 48px)",
+        weight: 700,
+        use: "landing hero headline, auth aside headline",
+      }
   letter_spacing:
     headings: "-0.025em (h1 to h3 base style)"
     score_numeral: "-0.04em on detail, -0.02em in tables"
@@ -134,12 +140,12 @@ typography:
     - Body copy line length stays under 70 characters.
     - Spacing, weights, z-index and tracking beyond the above use Tailwind defaults.
 
-radius:                 # Tailwind tokens from globals.css
+radius: # Tailwind tokens from globals.css
   sm: 6px
-  md: 10px              # buttons, inputs, menu popups, toasts, alerts
+  md: 10px # buttons, inputs, menu popups, toasts, alerts
   lg: 10px
-  xl: 16px              # cards, dropzone, auth status icon
-  2xl: 24px             # CTA cards, hero preview panel, dialogs
+  xl: 16px # cards, dropzone, auth status icon
+  2xl: 24px # CTA cards, hero preview panel, dialogs
   pill: "Tailwind rounded-full, no token (badges, chips, pills, avatars, bars)"
 
 shadows:
@@ -149,10 +155,10 @@ shadows:
   overlay: "0 16px 40px rgba(16, 24, 40, 0.18) (dialogs, sheets, toast, written inline)"
   rule: Cards use sm. Floating panels and the auth aside samples use md. No colored shadows.
 
-breakpoints:             # arbitrary values, not the Tailwind defaults
+breakpoints: # arbitrary values, not the Tailwind defaults
   phone_max: "max-[640px]"
-  tablet_up: "min-[641px]"        # gutter 16px to 24px, card padding 24px to 40px
-  desktop_up: "min-[961px]"       # sidebar shows, grids go two column, auth split shows
+  tablet_up: "min-[641px]" # gutter 16px to 24px, card padding 24px to 40px
+  desktop_up: "min-[961px]" # sidebar shows, grids go two column, auth split shows
   note: "Tailwind max-sm / sm (640px) is also used for control height and field text size."
 container: { max_width: 1120px, narrow: 760px, gutter: 24px, gutter_mobile: 16px }
 nav_height: 64px
@@ -161,25 +167,36 @@ control_height: { default: 40px, lg: 44px, sm: 36px, xs: 32px, phone_default: 44
 layout:
   landing_sections: "Each landing section (section-screen) is at least one screen tall (100svh minus nav) from 961px up on screens 640px or taller, content centered. Padding 56px, 24px on short screens."
   site_container: "max 1120px, 16px gutter, 24px from 641px"
-  min_touch_target: 40px   # desktop; 44px under 640px for buttons and fields
+  min_touch_target: 40px # desktop; 44px under 640px for buttons and fields
 
 components:
   button:
     file: ui/button.tsx
-    height: { default: 40px, lg: 44px, sm: 36px, xs: 32px, icon: 40px, icon-lg: 44px, icon-sm: 36px, icon-xs: 32px }
+    height:
+      {
+        default: 40px,
+        lg: 44px,
+        sm: 36px,
+        xs: 32px,
+        icon: 40px,
+        icon-lg: 44px,
+        icon-sm: 36px,
+        icon-xs: 32px,
+      }
     phone: "default and icon grow to 44px under 640px"
     text: "14px semibold (15px on lg)"
     radius: md
     icons: "lucide icons allowed inline, 16px (14px on xs); padding tightens on the icon side"
     variants:
-      default:     { bg: primary, text: primary-foreground, hover: primary-hover, active: primary-active }
-      outline:     { bg: surface, text: ink, border: line, hover-border: muted-foreground }
-      light:       { bg: white, text: primary, hover: primary-soft, use: "on primary background only" }
-      soft:        { bg: primary-soft, text: primary, border: primary-soft-line }
-      secondary:   { bg: secondary, text: secondary-foreground }
-      ghost:       { bg: none, hover: muted }
+      default:
+        { bg: primary, text: primary-foreground, hover: primary-hover, active: primary-active }
+      outline: { bg: surface, text: ink, border: line, hover-border: muted-foreground }
+      light: { bg: white, text: primary, hover: primary-soft, use: "on primary background only" }
+      soft: { bg: primary-soft, text: primary, border: primary-soft-line }
+      secondary: { bg: secondary, text: secondary-foreground }
+      ghost: { bg: none, hover: muted }
       destructive: { bg: "destructive at 10%", text: destructive, hover: "destructive at 20%" }
-      link:        { text: primary, hover: underline }
+      link: { text: primary, hover: underline }
     states: "disabled 50% opacity, pressed shifts 1px down, focus is a 3px primary outline with 2px offset"
     rules: One default button per section. Labels are verbs.
   badge:
@@ -206,8 +223,20 @@ components:
     variants:
       matched: { bg: primary-soft, text: primary }
       missing: { bg: white, text: muted-foreground, border: "1px dashed line-dashed" }
-      neutral: { bg: weak-soft, text: weak, component: NeutralChip, use: "a listing's skills with no comparison" }
-      more: { bg: weak-soft, text: weak, component: MoreChip, content: "+N, reads 'and N more' to screen readers" }
+      neutral:
+        {
+          bg: weak-soft,
+          text: weak,
+          component: NeutralChip,
+          use: "a listing's skills with no comparison",
+        }
+      more:
+        {
+          bg: weak-soft,
+          text: weak,
+          component: MoreChip,
+          content: "+N, reads 'and N more' to screen readers",
+        }
     list: "ChipList renders an aria-labelled ul, with an optional max that collapses the rest into MoreChip"
   card:
     file: ui/card.tsx
@@ -221,8 +250,8 @@ components:
     primitive: none
     note: "There is no ui/input. Fields use the FIELD_CLASS string exported from shared/field-label.tsx, and FieldLabel for the label (supports required asterisk and Optional hint)."
     auth: "auth/auth-input.tsx wraps FieldLabel and FIELD_CLASS with a 44px field, hint, role=alert error line and a show/hide password toggle; also exports toFieldErrors, clearFieldError, focusFirstError."
-    height: 40px          # 44px on auth and under 640px
-    text: 14px            # 16px under 640px to prevent iOS zoom
+    height: 40px # 44px on auth and under 640px
+    text: 14px # 16px under 640px to prevent iOS zoom
     radius: md
     border: "1px solid line, bg white"
     focus: "border primary + focus shadow"
@@ -273,7 +302,7 @@ app_console:
     roles:
       applicant: [Dashboard, Browse jobs, My resume, My applications, Profile]
       recruiter: [Dashboard, Listings, Applicants, Profile]
-      administrator: [Dashboard, Approvals (pending count badge), Users, Listings]
+      administrator: [Dashboard, Approvals (pending count badge), Users, Listings, Profile]
   page_header: "shared/page-header.tsx: title (xl on phones, 2xl up), optional description, optional action slot; CRUMB_CLASS styles back links"
   data_table:
     file: shared/data-table.tsx
@@ -345,7 +374,7 @@ accessibility:
   - Score and band are never shown by color alone. The number and band name are always text.
   - Missing skills use a dashed border as well as color.
 
-future:                          # in the spec but not built; do not treat as live
+future: # in the spec but not built; do not treat as live
   design_tokens:
     - "Spacing scale (4px base: 4, 8, 12, 16, 24, 32, 48, 56, 104), section and card padding tokens; code uses Tailwind spacing."
     - "Z-index, font-weight, line-height and letter-spacing token scales; code uses Tailwind defaults."

@@ -5,13 +5,13 @@ listings and review applicants ranked by match score; applicants apply with a
 PDF resume. Built on Next.js 16 + Supabase + Drizzle + Zod.
 
 - **Recruiters**: approval-gated console (dashboard, listings, applicants with
-  band filter and match sort, company profile).
+  band filter and match sort, company profile and application CSV export).
 - **Applicants**: signup/login, resume upload, browse open listings, apply,
   track and withdraw applications.
 - **Administrators**: console for users (suspend/reactivate), recruiter
-  approvals, listing moderation (remove/restore), platform stats and CSV
-  export. Suspended recruiters can send a review request from their status
-  screen.
+  approvals with confirmation, listing moderation (remove/restore), platform
+  stats, CSV export and own profile. Suspended recruiters can send a review
+  request from their status screen.
 - **Matcher**: a trained model scores each resume and listing pair (0-100, with
   a band). Scoring runs in the app; a small Python service in `matcher/` only
   makes the text embeddings. See [ML matching](#ml-matching).
@@ -32,7 +32,7 @@ Product, brand and design references (PRD, brief, tokens) are in
 | API docs     | OpenAPI 3.1 (`zod-openapi`) + Scalar (`/api/docs`)                |
 | Testing      | Vitest (unit tests, colocated `*.test.ts`)                        |
 | Code quality | ESLint + Prettier + Husky/lint-staged pre-commit                  |
-| CI           | GitHub Actions — typecheck/lint/test + PR description bot         |
+| CI           | GitHub Actions — typecheck/lint/format/test + PR description bot  |
 
 ## Quick start
 
@@ -102,8 +102,17 @@ pip install -r matcher/requirements.txt
 3. `npm run dev:all` (web + matcher) or `npm run matcher:dev`. The first start
    downloads the SBERT model.
 
-Hosting the matcher is still open: it needs a separate always-on host. The
-Next.js app can stay on Vercel. In production `MATCHER_URL` must be https.
+## Deployment status
+
+The Next.js app can be deployed to Vercel without the matcher. Leave
+`MATCHER_URL` and `MATCHER_API_KEY` unset there; `localhost` in Vercel cannot
+reach a developer machine. Auth, profiles, administration, CSV exports and
+existing prepared data work, but new or replaced resumes become Failed and new
+or edited listings are not match-ready until an externally reachable matcher is
+configured. Applying needs both the resume and listing to be ready.
+
+When matching is needed in production, the Python matcher requires its own
+always-on HTTPS host; it is not deployed by this repository today.
 
 Retraining: run `python ml/run.py --test` (setup in `ml/README.md`). It trains,
 exports `model.json`, `golden.json` and the skills seed, runs prettier and the
@@ -132,7 +141,7 @@ db (src/db, Drizzle)  /  Supabase
 - **Frontend never imports services or `db`.** It calls `/api/**` through the `api` wrapper only.
 - **Route handlers stay thin**: authenticate (Supabase), validate input (Zod), delegate to a service, wrap the result with `apiSuccess` / `apiError`.
 - **Services own business logic and DB access.** They never touch `Request` / `Response` / cookies.
-- **All API routes return the `ApiResponse<T>` envelope** (`src/types/api.ts`) — except: `/api/openapi.json` (raw spec for external tooling), `/api/auth/callback` and `/api/auth/logout` (browser redirects), the three `/file` routes (`/api/resumes/me/file`, `/api/applications/me/[id]/file`, `/api/applications/[id]/file`, raw PDF bytes opened as plain links), the three `/api/admin/export/*` routes (raw CSV, downloaded through `useExportCsv`), and `/api/docs` (Scalar UI).
+- **All API routes return the `ApiResponse<T>` envelope** (`src/types/api.ts`) — except: `/api/openapi.json` (raw spec for external tooling), `/api/auth/callback` and `/api/auth/logout` (browser redirects), the three `/file` routes (`/api/resumes/me/file`, `/api/applications/me/[id]/file`, `/api/applications/[id]/file`, raw PDF bytes opened as plain links), and the four `/api/*/export/*` routes (raw CSV, downloaded through `useExportCsv`). `/api/docs` serves the Scalar UI.
 - **Server state vs client state**: API data lives in TanStack Query (via `src/hooks`); UI-only state in Zustand stores (`src/stores`). Never mirror API data into a store.
 
 ## API docs
@@ -175,7 +184,7 @@ Tests are excluded on purpose — kept fast locally; they run in CI instead.
 
 `.github/workflows/`:
 
-- **`ci.yml`** — every PR + push to `main`: `npm ci` → typecheck → lint → test. The real verification gate; enable "require status checks" in branch protection to block merges on it.
+- **`ci.yml`** — every PR + push to `main`: `npm ci` → typecheck → lint → format check → test. The real verification gate; enable "require status checks" in branch protection to block merges on it.
 - **`pr-description-bot.yml`** — regenerates the PR description from the diff via Gemini (on open/reopen/ready-for-review/new commits, or a `/describe` comment). Needs a `GEM_KEY` repo secret. Doesn't work on fork PRs — GitHub withholds secrets and write access from fork-triggered runs.
 
 ## Project structure
@@ -186,7 +195,7 @@ src/
 │   ├── (auth)/           # Login, signup, forgot/reset password (route group)
 │   ├── (auth-split)/     # Login, signup (split-layout route group)
 │   ├── dashboard/        # Role-based redirect + one folder per role
-│   │   ├── administrator/  # (console)/ approvals, listings, users
+│   │   ├── administrator/  # (console)/ approvals, listings, users, profile
 │   │   ├── applicant/    # (console)/ applications, jobs, profile, resume
 │   │   └── recruiter/    # status/ (approval screens) + (console)/ applicants, listings, profile
 │   ├── error.tsx         # Error boundary (wire Sentry etc. here)
@@ -202,6 +211,7 @@ src/
 │       ├── listings/     # CRUD, [id]/applications, [id]/prepare, open/ (applicant browse)
 │       ├── openapi.json/ # generated OpenAPI 3.1 spec (raw JSON, no envelope)
 │       ├── profile/      # GET/PATCH /api/profile + review-request
+│       ├── recruiter/    # authenticated recruiter CSV export
 │       ├── resumes/      # me/ (upload, file, pdf, reprocess)
 │       └── skills/       # list + suggest
 ├── components/
@@ -337,4 +347,4 @@ create a custom migration: `npx drizzle-kit generate --custom --name=...`.
 | `db:push`                 | Push schema directly (prototyping only)                    |
 | `db:studio`               | Drizzle Studio data browser                                |
 
-The first administrator signs up like anyone else, then run `npm run db:seed-admin -- <email>` to promote that account. Admin CSV exports are capped at the 10,000 most recent rows.
+The first administrator signs up like anyone else, then run `npm run db:seed-admin -- <email>` to promote that account. Admin and recruiter CSV exports are capped at the 10,000 most recent rows.

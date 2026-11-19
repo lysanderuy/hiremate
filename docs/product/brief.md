@@ -51,7 +51,7 @@ For job seekers and recruiters who lose time on applications that do not fit, Ta
 
 **Secondary**
 
-- **Administrators.** Platform owners. They approve recruiter accounts, suspend and reactivate users, moderate listings, read platform stats and export CSV reports.
+- **Administrators.** Platform owners. They approve recruiter accounts with confirmation, suspend and reactivate users, moderate listings, read platform stats, export CSV reports and manage their own profile.
 
 ## Core value proposition
 
@@ -77,7 +77,8 @@ Why it holds up:
 - **Roles.** Applicant, recruiter or administrator. Applicants and recruiters choose a role at signup; it is read-only afterwards.
 - **Recruiter approval.** New recruiters are pending until an administrator approves them. A rejection carries a reason, and the recruiter can send a review request.
 - **Suspension.** Administrators suspend and reactivate users.
-- **Administrator console.** Users, approvals, listings, platform stats and CSV exports.
+- **Recruiter export.** Active recruiters can download a CSV of applications to their own listings.
+- **Administrator console.** Users, approvals, listings, platform stats, CSV exports and Profile.
 
 ## Data rules
 

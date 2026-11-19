@@ -1,6 +1,6 @@
 # TalentFlow AI: PRD
 
-Version: v1.4. Date: 2026-11-08. Describes the live product. Unbuilt items are in section 10, Future.
+Version: v1.5. Date: 2026-11-19. Describes the live product. Unbuilt items are in section 10, Future.
 Companion file: `brief.md` (brand, positioning, audience). Terms here match that file.
 
 ## 0. Glossary
@@ -213,9 +213,9 @@ Acceptance criteria:
 - [ ] Company name is required (2 to 120 characters) and creates the Company.
 - [ ] Job title is required (up to 100 characters).
 - [ ] A new Recruiter has account status Pending.
-- [ ] A Pending or Rejected Recruiter can log in, view public listings, and sees the status page, but cannot reach Post a listing or applicant pages.
+- [ ] A Pending or Rejected Recruiter can log in and sees the status page, but cannot reach the recruiter console or applicant-only jobs.
 - [ ] The Approvals queue lists Pending Recruiters oldest first with display name, email, company name and sign up date.
-- [ ] Approve sets Active in one click. Reject asks for an optional reason up to 300 characters.
+- [ ] Approve asks for confirmation, then sets Active. Reject asks for an optional reason up to 300 characters.
 - [ ] After approval the Recruiter can open Post a listing on the next page load.
 - [ ] "Ask for another review" returns the account to Pending, clears the rejection reason, sets review_requested_at, and the Recruiter reappears in the Approvals queue.
 - [ ] A second review request within 24 hours of the last one is refused with "You can request another review 24 hours after your last request."
@@ -247,10 +247,10 @@ Acceptance criteria:
 
 ### FL-05 Browse and search listings
 
-1. Anyone opens Jobs. The list shows Open listings, newest first, 10 per page.
-2. The user searches by keyword and filters by location, employment type and minimum salary.
-3. A logged-in Applicant with a Ready resume can sort by Best match.
-4. The user opens a listing to see the detail page.
+1. An Applicant opens Jobs. The list shows Open listings, newest first, 10 per page.
+2. The Applicant searches by keyword and filters by location, employment type and minimum salary.
+3. An Applicant with a Ready resume can sort by Best match.
+4. The Applicant opens a listing to see the detail page.
 
 Acceptance criteria:
 
@@ -386,6 +386,7 @@ Acceptance criteria:
 - [ ] The dashboard shows: open listings, total applications across own listings, applications with status Shortlisted, applications with status Interview, applications awaiting review (Submitted), and applications received in the last 7 days.
 - [ ] The dashboard lists the most recent applications across own listings, with applicant name, listing title, match score, band and status.
 - [ ] A Recruiter sees only their own data.
+- [ ] The dashboard offers a CSV export of the latest application for each applicant across the Recruiter's own listings. It includes listing title, applicant name and email, match score, band, status and applied date.
 - [ ] A Pending or Rejected Recruiter sees the status page (`/dashboard/recruiter/status`) instead: "Awaiting approval." or "Your account was not approved." with the reason and the "Ask for another review" button (FL-03).
 
 ### FL-13 Administrator: manage users
@@ -455,7 +456,7 @@ Acceptance criteria:
 ### 6.1 Accounts and roles
 
 - Sign up creates an Applicant or a Recruiter. Administrators are created directly in the database.
-- Account status controls access: Active can use the product. Pending and Rejected Recruiters see only the status page and public listings. Suspended users cannot log in.
+- Account status controls access: Active can use the product. Pending and Rejected Recruiters see only the status page. Suspended users cannot log in.
 - Pages are protected by role. Every API route checks login, role, and ownership before it returns data.
 - Confirmation and password reset emails come from the auth provider. The product sends no other email.
 - Roles live in the profile record, are set at sign up and are read-only afterwards.
@@ -578,9 +579,10 @@ Limits:
 ### 6.10 CSV export
 
 - Administrator: users, listings, applications (FL-15).
+- Active Recruiter: latest applications to their own listings, from the Recruiter dashboard. The file includes applicant email because that Recruiter can already read it for those applications.
 - UTF-8 with byte order mark. Formula protection on cells starting with =, +, - or @. Standard escaping.
 - Generated on the server and downloaded as a file through `useExportCsv`. A failed download shows a toast. No outside service.
-- The `/api/admin/export/*` routes return raw CSV, not the `ApiResponse` envelope.
+- The `/api/admin/export/*` and `/api/recruiter/export/*` routes return raw CSV, not the `ApiResponse` envelope.
 
 ### 6.11 Administration
 
@@ -613,8 +615,8 @@ Recruiter (Active) is a Recruiter with account status Active. Recruiter (not act
 | Action                                             | Guest | Applicant | Recruiter (Active) | Recruiter (not active) | Administrator |
 | -------------------------------------------------- | ----- | --------- | ------------------ | ---------------------- | ------------- |
 | View landing page                                  | Yes   | Yes       | Yes                | Yes                    | Yes           |
-| Browse and search Open listings                    | Yes   | Yes       | Yes                | Yes                    | Yes           |
-| View a listing detail (Open)                       | Yes   | Yes       | Yes                | Yes                    | Yes           |
+| Browse and search Open listings                    | No    | Yes       | No                 | No                     | No            |
+| View a listing detail (Open)                       | No    | Yes       | No                 | No                     | No            |
 | Sign up, log in, reset password                    | Yes   | Yes       | Yes                | Yes                    | Yes           |
 | Save or replace own resume                         | No    | Yes       | No                 | No                     | No            |
 | See match score on a listing                       | No    | Yes       | No                 | No                     | No            |
@@ -628,6 +630,7 @@ Recruiter (Active) is a Recruiter with account status Active. Recruiter (not act
 | Read resume snapshot of own listing's applications | No    | No        | Yes                | No                     | No            |
 | Change application status (own listings)           | No    | No        | Yes                | No                     | No            |
 | View recruiter dashboard (own data)                | No    | No        | Yes                | No                     | No            |
+| Export applications for own listings               | No    | No        | Yes                | No                     | No            |
 | Ask for another review (when Rejected)             | No    | No        | No                 | Yes                    | No            |
 | View Approvals queue, approve, reject              | No    | No        | No                 | No                     | Yes           |
 | View users, suspend, reactivate                    | No    | No        | No                 | No                     | Yes           |
@@ -728,7 +731,7 @@ Matcher figures come from the latest training run (`ml/outputs/model_card.json`,
 Not built. None of these are live.
 
 - Recruiter Analytics tab per listing: total applications, applications per day for the last 30 days, count by band, count by status, top 5 missing skills.
-- Recruiter CSV export of a listing's applicants on the Applicants page.
+- Per-listing filtered recruiter CSV export from the Applicants page.
 - Measured performance: instrumentation for the 2 second card, 10 second Preparing and 1 second page targets (6.14), and a 360 pixel layout check.
 - Model comparison on the test set against the hand-made formula (0.4 skills overlap + 0.6 meaning) and an untrained cross-encoder.
 - Rater agreement report on the 600 pairs: exact match, within 1, weighted kappa.
