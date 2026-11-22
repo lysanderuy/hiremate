@@ -33,62 +33,66 @@ export const adminDashboardService = {
     const windowStart = new Date(`${days[0]}T00:00:00.000Z`);
     const dayExpr = sql<string>`to_char(${applications.createdAt} at time zone 'UTC', 'YYYY-MM-DD')`;
 
-    const [[userRow], [jobRow], [applicationRow], perDay, topSkills, [resumeRow]] =
-      await Promise.all([
-        db
-          .select({
-            total: sql<number>`count(*)`.mapWith(Number),
-            applicant: countWhere(sql`${profiles.role} = 'applicant'`),
-            recruiter: countWhere(sql`${profiles.role} = 'recruiter'`),
-            administrator: countWhere(sql`${profiles.role} = 'administrator'`),
-            active: countWhere(sql`${profiles.accountStatus} = 'active'`),
-            pending: countWhere(sql`${profiles.accountStatus} = 'pending'`),
-            pendingRecruiters: countWhere(
-              sql`${profiles.role} = 'recruiter' and ${profiles.accountStatus} = 'pending'`,
-            ),
-            rejected: countWhere(sql`${profiles.accountStatus} = 'rejected'`),
-            suspended: countWhere(sql`${profiles.accountStatus} = 'suspended'`),
-          })
-          .from(profiles),
-        db
-          .select({
-            open: countWhere(sql`${jobs.status} = 'open'`),
-            closed: countWhere(sql`${jobs.status} = 'closed'`),
-            removed: countWhere(sql`${jobs.status} = 'removed'`),
-            preparing: countWhere(sql`${jobs.matchReady} = false`),
-            hiddenOpen: countWhere(
-              sql`${jobs.status} = 'open' and exists (select 1 from profiles p where p.id = "jobs"."recruiter_id" and p.account_status <> 'active')`,
-            ),
-            openWithoutApplications: countWhere(
-              sql`${jobs.status} = 'open' and not exists (select 1 from applications a where a.job_id = "jobs"."id")`,
-            ),
-          })
-          .from(jobs),
-        db
-          .select({
-            total: sql<number>`count(*)`.mapWith(Number),
-            average: sql<string | null>`avg(${applications.matchScore})`,
-            strong: countWhere(sql`${applications.band} = 'strong'`),
-            fair: countWhere(sql`${applications.band} = 'fair'`),
-            weak: countWhere(sql`${applications.band} = 'weak'`),
-          })
-          .from(applications),
-        db
-          .select({ day: dayExpr, count: sql<number>`count(*)`.mapWith(Number) })
-          .from(applications)
-          .where(gte(applications.createdAt, windowStart))
-          .groupBy(sql`1`),
-        db
-          .select({ name: skills.name, count: sql<number>`count(*)`.mapWith(Number) })
-          .from(jobSkills)
-          .innerJoin(skills, eq(skills.id, jobSkills.skillId))
-          .innerJoin(jobs, eq(jobs.id, jobSkills.jobId))
-          .where(eq(jobs.status, "open"))
-          .groupBy(skills.id, skills.name)
-          .orderBy(desc(sql`count(*)`), skills.name)
-          .limit(ADMIN_DASHBOARD_TOP_SKILLS),
-        db.select({ failed: countWhere(sql`${resumes.state} = 'failed'`) }).from(resumes),
-      ]);
+    const [userRow] = await db
+      .select({
+        total: sql<number>`count(*)`.mapWith(Number),
+        applicant: countWhere(sql`${profiles.role} = 'applicant'`),
+        recruiter: countWhere(sql`${profiles.role} = 'recruiter'`),
+        administrator: countWhere(sql`${profiles.role} = 'administrator'`),
+        active: countWhere(sql`${profiles.accountStatus} = 'active'`),
+        pending: countWhere(sql`${profiles.accountStatus} = 'pending'`),
+        pendingRecruiters: countWhere(
+          sql`${profiles.role} = 'recruiter' and ${profiles.accountStatus} = 'pending'`,
+        ),
+        rejected: countWhere(sql`${profiles.accountStatus} = 'rejected'`),
+        suspended: countWhere(sql`${profiles.accountStatus} = 'suspended'`),
+      })
+      .from(profiles);
+
+    const [jobRow] = await db
+      .select({
+        open: countWhere(sql`${jobs.status} = 'open'`),
+        closed: countWhere(sql`${jobs.status} = 'closed'`),
+        removed: countWhere(sql`${jobs.status} = 'removed'`),
+        preparing: countWhere(sql`${jobs.matchReady} = false`),
+        hiddenOpen: countWhere(
+          sql`${jobs.status} = 'open' and exists (select 1 from profiles p where p.id = "jobs"."recruiter_id" and p.account_status <> 'active')`,
+        ),
+        openWithoutApplications: countWhere(
+          sql`${jobs.status} = 'open' and not exists (select 1 from applications a where a.job_id = "jobs"."id")`,
+        ),
+      })
+      .from(jobs);
+
+    const [applicationRow] = await db
+      .select({
+        total: sql<number>`count(*)`.mapWith(Number),
+        average: sql<string | null>`avg(${applications.matchScore})`,
+        strong: countWhere(sql`${applications.band} = 'strong'`),
+        fair: countWhere(sql`${applications.band} = 'fair'`),
+        weak: countWhere(sql`${applications.band} = 'weak'`),
+      })
+      .from(applications);
+
+    const perDay = await db
+      .select({ day: dayExpr, count: sql<number>`count(*)`.mapWith(Number) })
+      .from(applications)
+      .where(gte(applications.createdAt, windowStart))
+      .groupBy(sql`1`);
+
+    const topSkills = await db
+      .select({ name: skills.name, count: sql<number>`count(*)`.mapWith(Number) })
+      .from(jobSkills)
+      .innerJoin(skills, eq(skills.id, jobSkills.skillId))
+      .innerJoin(jobs, eq(jobs.id, jobSkills.jobId))
+      .where(eq(jobs.status, "open"))
+      .groupBy(skills.id, skills.name)
+      .orderBy(desc(sql`count(*)`), skills.name)
+      .limit(ADMIN_DASHBOARD_TOP_SKILLS);
+
+    const [resumeRow] = await db
+      .select({ failed: countWhere(sql`${resumes.state} = 'failed'`) })
+      .from(resumes);
 
     const countByDay = new Map(perDay.map((row) => [row.day, row.count]));
     const average = applicationRow?.average;
