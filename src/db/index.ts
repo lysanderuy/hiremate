@@ -16,7 +16,12 @@ const globalForDb = globalThis as unknown as { db?: Db };
 function createDb(): Db {
   // prepare: false is required when connecting through the Supabase
   // transaction pooler (port 6543), which does not support prepared statements.
-  const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
+  const client = postgres(env.DATABASE_URL, {
+    prepare: false,
+    max: 1,
+    connect_timeout: 10,
+    connection: { statement_timeout: 10_000 },
+  });
   return drizzle(client, { schema });
 }
 

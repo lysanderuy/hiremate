@@ -5,11 +5,8 @@ import {
   AdministratorTopBar,
 } from "@/components/shared/administrator-sidebar";
 import { Toaster } from "@/components/shared/toaster";
-import { requireRole } from "@/lib/auth/require-role";
 
 export default async function AdministratorConsoleLayout({ children }: { children: ReactNode }) {
-  await requireRole("administrator");
-
   return (
     <div className="flex min-h-screen bg-page">
       <AdministratorSidebar />

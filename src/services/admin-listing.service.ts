@@ -5,6 +5,7 @@ import { and, count, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle
 import { db } from "@/db";
 import { applications, companies, jobs, jobSkills, profiles, skills } from "@/db/schema";
 import { HttpError } from "@/lib/api/errors";
+import { retryDatabaseRead } from "@/lib/database/retry";
 import { escapeLike } from "@/lib/escape-like";
 import {
   ADMIN_LISTING_PAGE_SIZE,
@@ -64,66 +65,70 @@ function toListing<T extends ListingRow>({
   };
 }
 
-export const adminListingService = {
-  async list({
-    q,
-    status,
-    noApplications,
-    preparing,
+async function listAdminListings({
+  q,
+  status,
+  noApplications,
+  preparing,
+  page,
+}: ListAdminListingsQuery): Promise<AdminListingListResponse> {
+  const searchConditions: SQL[] = [];
+  if (q) {
+    const pattern = `%${escapeLike(q)}%`;
+    const match = or(ilike(jobs.title, pattern), ilike(companies.name, pattern));
+    if (match) searchConditions.push(match);
+  }
+  const conditions = [...searchConditions];
+  if (status) conditions.push(eq(jobs.status, status));
+  if (noApplications) {
+    conditions.push(
+      eq(jobs.status, "open"),
+      sql`not exists (select 1 from ${applications} where ${applications.jobId} = ${jobs.id})`,
+    );
+  }
+  if (preparing) conditions.push(eq(jobs.matchReady, false));
+  const where = and(...conditions);
+
+  const [rows, [totals], statusCounts] = await Promise.all([
+    db
+      .select(listingColumns)
+      .from(jobs)
+      .innerJoin(companies, eq(companies.id, jobs.companyId))
+      .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
+      .where(where)
+      .orderBy(desc(jobs.createdAt), desc(jobs.id))
+      .limit(ADMIN_LISTING_PAGE_SIZE)
+      .offset((page - 1) * ADMIN_LISTING_PAGE_SIZE),
+    db
+      .select({ total: count() })
+      .from(jobs)
+      .innerJoin(companies, eq(companies.id, jobs.companyId))
+      .where(where),
+    db
+      .select({ status: jobs.status, total: count() })
+      .from(jobs)
+      .innerJoin(companies, eq(companies.id, jobs.companyId))
+      .where(and(...searchConditions))
+      .groupBy(jobs.status),
+  ]);
+
+  const byStatus = new Map(statusCounts.map((row) => [row.status, row.total]));
+  const open = byStatus.get("open") ?? 0;
+  const closed = byStatus.get("closed") ?? 0;
+  const removed = byStatus.get("removed") ?? 0;
+
+  return {
+    items: rows.map(toListing),
+    total: totals?.total ?? 0,
     page,
-  }: ListAdminListingsQuery): Promise<AdminListingListResponse> {
-    const searchConditions: SQL[] = [];
-    if (q) {
-      const pattern = `%${escapeLike(q)}%`;
-      const match = or(ilike(jobs.title, pattern), ilike(companies.name, pattern));
-      if (match) searchConditions.push(match);
-    }
-    const conditions = [...searchConditions];
-    if (status) conditions.push(eq(jobs.status, status));
-    if (noApplications) {
-      conditions.push(
-        eq(jobs.status, "open"),
-        sql`not exists (select 1 from ${applications} where ${applications.jobId} = ${jobs.id})`,
-      );
-    }
-    if (preparing) conditions.push(eq(jobs.matchReady, false));
-    const where = and(...conditions);
+    pageSize: ADMIN_LISTING_PAGE_SIZE,
+    counts: { all: open + closed + removed, open, closed, removed },
+  };
+}
 
-    const [rows, [totals], statusCounts] = await Promise.all([
-      db
-        .select(listingColumns)
-        .from(jobs)
-        .innerJoin(companies, eq(companies.id, jobs.companyId))
-        .innerJoin(profiles, eq(profiles.id, jobs.recruiterId))
-        .where(where)
-        .orderBy(desc(jobs.createdAt), desc(jobs.id))
-        .limit(ADMIN_LISTING_PAGE_SIZE)
-        .offset((page - 1) * ADMIN_LISTING_PAGE_SIZE),
-      db
-        .select({ total: count() })
-        .from(jobs)
-        .innerJoin(companies, eq(companies.id, jobs.companyId))
-        .where(where),
-      db
-        .select({ status: jobs.status, total: count() })
-        .from(jobs)
-        .innerJoin(companies, eq(companies.id, jobs.companyId))
-        .where(and(...searchConditions))
-        .groupBy(jobs.status),
-    ]);
-
-    const byStatus = new Map(statusCounts.map((row) => [row.status, row.total]));
-    const open = byStatus.get("open") ?? 0;
-    const closed = byStatus.get("closed") ?? 0;
-    const removed = byStatus.get("removed") ?? 0;
-
-    return {
-      items: rows.map(toListing),
-      total: totals?.total ?? 0,
-      page,
-      pageSize: ADMIN_LISTING_PAGE_SIZE,
-      counts: { all: open + closed + removed, open, closed, removed },
-    };
+export const adminListingService = {
+  async list(query: ListAdminListingsQuery): Promise<AdminListingListResponse> {
+    return retryDatabaseRead(() => listAdminListings(query));
   },
 
   async getById(id: string): Promise<AdminListingDetailResponse> {

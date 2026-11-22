@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { profiles, type Profile } from "@/db/schema";
+import { retryDatabaseRead } from "@/lib/database/retry";
 import type { ProfileResponse, UpdateProfileInput } from "@/validators/profile.validator";
 
 export function toProfileResponse(profile: Profile): ProfileResponse {
@@ -24,9 +25,11 @@ export function toProfileResponse(profile: Profile): ProfileResponse {
 // Example service — replace/extend per project.
 export const profileService = {
   async getById(id: string): Promise<Profile | undefined> {
-    return db.query.profiles.findFirst({
-      where: eq(profiles.id, id),
-    });
+    return retryDatabaseRead(() =>
+      db.query.profiles.findFirst({
+        where: eq(profiles.id, id),
+      }),
+    );
   },
 
   async update(id: string, input: UpdateProfileInput): Promise<Profile | undefined> {
